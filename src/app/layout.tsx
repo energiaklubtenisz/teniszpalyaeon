@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { DM_Sans, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
+/** Savee Font substitute from DESIGN.md — geometric sans, 400/500. */
+const saveeSans = DM_Sans({
+  variable: "--font-savee",
+  subsets: ["latin", "latin-ext"],
+  weight: ["400", "500"],
 });
 
 const geistMono = Geist_Mono({
@@ -24,10 +26,14 @@ export default function RootLayout({
 }>) {
   return (
     <html
-      lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      lang="hu"
+      className={`${saveeSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body
+        className={`${saveeSans.className} flex min-h-full flex-col antialiased`}
+      >
+        {children}
+      </body>
     </html>
   );
 }
