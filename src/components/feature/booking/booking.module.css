@@ -1,0 +1,525 @@
+.page {
+  min-height: calc(100dvh - 4rem);
+  background: var(--background);
+  overflow-x: clip;
+}
+
+.inner,
+.innerWide {
+  max-width: 40rem;
+  padding: 4.5rem 1.5rem;
+}
+
+.innerWide {
+  max-width: 44rem;
+}
+
+.band {
+  background: var(--warm-taupe);
+}
+
+.wizard {
+  display: grid;
+  gap: 1.75rem;
+}
+
+.progress {
+  display: grid;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+@media (min-width: 720px) {
+  .progress {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 0.75rem;
+  }
+}
+
+.progressItem {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  color: var(--smoke);
+}
+
+.progressIndex {
+  display: inline-grid;
+  place-items: center;
+  width: 1.6rem;
+  height: 1.6rem;
+  border-radius: 999px;
+  border: 1px solid var(--stone);
+  background: var(--eggshell);
+  font-size: var(--text-body-sm);
+  font-weight: 600;
+}
+
+.progressLabel {
+  font-size: var(--text-body-sm);
+  font-weight: 500;
+}
+
+.progressCurrent {
+  color: var(--ink);
+}
+
+.progressCurrent .progressIndex {
+  border-color: var(--eon-red);
+  background: var(--eon-red);
+  color: white;
+}
+
+.progressDone .progressIndex {
+  border-color: var(--graphite);
+  background: var(--graphite);
+  color: white;
+}
+
+.authBanner {
+  display: grid;
+  gap: 0.85rem;
+  padding: 1rem 1.1rem;
+  background: var(--eggshell);
+  border-left: 3px solid var(--eon-red);
+  color: var(--graphite);
+  font-size: var(--text-body-sm);
+  line-height: 1.5;
+}
+
+.authBanner p {
+  margin: 0;
+}
+
+.authLinks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.25rem;
+}
+
+.authLink,
+.authLinkMuted {
+  font-weight: 600;
+  color: var(--eon-red);
+  text-decoration: none;
+}
+
+.authLinkMuted {
+  color: var(--graphite);
+  font-weight: 500;
+}
+
+.authLink:hover,
+.authLinkMuted:hover {
+  text-decoration: underline;
+}
+
+.stepPanel {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.stepTitle {
+  margin: 0;
+  font-size: clamp(1.5rem, 3.5vw, 2rem);
+  font-weight: 500;
+  letter-spacing: -0.03em;
+  color: var(--ink);
+}
+
+.stepLead {
+  margin: 0;
+  max-width: 36rem;
+  font-size: var(--text-body);
+  line-height: 1.6;
+  color: var(--smoke);
+}
+
+.schematic {
+  width: 100%;
+}
+
+.schematicFrame {
+  display: grid;
+  gap: 0.85rem;
+  padding: 1rem;
+  background: linear-gradient(180deg, var(--eggshell), var(--stone));
+  border: 1px solid color-mix(in srgb, var(--graphite) 12%, transparent);
+}
+
+.schematicHint {
+  margin: 0;
+  text-align: center;
+  font-size: var(--text-caption);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--smoke);
+}
+
+.courtGrid {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.courtRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.65rem;
+}
+
+.courtTile,
+.courtMissing {
+  display: grid;
+  gap: 0.2rem;
+  min-height: 4.5rem;
+  padding: 0.9rem 0.85rem;
+  border: 1px solid color-mix(in srgb, var(--graphite) 18%, transparent);
+  background: color-mix(in srgb, #7a8f5c 18%, var(--eggshell));
+  color: var(--ink);
+  text-align: left;
+  cursor: pointer;
+  transition:
+    transform 160ms ease,
+    border-color 160ms ease,
+    background 160ms ease;
+}
+
+.courtTile:hover {
+  transform: translateY(-1px);
+  border-color: var(--graphite);
+}
+
+.courtTileSelected {
+  border-color: var(--eon-red);
+  background: color-mix(in srgb, var(--eon-red) 12%, var(--eggshell));
+  box-shadow: inset 0 0 0 1px var(--eon-red);
+}
+
+.courtMissing {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.courtNumber {
+  font-size: 1.25rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.courtName {
+  font-size: var(--text-body-sm);
+  color: var(--graphite);
+}
+
+.calendar {
+  display: grid;
+  gap: 0.85rem;
+  max-width: 24rem;
+}
+
+.calendarHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.calendarMonth {
+  margin: 0;
+  font-size: var(--text-subheading);
+  font-weight: 500;
+  color: var(--ink);
+  text-transform: capitalize;
+}
+
+.iconButton {
+  display: inline-grid;
+  place-items: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border: 1px solid color-mix(in srgb, var(--graphite) 20%, transparent);
+  background: var(--eggshell);
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.iconButton:hover {
+  border-color: var(--graphite);
+}
+
+.weekdayRow,
+.dayGrid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 0.35rem;
+}
+
+.weekday {
+  text-align: center;
+  font-size: var(--text-caption);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--smoke);
+}
+
+.dayEmpty {
+  min-height: 2.4rem;
+}
+
+.dayCell {
+  min-height: 2.4rem;
+  border: 1px solid transparent;
+  background: var(--eggshell);
+  color: var(--ink);
+  font-size: var(--text-body-sm);
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.dayCell:hover:not(:disabled) {
+  border-color: var(--graphite);
+}
+
+.dayToday {
+  box-shadow: inset 0 -2px 0 var(--eon-red);
+}
+
+.daySelected {
+  background: var(--eon-red);
+  color: white;
+}
+
+.dayDisabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.timeBlock {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.1rem;
+  font-size: var(--text-body-sm);
+  color: var(--smoke);
+}
+
+.legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.swatch {
+  display: inline-block;
+  width: 0.7rem;
+  height: 0.7rem;
+  border: 1px solid color-mix(in srgb, var(--graphite) 25%, transparent);
+}
+
+.swatchFree {
+  background: var(--eggshell);
+}
+
+.swatchBooked {
+  background: color-mix(in srgb, var(--graphite) 35%, var(--stone));
+}
+
+.swatchPast {
+  background: var(--stone);
+  opacity: 0.7;
+}
+
+.timeHint {
+  margin: 0;
+  font-size: var(--text-body-sm);
+  color: var(--graphite);
+}
+
+.timeGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.4rem;
+}
+
+@media (min-width: 640px) {
+  .timeGrid {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+}
+
+.timeCell {
+  min-height: 2.5rem;
+  border: 1px solid color-mix(in srgb, var(--graphite) 16%, transparent);
+  background: var(--eggshell);
+  color: var(--ink);
+  font-size: var(--text-body-sm);
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+}
+
+.timeCell:hover:not(:disabled) {
+  border-color: var(--graphite);
+}
+
+.timeSelected {
+  background: color-mix(in srgb, var(--eon-red) 16%, var(--eggshell));
+  border-color: var(--eon-red);
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.timeStartOnly {
+  outline: 2px solid var(--eon-red);
+  outline-offset: -2px;
+}
+
+.timeBooked,
+.timePast {
+  opacity: 0.45;
+  cursor: not-allowed;
+  background: var(--stone);
+}
+
+.typeList {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.typeOption {
+  display: grid;
+  gap: 0.35rem;
+  padding: 1rem 1.1rem;
+  border: 1px solid color-mix(in srgb, var(--graphite) 18%, transparent);
+  background: var(--eggshell);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 160ms ease, background 160ms ease;
+}
+
+.typeOption:hover {
+  border-color: var(--graphite);
+}
+
+.typeOptionSelected {
+  border-color: var(--eon-red);
+  background: color-mix(in srgb, var(--eon-red) 8%, var(--eggshell));
+  box-shadow: inset 0 0 0 1px var(--eon-red);
+}
+
+.typeTitle {
+  font-size: var(--text-subheading);
+  font-weight: 500;
+  color: var(--ink);
+}
+
+.typeBody {
+  font-size: var(--text-body-sm);
+  line-height: 1.55;
+  color: var(--smoke);
+}
+
+.typePrice {
+  margin-top: 0.35rem;
+  font-size: var(--text-body);
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.summary {
+  display: grid;
+  gap: 0.85rem;
+  margin: 0;
+}
+
+.summary > div {
+  display: grid;
+  grid-template-columns: 7rem 1fr;
+  gap: 0.75rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid color-mix(in srgb, var(--graphite) 12%, transparent);
+}
+
+.summary dt {
+  margin: 0;
+  font-size: var(--text-body-sm);
+  color: var(--smoke);
+}
+
+.summary dd {
+  margin: 0;
+  font-size: var(--text-body);
+  font-weight: 500;
+  color: var(--ink);
+}
+
+.paymentNote {
+  margin: 0.25rem 0 0;
+  font-size: var(--text-body-sm);
+  color: var(--smoke);
+}
+
+.actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+
+.primaryButton,
+.secondaryButton {
+  min-height: 2.75rem;
+  padding: 0.65rem 1.2rem;
+  border: 1px solid transparent;
+  font-size: var(--text-body);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.primaryButton {
+  background: var(--eon-red);
+  color: white;
+}
+
+.primaryButton:hover:not(:disabled) {
+  background: var(--dark-red);
+}
+
+.primaryButton:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.secondaryButton {
+  background: transparent;
+  border-color: color-mix(in srgb, var(--graphite) 25%, transparent);
+  color: var(--ink);
+}
+
+.secondaryButton:hover {
+  border-color: var(--graphite);
+}
+
+.successPanel {
+  display: grid;
+  gap: 1rem;
+  max-width: 28rem;
+}
+
+.inlineError {
+  margin: 0;
+  color: var(--dark-red);
+  font-size: var(--text-body-sm);
+}
+
+.muted {
+  margin: 0;
+  color: var(--smoke);
+  font-size: var(--text-body);
+}

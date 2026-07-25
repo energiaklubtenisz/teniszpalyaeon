@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
 import { DM_Sans, Geist_Mono } from "next/font/google";
+
+import { site } from "@/content/site";
+
 import "./globals.css";
 
 /** Savee Font substitute from DESIGN.md — geometric sans, 400/500. */
@@ -15,8 +18,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Teniszpálya EON",
-  description: "Teniszpálya foglalási rendszer",
+  title: site.name,
+  description: site.description,
 };
 
 export default function RootLayout({
@@ -26,7 +29,7 @@ export default function RootLayout({
 }>) {
   return (
     <html
-      lang="hu"
+      lang={site.lang}
       className={`${saveeSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body

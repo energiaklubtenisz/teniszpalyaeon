@@ -1,0 +1,39 @@
+.page {
+  min-height: calc(100dvh - 4rem);
+  background: var(--background);
+}
+
+.section {
+  max-width: 40rem;
+  padding: 4rem 1.5rem 6rem;
+}
+
+.title {
+  margin: 0 0 1rem;
+  font-size: var(--text-heading);
+  font-weight: 500;
+  line-height: 1.17;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+}
+
+.support {
+  margin: 0;
+  font-size: var(--text-body);
+  line-height: 1.625;
+  color: var(--smoke);
+}
+
+@media (min-width: 768px) {
+  .section {
+    padding: 5rem 2.5rem 8rem;
+  }
+
+  .title {
+    font-size: var(--text-display);
+  }
+
+  .support {
+    font-size: var(--text-subheading);
+  }
+}
