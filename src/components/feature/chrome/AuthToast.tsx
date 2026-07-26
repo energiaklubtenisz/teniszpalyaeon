@@ -4,6 +4,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { login } from "@/content/login";
+import { profile } from "@/content/profile";
 import { cn } from "@/lib/utils";
 
 import styles from "./auth-toast.module.css";
@@ -11,6 +12,7 @@ import styles from "./auth-toast.module.css";
 const NOTICE_MESSAGES = {
   login: login.notices.login,
   logout: login.notices.logout,
+  "account-deleted": profile.notices.accountDeleted,
 } as const;
 
 const TOAST_MS = 2000;
@@ -18,7 +20,9 @@ const TOAST_MS = 2000;
 type NoticeKey = keyof typeof NOTICE_MESSAGES;
 
 function isNoticeKey(value: string | null): value is NoticeKey {
-  return value === "login" || value === "logout";
+  return (
+    value === "login" || value === "logout" || value === "account-deleted"
+  );
 }
 
 export function AuthToast() {

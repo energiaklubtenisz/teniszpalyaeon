@@ -1,9 +1,10 @@
 "use client";
 
+import { User } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 
 import { logout } from "@/actions/auth";
 import { site } from "@/content/site";
@@ -26,10 +27,53 @@ type SiteHeaderProps = {
 export function SiteHeader({ isAuthenticated }: SiteHeaderProps) {
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [profileMenuOpen, setProfileMenuOpen] = useState(false);
+  const profileMenuRef = useRef<HTMLDivElement>(null);
+  const profileMenuId = useId();
 
   const closeMenu = () => {
     setMenuOpen(false);
   };
+
+  const closeProfileMenu = () => {
+    setProfileMenuOpen(false);
+  };
+
+  useEffect(() => {
+    if (!profileMenuOpen) {
+      return;
+    }
+
+    const handlePointerDown = (event: MouseEvent | TouchEvent) => {
+      const target = event.target;
+      if (
+        target instanceof Node &&
+        !profileMenuRef.current?.contains(target)
+      ) {
+        setProfileMenuOpen(false);
+      }
+    };
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setProfileMenuOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handlePointerDown);
+    document.addEventListener("touchstart", handlePointerDown);
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.removeEventListener("mousedown", handlePointerDown);
+      document.removeEventListener("touchstart", handlePointerDown);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [profileMenuOpen]);
+
+  useEffect(() => {
+    setProfileMenuOpen(false);
+  }, [pathname]);
 
   return (
     <header className={styles.header}>
@@ -80,15 +124,55 @@ export function SiteHeader({ isAuthenticated }: SiteHeaderProps) {
 
         <div className={styles.auth}>
           {isAuthenticated ? (
-            <form action={logout}>
+            <div className={styles.profileMenu} ref={profileMenuRef}>
               <button
-                type="submit"
-                className={styles.logout}
-                onClick={closeMenu}
+                type="button"
+                className={cn(
+                  styles.profile,
+                  (profileMenuOpen ||
+                    isActivePath(pathname, site.nav.auth.profile.href)) &&
+                    styles.profileActive
+                )}
+                aria-label={site.nav.auth.profile.menuLabel}
+                aria-expanded={profileMenuOpen}
+                aria-haspopup="menu"
+                aria-controls={profileMenuId}
+                onClick={() => {
+                  setProfileMenuOpen((open) => !open);
+                }}
               >
-                {site.nav.auth.logout.label}
+                <User className={styles.profileIcon} aria-hidden />
               </button>
-            </form>
+
+              {profileMenuOpen ? (
+                <div
+                  id={profileMenuId}
+                  className={styles.profileDropdown}
+                  role="menu"
+                >
+                  <Link
+                    href={site.nav.auth.profile.href}
+                    role="menuitem"
+                    className={styles.profileDropdownItem}
+                    onClick={() => {
+                      closeProfileMenu();
+                      closeMenu();
+                    }}
+                  >
+                    {site.nav.auth.profile.label}
+                  </Link>
+                  <form action={logout} className={styles.profileDropdownForm}>
+                    <button
+                      type="submit"
+                      role="menuitem"
+                      className={styles.profileDropdownItem}
+                    >
+                      {site.nav.auth.logout.label}
+                    </button>
+                  </form>
+                </div>
+              ) : null}
+            </div>
           ) : (
             <>
               <Link
