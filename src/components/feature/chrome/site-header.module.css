@@ -139,6 +139,25 @@
   background: var(--dark-red);
 }
 
+.logout {
+  font: inherit;
+  font-size: var(--text-body-lg);
+  font-weight: 550;
+  color: var(--ink);
+  text-decoration: none;
+  padding: 0.5rem 0.875rem;
+  border: 1px solid var(--stone);
+  border-radius: 9999px;
+  background: transparent;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.logout:hover {
+  background: var(--warm-taupe);
+  border-color: var(--ash);
+}
+
 @media (max-width: 767px) {
   .header {
     flex-wrap: wrap;
@@ -192,8 +211,10 @@
   }
 
   .login,
-  .register {
+  .register,
+  .logout {
     text-align: center;
+    width: 100%;
   }
 }
 

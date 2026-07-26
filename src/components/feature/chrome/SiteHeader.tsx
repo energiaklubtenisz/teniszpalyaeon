@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 
+import { logout } from "@/actions/auth";
 import { site } from "@/content/site";
 import { assets } from "@/lib/assets";
 import { cn } from "@/lib/utils";
@@ -18,7 +19,11 @@ function isActivePath(pathname: string, href: string): boolean {
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
-export function SiteHeader() {
+type SiteHeaderProps = {
+  isAuthenticated: boolean;
+};
+
+export function SiteHeader({ isAuthenticated }: SiteHeaderProps) {
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -74,28 +79,42 @@ export function SiteHeader() {
         </div>
 
         <div className={styles.auth}>
-          <Link
-            href={site.nav.auth.login.href}
-            className={cn(
-              styles.login,
-              isActivePath(pathname, site.nav.auth.login.href) &&
-                styles.loginActive
-            )}
-            onClick={closeMenu}
-          >
-            {site.nav.auth.login.label}
-          </Link>
-          <Link
-            href={site.nav.auth.register.href}
-            className={cn(
-              styles.register,
-              isActivePath(pathname, site.nav.auth.register.href) &&
-                styles.registerActive
-            )}
-            onClick={closeMenu}
-          >
-            {site.nav.auth.register.label}
-          </Link>
+          {isAuthenticated ? (
+            <form action={logout}>
+              <button
+                type="submit"
+                className={styles.logout}
+                onClick={closeMenu}
+              >
+                {site.nav.auth.logout.label}
+              </button>
+            </form>
+          ) : (
+            <>
+              <Link
+                href={site.nav.auth.login.href}
+                className={cn(
+                  styles.login,
+                  isActivePath(pathname, site.nav.auth.login.href) &&
+                    styles.loginActive
+                )}
+                onClick={closeMenu}
+              >
+                {site.nav.auth.login.label}
+              </Link>
+              <Link
+                href={site.nav.auth.register.href}
+                className={cn(
+                  styles.register,
+                  isActivePath(pathname, site.nav.auth.register.href) &&
+                    styles.registerActive
+                )}
+                onClick={closeMenu}
+              >
+                {site.nav.auth.register.label}
+              </Link>
+            </>
+          )}
         </div>
       </nav>
     </header>
