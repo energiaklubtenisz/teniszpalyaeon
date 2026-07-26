@@ -14,6 +14,8 @@ export const site = {
     auth: {
       login: { label: "Bejelentkezés", href: "/login" },
       register: { label: "Regisztráció", href: "/register" },
+      profile: { label: "Profil", href: "/profil", menuLabel: "Fiók menü" },
+      logout: { label: "Kijelentkezés" },
     },
   },
 } as const;

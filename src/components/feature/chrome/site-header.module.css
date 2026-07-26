@@ -139,6 +139,86 @@
   background: var(--dark-red);
 }
 
+.profile {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  padding: 0;
+  border: 1px solid var(--stone);
+  border-radius: 9999px;
+  background: var(--warm-taupe);
+  color: var(--graphite);
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.profile:hover {
+  background: #fff;
+  border-color: var(--ash);
+  color: var(--ink);
+}
+
+.profileActive {
+  border-color: var(--eon-red);
+  color: var(--eon-red);
+}
+
+.profileIcon {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.profileMenu {
+  position: relative;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.profileDropdown {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  right: 0;
+  z-index: 60;
+  min-width: 11rem;
+  padding: 0.375rem;
+  background: #fff;
+  border: 1px solid var(--stone);
+  border-radius: 0.75rem;
+  box-shadow: 0 8px 24px rgb(28 25 23 / 10%);
+}
+
+.profileDropdownForm {
+  margin: 0;
+}
+
+.profileDropdownItem {
+  display: block;
+  width: 100%;
+  margin: 0;
+  padding: 0.625rem 0.75rem;
+  font: inherit;
+  font-size: var(--text-body);
+  font-weight: 500;
+  line-height: 1.4;
+  text-align: left;
+  text-decoration: none;
+  color: var(--ink);
+  background: transparent;
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.profileDropdownItem:hover {
+  background: var(--warm-taupe);
+}
+
 @media (max-width: 767px) {
   .header {
     flex-wrap: wrap;
@@ -194,6 +274,21 @@
   .login,
   .register {
     text-align: center;
+    width: 100%;
+  }
+
+  .profile {
+    align-self: flex-end;
+  }
+
+  .profileMenu {
+    width: 100%;
+  }
+
+  .profileDropdown {
+    right: 0;
+    left: auto;
+    width: 100%;
   }
 }
 

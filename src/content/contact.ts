@@ -1,6 +1,6 @@
 export const contact = {
   title: "Kapcsolat",
-  lead: "Cím, parkolás, elérhetőségek — vagy írjon nekünk üzenetet.",
+  lead: "Cím, parkolás, elérhetőségek",
   address: {
     title: "Cím és parkolás",
     label: "Pályánk címe",
