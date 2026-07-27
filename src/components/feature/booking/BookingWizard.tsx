@@ -2,60 +2,75 @@
 
 import { useEffect, useMemo, useState, useTransition } from "react";
 import Link from "next/link";
-import { format } from "date-fns";
-import { hu } from "date-fns/locale";
 
 import {
   createBooking,
-  getCourtAvailability,
-  type BusyInterval,
+  getCourtsAvailabilityForWindow,
   type CourtOption,
 } from "@/actions/booking";
 import { booking } from "@/content/booking";
 import {
   calculateOneTimePriceHuf,
+  formatDateKeyLabel,
   formatPriceHuf,
   isValidBookingRange,
-  parseDateKey,
   type TimeLabel,
 } from "@/lib/booking/time";
 import { cn } from "@/lib/utils";
 
-import { BookingTypeStep, type BookingTypeChoice } from "./BookingTypeStep";
+import {
+  BookingTypeStep,
+  type BookingTypeChoice,
+  type PlayerCountChoice,
+} from "./BookingTypeStep";
 import { CourtSchematic } from "./CourtSchematic";
 import { DayPicker } from "./DayPicker";
 import { TimeSlotPicker } from "./TimeSlotPicker";
 import styles from "./booking.module.css";
 
-type StepId = "court" | "day" | "time" | "type" | "confirm";
+type StepId = "day" | "time" | "court" | "type" | "confirm";
 
-const STEPS: StepId[] = ["court", "day", "time", "type", "confirm"];
+const STEPS: StepId[] = ["day", "time", "court", "type", "confirm"];
 
 type BookingWizardProps = {
   courts: CourtOption[];
   isAuthenticated: boolean;
+  bookerName: string | null;
+  onSuccess: () => void;
 };
 
-function formatDateLabel(dateKey: string): string {
-  const { year, monthIndex, day } = parseDateKey(dateKey);
-  return format(new Date(year, monthIndex, day), "yyyy. MMMM d. (EEEE)", {
-    locale: hu,
-  });
+function guestNamesComplete(
+  playerCount: PlayerCountChoice | null,
+  guestPlayerNames: string[],
+): boolean {
+  if (!playerCount) return false;
+  const expected = playerCount - 1;
+  if (guestPlayerNames.length !== expected) return false;
+  return guestPlayerNames.every((name) => name.trim().length >= 2);
 }
 
-export function BookingWizard({ courts, isAuthenticated }: BookingWizardProps) {
+export function BookingWizard({
+  courts,
+  isAuthenticated,
+  bookerName,
+  onSuccess,
+}: BookingWizardProps) {
   const [stepIndex, setStepIndex] = useState(0);
+  const [furthestStepIndex, setFurthestStepIndex] = useState(0);
   const [courtId, setCourtId] = useState<string | null>(null);
   const [dateKey, setDateKey] = useState<string | null>(null);
   const [startLabel, setStartLabel] = useState<TimeLabel | null>(null);
   const [endLabel, setEndLabel] = useState<TimeLabel | null>(null);
   const [bookingType, setBookingType] = useState<BookingTypeChoice | null>(null);
-  const [busy, setBusy] = useState<BusyInterval[]>([]);
-  const [busyError, setBusyError] = useState<string | null>(null);
+  const [playerCount, setPlayerCount] = useState<PlayerCountChoice | null>(null);
+  const [guestPlayerNames, setGuestPlayerNames] = useState<string[]>([]);
+  const [availabilityByCourtId, setAvailabilityByCourtId] = useState<
+    Record<string, boolean>
+  >({});
+  const [availabilityError, setAvailabilityError] = useState<string | null>(null);
+  const [loadingAvailability, setLoadingAvailability] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
-  const [successId, setSuccessId] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
-  const [loadingBusy, setLoadingBusy] = useState(false);
 
   const step = STEPS[stepIndex];
   const selectedCourt = useMemo(
@@ -64,40 +79,62 @@ export function BookingWizard({ courts, isAuthenticated }: BookingWizardProps) {
   );
 
   useEffect(() => {
-    if (!courtId || !dateKey || step !== "time") return;
+    if (
+      step !== "court" ||
+      !dateKey ||
+      !startLabel ||
+      !endLabel ||
+      !isValidBookingRange(startLabel, endLabel)
+    ) {
+      return;
+    }
 
     let cancelled = false;
-    setLoadingBusy(true);
-    setBusyError(null);
+    setLoadingAvailability(true);
+    setAvailabilityError(null);
 
-    void getCourtAvailability(courtId, dateKey).then((result) => {
-      if (cancelled) return;
-      setLoadingBusy(false);
-      if (!result.success) {
-        setBusy([]);
-        setBusyError(result.error);
-        return;
-      }
-      setBusy(result.data);
-    });
+    void getCourtsAvailabilityForWindow(dateKey, startLabel, endLabel).then(
+      (result) => {
+        if (cancelled) return;
+        setLoadingAvailability(false);
+        if (!result.success) {
+          setAvailabilityByCourtId({});
+          setAvailabilityError(result.error);
+          return;
+        }
+
+        const next: Record<string, boolean> = {};
+        for (const row of result.data) {
+          next[row.courtId] = row.available;
+        }
+        setAvailabilityByCourtId(next);
+        setCourtId((current) =>
+          current && next[current] === false ? null : current,
+        );
+      },
+    );
 
     return () => {
       cancelled = true;
     };
-  }, [courtId, dateKey, step]);
+  }, [step, dateKey, startLabel, endLabel]);
 
   const canGoNext = (() => {
     switch (step) {
-      case "court":
-        return Boolean(courtId);
       case "day":
         return Boolean(dateKey);
       case "time":
         return Boolean(
           startLabel && endLabel && isValidBookingRange(startLabel, endLabel),
         );
+      case "court":
+        return Boolean(courtId && availabilityByCourtId[courtId] === true);
       case "type":
-        return Boolean(bookingType);
+        return Boolean(
+          bookingType &&
+            playerCount &&
+            guestNamesComplete(playerCount, guestPlayerNames),
+        );
       default:
         return false;
     }
@@ -106,7 +143,9 @@ export function BookingWizard({ courts, isAuthenticated }: BookingWizardProps) {
   const goNext = () => {
     if (!canGoNext) return;
     setSubmitError(null);
-    setStepIndex((index) => Math.min(index + 1, STEPS.length - 1));
+    const next = Math.min(stepIndex + 1, STEPS.length - 1);
+    setStepIndex(next);
+    setFurthestStepIndex((furthest) => Math.max(furthest, next));
   };
 
   const goBack = () => {
@@ -114,25 +153,25 @@ export function BookingWizard({ courts, isAuthenticated }: BookingWizardProps) {
     setStepIndex((index) => Math.max(index - 1, 0));
   };
 
-  const reset = () => {
-    setStepIndex(0);
-    setCourtId(null);
-    setDateKey(null);
-    setStartLabel(null);
-    setEndLabel(null);
-    setBookingType(null);
-    setBusy([]);
-    setSubmitError(null);
-    setSuccessId(null);
-  };
-
   const handleConfirm = () => {
     if (!isAuthenticated) {
       setSubmitError(booking.errors.auth);
       return;
     }
-    if (!courtId || !dateKey || !startLabel || !endLabel || !bookingType) {
-      setSubmitError(booking.errors.generic);
+    if (
+      !courtId ||
+      !dateKey ||
+      !startLabel ||
+      !endLabel ||
+      !bookingType ||
+      !playerCount ||
+      !guestNamesComplete(playerCount, guestPlayerNames)
+    ) {
+      setSubmitError(
+        !guestNamesComplete(playerCount, guestPlayerNames)
+          ? booking.errors.guestNames
+          : booking.errors.generic,
+      );
       return;
     }
 
@@ -144,26 +183,24 @@ export function BookingWizard({ courts, isAuthenticated }: BookingWizardProps) {
         startLabel,
         endLabel,
         bookingType,
+        playerCount,
+        guestPlayerNames: guestPlayerNames.map((name) => name.trim()),
       });
       if (!result.success) {
         setSubmitError(result.error);
         return;
       }
-      setSuccessId(result.data.id);
+      onSuccess();
     });
   };
 
-  if (successId) {
-    return (
-      <div className={styles.successPanel}>
-        <h2 className={styles.stepTitle}>{booking.steps.confirm.success}</h2>
-        <p className={styles.stepLead}>{booking.steps.confirm.successBody}</p>
-        <button type="button" className={styles.primaryButton} onClick={reset}>
-          {booking.steps.confirm.another}
-        </button>
-      </div>
-    );
-  }
+  const goToStep = (index: number) => {
+    if (index < 0 || index >= STEPS.length) return;
+    if (index > furthestStepIndex) return;
+    if (index === stepIndex) return;
+    setSubmitError(null);
+    setStepIndex(index);
+  };
 
   const priceLabel =
     bookingType === "season_pass"
@@ -172,28 +209,52 @@ export function BookingWizard({ courts, isAuthenticated }: BookingWizardProps) {
         ? formatPriceHuf(calculateOneTimePriceHuf(startLabel, endLabel))
         : "—";
 
+  const playersLabel =
+    playerCount === 2
+      ? booking.steps.type.players.two
+      : playerCount === 4
+        ? booking.steps.type.players.four
+        : "—";
+
   return (
     <div className={styles.wizard}>
       <ol className={styles.progress} aria-label="Foglalási lépések">
-        {STEPS.map((id, index) => (
-          <li
-            key={id}
-            className={cn(
-              styles.progressItem,
-              index === stepIndex && styles.progressCurrent,
-              index < stepIndex && styles.progressDone,
-            )}
-          >
-            <span className={styles.progressIndex}>{index + 1}</span>
-            <span className={styles.progressLabel}>{booking.steps[id].title}</span>
-          </li>
-        ))}
+        {STEPS.map((id, index) => {
+          const isCurrent = index === stepIndex;
+          const isReached = index <= furthestStepIndex;
+          const isDone = index < stepIndex;
+          const canJump = isReached && !isCurrent;
+
+          return (
+            <li key={id} className={styles.progressItemWrap}>
+              <button
+                type="button"
+                className={cn(
+                  styles.progressItem,
+                  isCurrent && styles.progressCurrent,
+                  (isDone || (isReached && !isCurrent)) && styles.progressDone,
+                  canJump && styles.progressClickable,
+                )}
+                disabled={!canJump}
+                aria-current={isCurrent ? "step" : undefined}
+                aria-label={`${index + 1}. ${booking.steps[id].shortTitle}`}
+                onClick={() => goToStep(index)}
+              >
+                <span className={styles.progressIndex}>{index + 1}</span>
+                <span className={styles.progressLabel}>
+                  {booking.steps[id].shortTitle}
+                </span>
+              </button>
+            </li>
+          );
+        })}
       </ol>
 
       {!isAuthenticated ? (
         <aside className={styles.authBanner}>
           <p>
-            <strong>{booking.loginRequired.title}</strong> — {booking.loginRequired.body}
+            <strong>{booking.loginRequired.title}</strong> —{" "}
+            {booking.loginRequired.body}
           </p>
           <div className={styles.authLinks}>
             <Link href="/login" className={styles.authLink}>
@@ -211,20 +272,7 @@ export function BookingWizard({ courts, isAuthenticated }: BookingWizardProps) {
           {booking.steps[step].title}
         </h2>
         <p className={styles.stepLead}>{booking.steps[step].lead}</p>
-
-        {step === "court" ? (
-          <CourtSchematic
-            courts={courts}
-            selectedCourtId={courtId}
-            onSelect={(id) => {
-              setCourtId(id);
-              setDateKey(null);
-              setStartLabel(null);
-              setEndLabel(null);
-              setBookingType(null);
-            }}
-          />
-        ) : null}
+        <p className={styles.stepLead}>{booking.steps[step].lead2}</p>
 
         {step === "day" ? (
           <DayPicker
@@ -233,33 +281,77 @@ export function BookingWizard({ courts, isAuthenticated }: BookingWizardProps) {
               setDateKey(key);
               setStartLabel(null);
               setEndLabel(null);
+              setCourtId(null);
+              setBookingType(null);
+              setPlayerCount(null);
+              setGuestPlayerNames([]);
+              setAvailabilityByCourtId({});
             }}
           />
         ) : null}
 
         {step === "time" && dateKey ? (
+          <TimeSlotPicker
+            dateKey={dateKey}
+            busy={[]}
+            startLabel={startLabel}
+            endLabel={endLabel}
+            onChange={(start, end) => {
+              setStartLabel(start);
+              setEndLabel(end);
+              setCourtId(null);
+              setBookingType(null);
+              setPlayerCount(null);
+              setGuestPlayerNames([]);
+              setAvailabilityByCourtId({});
+            }}
+          />
+        ) : null}
+
+        {step === "court" ? (
           <>
-            {loadingBusy ? <p className={styles.muted}>Foglaltság betöltése…</p> : null}
-            {busyError ? <p className={styles.inlineError}>{busyError}</p> : null}
-            <TimeSlotPicker
-              dateKey={dateKey}
-              busy={busy}
-              startLabel={startLabel}
-              endLabel={endLabel}
-              onChange={(start, end) => {
-                setStartLabel(start);
-                setEndLabel(end);
-              }}
-            />
+            {loadingAvailability ? (
+              <p className={styles.muted}>{booking.steps.court.loading}</p>
+            ) : null}
+            {availabilityError ? (
+              <p className={styles.inlineError}>{availabilityError}</p>
+            ) : null}
+            {!loadingAvailability && !availabilityError ? (
+              <CourtSchematic
+                courts={courts}
+                selectedCourtId={courtId}
+                availabilityByCourtId={availabilityByCourtId}
+                onSelect={(id) => {
+                  setCourtId(id);
+                  setBookingType(null);
+                  setPlayerCount(null);
+                  setGuestPlayerNames([]);
+                }}
+              />
+            ) : null}
           </>
         ) : null}
 
         {step === "type" && startLabel && endLabel ? (
           <BookingTypeStep
             value={bookingType}
+            playerCount={playerCount}
+            guestPlayerNames={guestPlayerNames}
+            bookerName={bookerName}
             startLabel={startLabel}
             endLabel={endLabel}
-            onChange={setBookingType}
+            onChangeType={setBookingType}
+            onChangePlayers={(count) => {
+              setPlayerCount(count);
+              setGuestPlayerNames(Array.from({ length: count - 1 }, () => ""));
+            }}
+            onChangeGuestName={(index, value) => {
+              setGuestPlayerNames((current) => {
+                const next = [...current];
+                next[index] = value;
+                return next;
+              });
+            }}
           />
         ) : null}
 
@@ -271,11 +363,13 @@ export function BookingWizard({ courts, isAuthenticated }: BookingWizardProps) {
             </div>
             <div>
               <dt>{booking.steps.confirm.date}</dt>
-              <dd>{dateKey ? formatDateLabel(dateKey) : "—"}</dd>
+              <dd>{dateKey ? formatDateKeyLabel(dateKey) : "—"}</dd>
             </div>
             <div>
               <dt>{booking.steps.confirm.time}</dt>
-              <dd>{startLabel && endLabel ? `${startLabel}–${endLabel}` : "—"}</dd>
+              <dd>
+                {startLabel && endLabel ? `${startLabel}–${endLabel}` : "—"}
+              </dd>
             </div>
             <div>
               <dt>{booking.steps.confirm.type}</dt>
@@ -286,25 +380,47 @@ export function BookingWizard({ courts, isAuthenticated }: BookingWizardProps) {
               </dd>
             </div>
             <div>
+              <dt>{booking.steps.confirm.players}</dt>
+              <dd>{playersLabel}</dd>
+            </div>
+            <div>
+              <dt>{booking.steps.confirm.playerNames}</dt>
+              <dd>
+                {[
+                  bookerName ?? booking.steps.type.names.bookerFallback,
+                  ...guestPlayerNames.map((name) => name.trim()).filter(Boolean),
+                ].join(", ")}
+              </dd>
+            </div>
+            <div>
               <dt>{booking.steps.confirm.price}</dt>
               <dd>{priceLabel}</dd>
             </div>
             {bookingType === "one_time" ? (
-              <p className={styles.paymentNote}>{booking.steps.confirm.paymentNote}</p>
+              <p className={styles.paymentNote}>
+                {booking.steps.confirm.paymentNote}
+              </p>
             ) : null}
           </dl>
         ) : null}
 
         {submitError ? <p className={styles.inlineError}>{submitError}</p> : null}
 
-        <div className={styles.actions}>
+        <div
+          className={cn(
+            styles.actions,
+            stepIndex === 0 && styles.actionsSingle,
+          )}
+        >
           {stepIndex > 0 ? (
-            <button type="button" className={styles.secondaryButton} onClick={goBack}>
+            <button
+              type="button"
+              className={styles.secondaryButton}
+              onClick={goBack}
+            >
               {booking.nav.back}
             </button>
-          ) : (
-            <span />
-          )}
+          ) : null}
 
           {step === "confirm" ? (
             <button
@@ -329,6 +445,16 @@ export function BookingWizard({ courts, isAuthenticated }: BookingWizardProps) {
           )}
         </div>
       </section>
+
+      <aside className={styles.helpCard}>
+        <div>
+          <p className={styles.helpTitle}>{booking.help.title}</p>
+          <p className={styles.helpBody}>{booking.help.body}</p>
+        </div>
+        <Link href={booking.help.href} className={styles.helpLink}>
+          {booking.help.cta}
+        </Link>
+      </aside>
     </div>
   );
 }

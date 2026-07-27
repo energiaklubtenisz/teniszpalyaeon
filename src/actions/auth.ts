@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 
 import type { LoginFormState, RegisterFormState } from "@/actions/auth-state";
+import { register as registerContent } from "@/content/register";
 import { createClient } from "@/lib/supabase/server";
 
 const registerSchema = z
@@ -24,6 +25,9 @@ const registerSchema = z
       .min(8, "A jelszó legyen legalább 8 karakter.")
       .max(72, "A jelszó legfeljebb 72 karakter lehet."),
     passwordConfirm: z.string(),
+    privacyAccepted: z
+      .string()
+      .refine((value) => value === "on", registerContent.privacy.error),
     company: z.string().max(0).optional(),
   })
   .refine((data) => data.password === data.passwordConfirm, {
@@ -81,6 +85,7 @@ export async function register(
     email: String(formData.get("email") ?? ""),
     password: String(formData.get("password") ?? ""),
     passwordConfirm: String(formData.get("passwordConfirm") ?? ""),
+    privacyAccepted: String(formData.get("privacyAccepted") ?? ""),
     company: String(formData.get("company") ?? ""),
   };
 
@@ -103,7 +108,8 @@ export async function register(
         key === "fullName" ||
         key === "email" ||
         key === "password" ||
-        key === "passwordConfirm"
+        key === "passwordConfirm" ||
+        key === "privacyAccepted"
       ) {
         fieldErrors[key] ??= issue.message;
       }

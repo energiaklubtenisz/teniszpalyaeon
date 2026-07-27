@@ -9,6 +9,11 @@
   padding: 4.5rem 1.5rem;
 }
 
+.innerWide {
+  max-width: 72rem;
+  padding: 4.5rem 1.5rem;
+}
+
 .intro {
   background: var(--eggshell);
 }
@@ -35,16 +40,35 @@
   background: var(--warm-taupe);
 }
 
-.bandPeople {
+.bandSplit {
   background: var(--eggshell);
-}
-
-.bandAccess {
-  background: var(--stone);
+  border-top: 1px solid var(--stone);
 }
 
 .bandForm {
-  background: var(--eggshell);
+  background: var(--warm-taupe);
+  border-top: 1px solid var(--stone);
+}
+
+.addressGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.addressSide {
+  padding-top: 1.5rem;
+  border-top: 1px solid color-mix(in srgb, var(--ash) 35%, var(--warm-taupe));
+}
+
+.splitGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 3rem;
+}
+
+.splitCol {
+  min-width: 0;
 }
 
 .sectionTitle {
@@ -88,12 +112,23 @@
 .peopleList {
   display: flex;
   flex-direction: column;
-  gap: 2rem;
+  gap: 0;
 }
 
 .person {
   display: flex;
   flex-direction: column;
+  padding: 1.35rem 0;
+  border-bottom: 1px solid var(--stone);
+}
+
+.person:first-child {
+  padding-top: 0;
+}
+
+.person:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
 }
 
 .person .label {
@@ -130,15 +165,28 @@
 }
 
 .lines {
-  margin: 2.5rem 0 0;
+  margin: 1.75rem 0 0;
+  padding-top: 1.5rem;
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
+  gap: 0;
+  border-top: 1px solid var(--stone);
 }
 
 .lineRow {
   display: grid;
   gap: 0.25rem;
+  padding: 1rem 0;
+  border-bottom: 1px solid var(--stone);
+}
+
+.lineRow:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.lineRow:first-child {
+  padding-top: 0;
 }
 
 .lineRow dt {
@@ -162,11 +210,18 @@
 }
 
 .accessBlock {
-  margin-bottom: 2rem;
+  margin-bottom: 0;
+  padding: 1.35rem 0;
+  border-bottom: 1px solid var(--stone);
+}
+
+.accessBlock:first-of-type {
+  padding-top: 0;
 }
 
 .accessBlock:last-child {
-  margin-bottom: 0;
+  border-bottom: none;
+  padding-bottom: 0;
 }
 
 .subTitle {
@@ -397,7 +452,8 @@
 }
 
 @media (min-width: 768px) {
-  .inner {
+  .inner,
+  .innerWide {
     padding: 5.5rem 2.5rem;
   }
 
@@ -417,6 +473,32 @@
 
   .sectionLead {
     font-size: var(--text-body-lg);
+  }
+
+  .addressGrid {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    gap: 2.5rem 3rem;
+    align-items: start;
+  }
+
+  .addressSide {
+    padding-top: 0;
+    padding-left: 2.5rem;
+    border-top: none;
+    border-left: 1px solid color-mix(in srgb, var(--ash) 35%, var(--warm-taupe));
+  }
+
+  .splitGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem 4rem;
+    align-items: start;
+  }
+
+  .splitCol + .splitCol {
+    padding-left: 2.5rem;
+    border-left: 1px solid var(--stone);
   }
 
   .fieldRow {

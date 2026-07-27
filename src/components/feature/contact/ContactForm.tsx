@@ -10,7 +10,11 @@ import { cn } from "@/lib/utils";
 
 import styles from "./contact.module.css";
 
-export function ContactForm() {
+type ContactFormProps = {
+  defaultMessage?: string;
+};
+
+export function ContactForm({ defaultMessage = "" }: ContactFormProps) {
   const { form } = contact;
   const [state, formAction, pending] = useActionState(
     sendContactMessage,
@@ -127,6 +131,7 @@ export function ContactForm() {
           rows={6}
           maxLength={4000}
           disabled={pending}
+          defaultValue={defaultMessage}
           aria-invalid={Boolean(fieldErrors.message)}
           aria-describedby={
             fieldErrors.message ? "contact-message-error" : undefined

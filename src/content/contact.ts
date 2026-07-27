@@ -4,7 +4,7 @@ export const contact = {
   address: {
     title: "Cím és parkolás",
     label: "Pályánk címe",
-    lines: ["8800 Nagykanizsa, Király utca 2."],
+    lines: ["8800 Nagykanizsa, Vár utca 2."],
     directions:
       "A belváros irányából a Vár utcai vasúti kereszteződés előtt, az E.ON telephellyel szemben.",
     parking: {
@@ -71,6 +71,12 @@ export const contact = {
   form: {
     title: "Írjon nekünk",
     lead: "Küldjön üzenetet a klubnak — válaszolunk, amint tudunk.",
+    helpBooking: {
+      title: "Segítség a foglaláshoz",
+      lead: "Írja le, miben tudunk segíteni a pályafoglalással kapcsolatban.",
+      defaultMessage:
+        "Segítségre van szükségem a pályafoglaláshoz:\n\n",
+    },
     optional: "opcionális",
     submit: "Üzenet küldése",
     submitting: "Küldés…",
@@ -86,7 +92,7 @@ export const contact = {
     openLabel: "Megnyitás a Google Térképen",
     href: "https://maps.app.goo.gl/jSHF7y5pYhbG2s697",
     embedSrc:
-      "https://maps.google.com/maps?q=8800+Nagykanizsa,+Kir%C3%A1ly+utca+2&hl=hu&z=16&output=embed",
+      "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3289.2131966136094!2d16.981236499999998!3d46.453338099999996!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x47689328e4c82b05%3A0x2b8332e703c9d74c!2sEnergia%20Szabadid%C5%91sport%20Klub!5e1!3m2!1shu!2shu!4v1785085844573!5m2!1shu!2shu",
     iframeTitle: "Teniszpálya helyszíne a térképen — Nagykanizsa, Király utca 2.",
   },
 } as const;

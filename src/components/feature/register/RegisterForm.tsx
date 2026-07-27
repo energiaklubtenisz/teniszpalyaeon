@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useActionState } from "react";
 
 import { register as registerAction } from "@/actions/auth";
@@ -11,7 +12,7 @@ import { cn } from "@/lib/utils";
 import styles from "./register.module.css";
 
 export function RegisterForm() {
-  const { fields, submit, submitting } = register;
+  const { fields, submit, submitting, privacy } = register;
   const [state, formAction, pending] = useActionState(
     registerAction,
     initialRegisterFormState,
@@ -150,6 +151,50 @@ export function RegisterForm() {
             role="alert"
           >
             {fieldErrors.passwordConfirm}
+          </p>
+        ) : null}
+      </div>
+
+      <div className={styles.field}>
+        <div className={styles.checkboxRow}>
+          <input
+            id="register-privacyAccepted"
+            name="privacyAccepted"
+            type="checkbox"
+            value="on"
+            required
+            disabled={pending}
+            aria-invalid={Boolean(fieldErrors.privacyAccepted)}
+            aria-describedby={
+              fieldErrors.privacyAccepted
+                ? "register-privacyAccepted-error"
+                : undefined
+            }
+            className={styles.checkbox}
+          />
+          <label
+            htmlFor="register-privacyAccepted"
+            className={styles.checkboxLabel}
+          >
+            {privacy.labelBefore}{" "}
+            <Link
+              href={privacy.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={styles.privacyLink}
+            >
+              {privacy.linkLabel}
+            </Link>
+            .
+          </label>
+        </div>
+        {fieldErrors.privacyAccepted ? (
+          <p
+            id="register-privacyAccepted-error"
+            className={styles.fieldError}
+            role="alert"
+          >
+            {fieldErrors.privacyAccepted}
           </p>
         ) : null}
       </div>

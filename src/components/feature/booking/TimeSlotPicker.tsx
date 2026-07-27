@@ -2,7 +2,10 @@
 
 import type { BusyInterval } from "@/actions/booking";
 import { booking } from "@/content/booking";
-import { MIN_DURATION_MINUTES } from "@/lib/booking/constants";
+import {
+  CLOSE_HOUR,
+  MIN_DURATION_MINUTES,
+} from "@/lib/booking/constants";
 import {
   budapestLocalToUtc,
   durationMinutes,
@@ -10,6 +13,8 @@ import {
   isSlotInPast,
   isValidBookingRange,
   labelToMinutes,
+  maxEndMinutesForStart,
+  minutesToLabel,
   rangesOverlap,
   type TimeLabel,
 } from "@/lib/booking/time";
@@ -24,6 +29,9 @@ type TimeSlotPickerProps = {
   endLabel: TimeLabel | null;
   onChange: (start: TimeLabel | null, end: TimeLabel | null) => void;
 };
+
+const CLOSE_MINUTES = CLOSE_HOUR * 60;
+const LAST_START_MINUTES = CLOSE_MINUTES - MIN_DURATION_MINUTES;
 
 function rangeHasBusy(
   dateKey: string,
@@ -43,6 +51,35 @@ function rangeHasBusy(
   );
 }
 
+function canStartAt(
+  dateKey: string,
+  label: TimeLabel,
+  busy: BusyInterval[],
+): boolean {
+  const minutes = labelToMinutes(label);
+  if (minutes > LAST_START_MINUTES) return false;
+  if (isSlotInPast(dateKey, label)) return false;
+
+  const minEndMinutes = minutes + MIN_DURATION_MINUTES;
+  if (minEndMinutes > maxEndMinutesForStart(minutes)) return false;
+
+  const end = minutesToLabel(minEndMinutes);
+  return !rangeHasBusy(dateKey, label, end, busy);
+}
+
+function canEndAt(
+  dateKey: string,
+  start: TimeLabel,
+  end: TimeLabel,
+  busy: BusyInterval[],
+): boolean {
+  const startMinutes = labelToMinutes(start);
+  const endMinutes = labelToMinutes(end);
+  if (endMinutes - startMinutes < MIN_DURATION_MINUTES) return false;
+  if (endMinutes > maxEndMinutesForStart(startMinutes)) return false;
+  return !rangeHasBusy(dateKey, start, end, busy);
+}
+
 export function TimeSlotPicker({
   dateKey,
   busy,
@@ -52,25 +89,46 @@ export function TimeSlotPicker({
 }: TimeSlotPickerProps) {
   const boundaries = getBoundaryLabels();
 
+  const selectAsStart = (label: TimeLabel) => {
+    const minutes = labelToMinutes(label);
+    if (!canStartAt(dateKey, label, busy)) return;
+
+    if (minutes === LAST_START_MINUTES) {
+      onChange(label, minutesToLabel(CLOSE_MINUTES));
+      return;
+    }
+    onChange(label, null);
+  };
+
   const handleSelect = (label: TimeLabel) => {
+    const minutes = labelToMinutes(label);
+    const isClose = minutes === CLOSE_MINUTES;
+
+    if (startLabel && label === startLabel) {
+      onChange(null, null);
+      return;
+    }
+
+    if (endLabel && label === endLabel) {
+      onChange(startLabel, null);
+      return;
+    }
+
     if (!startLabel || (startLabel && endLabel)) {
-      if (labelToMinutes(label) >= 20 * 60) return;
-      if (isSlotInPast(dateKey, label)) return;
-      onChange(label, null);
+      if (isClose) return;
+      selectAsStart(label);
       return;
     }
 
     const startMinutes = labelToMinutes(startLabel);
-    const endMinutes = labelToMinutes(label);
 
-    if (endMinutes <= startMinutes) {
-      if (isSlotInPast(dateKey, label) || labelToMinutes(label) >= 20 * 60) return;
-      onChange(label, null);
+    if (minutes < startMinutes) {
+      if (isClose) return;
+      selectAsStart(label);
       return;
     }
 
-    if (endMinutes - startMinutes < MIN_DURATION_MINUTES) return;
-    if (rangeHasBusy(dateKey, startLabel, label, busy)) return;
+    if (!canEndAt(dateKey, startLabel, label, busy)) return;
     onChange(startLabel, label);
   };
 
@@ -81,13 +139,12 @@ export function TimeSlotPicker({
     <div className={styles.timeBlock}>
       <div className={styles.legend}>
         <span>
-          <i className={cn(styles.swatch, styles.swatchFree)} /> {booking.steps.time.available}
+          <i className={cn(styles.swatch, styles.swatchFree)} />{" "}
+          {booking.steps.time.available}
         </span>
         <span>
-          <i className={cn(styles.swatch, styles.swatchBooked)} /> {booking.steps.time.booked}
-        </span>
-        <span>
-          <i className={cn(styles.swatch, styles.swatchPast)} /> {booking.steps.time.past}
+          <i className={cn(styles.swatch, styles.swatchPast)} />{" "}
+          {booking.steps.time.past}
         </span>
       </div>
 
@@ -102,22 +159,23 @@ export function TimeSlotPicker({
       <div className={styles.timeGrid} role="group" aria-label={booking.steps.time.title}>
         {boundaries.map((label) => {
           const minutes = labelToMinutes(label);
-          const isClose = minutes === 20 * 60;
+          const isClose = minutes === CLOSE_MINUTES;
           const past = !isClose && isSlotInPast(dateKey, label);
           const selectingEnd = Boolean(startLabel && !endLabel);
+          const startMinutes = startLabel ? labelToMinutes(startLabel) : null;
 
           let disabled = past;
-          if (!selectingEnd && isClose) disabled = true;
-          if (selectingEnd && startLabel) {
-            const startMinutes = labelToMinutes(startLabel);
-            const tooShort = minutes - startMinutes < MIN_DURATION_MINUTES;
-            const beforeOrEqual = minutes <= startMinutes;
-            const overlaps =
-              minutes > startMinutes &&
-              rangeHasBusy(dateKey, startLabel, label, busy);
-            disabled = beforeOrEqual || tooShort || overlaps;
-          } else if (!startLabel) {
-            disabled = past || isClose || minutes + MIN_DURATION_MINUTES > 20 * 60;
+
+          if (selectingEnd && startMinutes !== null) {
+            if (label === startLabel) {
+              disabled = false;
+            } else if (minutes < startMinutes) {
+              disabled = !canStartAt(dateKey, label, busy);
+            } else {
+              disabled = !canEndAt(dateKey, startLabel!, label, busy);
+            }
+          } else if (!startLabel || (startLabel && endLabel)) {
+            disabled = isClose || !canStartAt(dateKey, label, busy);
           }
 
           const inSelection =
@@ -125,9 +183,11 @@ export function TimeSlotPicker({
             endLabel &&
             minutes >= labelToMinutes(startLabel) &&
             minutes < labelToMinutes(endLabel);
-          const isStart = startLabel === label && !endLabel;
+          const isStart = startLabel === label;
           const isEnd = endLabel === label;
-          const next = boundaries.find((item) => labelToMinutes(item) === minutes + 30);
+          const next = boundaries.find(
+            (item) => labelToMinutes(item) === minutes + 30,
+          );
           const segmentBusy =
             !isClose && next && rangeHasBusy(dateKey, label, next, busy);
 
@@ -138,8 +198,8 @@ export function TimeSlotPicker({
               disabled={disabled}
               className={cn(
                 styles.timeCell,
-                past && styles.timePast,
-                segmentBusy && !selectingEnd && styles.timeBooked,
+                disabled && styles.timePast,
+                segmentBusy && !selectingEnd && !disabled && styles.timeBooked,
                 inSelection && styles.timeSelected,
                 isStart && styles.timeStartOnly,
                 isEnd && styles.timeSelected,

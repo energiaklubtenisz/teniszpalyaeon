@@ -2,7 +2,10 @@ import { HOURLY_RATE_HUF } from "@/lib/booking/constants";
 
 export const booking = {
   title: "Foglalás",
-  lead: "Válasszon pályát, napot és időpontot — legalább egy órára, félórás határokkal.",
+  lead: "Válasszon napot és időpontot, majd pályát — legalább egy órára, félórás határokkal.",
+  loadError: {
+    empty: "Jelenleg nincs elérhető pálya. Próbálja később.",
+  },
   loginRequired: {
     title: "Bejelentkezés szükséges",
     body: "A foglaláshoz jelentkezzen be, vagy hozzon létre fiókot.",
@@ -10,28 +13,38 @@ export const booking = {
     register: "Regisztráció",
   },
   steps: {
-    court: {
-      title: "Pályaválasztás",
-      lead: "Nyolc salakpálya — 4 sor, soronként 2 pálya.",
-    },
     day: {
       title: "Nap kiválasztása",
-      lead: "Ma és a következő 30 nap közül választhat.",
+      shortTitle: "Nap",
+      lead: "Válasszon napot a foglaláshoz.",
+      lead2: "",
       weekdays: ["H", "K", "Sze", "Cs", "P", "Szo", "V"],
     },
     time: {
       title: "Idősáv",
-      lead: "Nyitvatartás 8:00–20:00. Kattintson a kezdő, majd a záró időpontra (pl. 8:00 → 9:30). Minimum 1 óra.",
+      shortTitle: "Idő",
+      lead: "Válasszon idősávot a foglaláshoz.",
+      lead2: "A nyitvatartási időn belül a minimális foglalási idő 1 óra. 20:00 órai kezdésnél a maximális foglalási idő 1 óra.",
       hintStart: "Válassza ki a kezdés idejét.",
       hintEnd: "Válassza ki a befejezés idejét (legalább 1 órával később).",
       selected: "Kiválasztott sáv",
-      booked: "Foglalt",
       past: "Elmúlt",
+      available: "Választható",
+    },
+    court: {
+      title: "Pályaválasztás",
+      shortTitle: "Pálya",
+      lead: "Válasszon pályát a foglaláshoz.",
+      lead2: "",
       available: "Szabad",
+      busy: "Foglalt",
+      loading: "Foglaltság betöltése…",
     },
     type: {
-      title: "Bérlet vagy egyedi?",
-      lead: "Jelölje meg, hogyan szeretne játszani. A bérletet egyelőre nem ellenőrizzük automatikusan.",
+      title: "Részletek",
+      shortTitle: "Típus",
+      lead: "Válassza ki a foglalás típusát majd adja meg a játékosok számát és nevét.",
+      lead2: "",
       seasonPass: {
         title: "Szezonbérletem van",
         body: "Bérletes pályahasználat — nincs óránkénti díj a foglaláskor.",
@@ -40,14 +53,32 @@ export const booking = {
         title: "Egyedi foglalás",
         body: `Pályabérleti díj: ${HOURLY_RATE_HUF.toLocaleString("hu-HU")} Ft / óra. Fizetés módja később egyeztetendő.`,
       },
+      players: {
+        title: "Játékosok száma",
+        two: "2 fő",
+        four: "4 fő",
+        hint: "A díj páros és négyes játéknál is azonos.",
+      },
+      names: {
+        title: "Játékosok nevei",
+        hint: "Az Ön neve a profilból jön; adja meg a többi játékos nevét.",
+        bookerLabel: "Ön (profil)",
+        bookerFallback: "Profil név nincs megadva",
+        guestLabel: "Játékos {n}",
+        guestPlaceholder: "Teljes név",
+      },
     },
     confirm: {
       title: "Összegzés",
+      shortTitle: "Összegzés",
       lead: "Ellenőrizze a foglalást, majd erősítse meg.",
+      lead2: "",
       court: "Pálya",
       date: "Nap",
       time: "Idő",
       type: "Típus",
+      players: "Játékosok",
+      playerNames: "Nevek",
       price: "Díj",
       priceFree: "Bérletes — 0 Ft",
       paymentNote: "Az egyedi díj fizetése később kerül kialakításra.",
@@ -56,7 +87,15 @@ export const booking = {
       success: "Sikeres foglalás!",
       successBody: "A kiválasztott pálya és időpont rögzítve.",
       another: "Új foglalás",
+      home: "Vissza a kezdőlapra",
+      help: "Segítségkérés",
     },
+  },
+  help: {
+    title: "Problémába ütközött?",
+    body: "Amennyiben kérdése, problémája van a foglalással, írjon nekünk üzenetet.",
+    cta: "Kapcsolatfelvétel",
+    href: "/contact?help=booking#form-heading",
   },
   nav: {
     back: "Vissza",
@@ -67,6 +106,7 @@ export const booking = {
     overlap: "Ez az idősáv már foglalt. Válasszon másik időt.",
     generic: "Nem sikerült a foglalás. Próbálja újra.",
     invalidRange: "Az idősáv legalább 1 óra legyen, :00 vagy :30 határokkal.",
+    guestNames: "Adja meg minden társ játékos nevét.",
   },
 } as const;
 

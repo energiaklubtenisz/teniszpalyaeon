@@ -6,15 +6,18 @@ import {
   isBefore,
   startOfDay,
 } from "date-fns";
+import { hu } from "date-fns/locale";
 
 import {
   BOOKING_TIMEZONE,
   CLOSE_HOUR,
   HOURLY_RATE_HUF,
+  LATE_EVENING_START_HOUR,
   MAX_BOOKING_DAYS_AHEAD,
   MIN_DURATION_MINUTES,
   OPEN_HOUR,
   SLOT_STEP_MINUTES,
+  STANDARD_CLOSE_HOUR,
 } from "@/lib/booking/constants";
 
 export type TimeLabel = `${string}:${string}`;
@@ -110,6 +113,23 @@ export function formatBudapestTime(date: Date): TimeLabel {
   return `${hour}:${minute}` as TimeLabel;
 }
 
+/** Calendar date label in Budapest timezone, e.g. `2026. július 27. (hétfő)`. */
+export function formatBudapestDateLabel(date: Date): string {
+  const dateKey = budapestDateKey(date);
+  const { year, monthIndex, day } = parseDateKey(dateKey);
+  return format(new Date(year, monthIndex, day), "yyyy. MMMM d. (EEEE)", {
+    locale: hu,
+  });
+}
+
+/** Same label from a `YYYY-MM-DD` date key (no timezone conversion). */
+export function formatDateKeyLabel(dateKey: string): string {
+  const { year, monthIndex, day } = parseDateKey(dateKey);
+  return format(new Date(year, monthIndex, day), "yyyy. MMMM d. (EEEE)", {
+    locale: hu,
+  });
+}
+
 export function isHalfHourAligned(date: Date): boolean {
   const label = formatBudapestTime(date);
   const minutes = labelToMinutes(label) % 60;
@@ -138,11 +158,21 @@ export function durationMinutes(start: TimeLabel, end: TimeLabel): number {
   return labelToMinutes(end) - labelToMinutes(start);
 }
 
+/** Latest allowed end time (minutes from midnight) for a given start. */
+export function maxEndMinutesForStart(startMinutes: number): number {
+  if (startMinutes >= LATE_EVENING_START_HOUR * 60) {
+    return CLOSE_HOUR * 60;
+  }
+  return STANDARD_CLOSE_HOUR * 60;
+}
+
 export function isValidBookingRange(start: TimeLabel, end: TimeLabel): boolean {
   const duration = durationMinutes(start, end);
   if (duration < MIN_DURATION_MINUTES) return false;
   if (labelToMinutes(start) < OPEN_HOUR * 60) return false;
-  if (labelToMinutes(end) > CLOSE_HOUR * 60) return false;
+  if (labelToMinutes(end) > maxEndMinutesForStart(labelToMinutes(start))) {
+    return false;
+  }
   if (labelToMinutes(start) % SLOT_STEP_MINUTES !== 0) return false;
   if (labelToMinutes(end) % SLOT_STEP_MINUTES !== 0) return false;
   return true;

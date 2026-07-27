@@ -1,4 +1,5 @@
 import Image from "next/image";
+import type { ReactNode } from "react";
 
 import { cn } from "@/lib/utils";
 
@@ -10,6 +11,7 @@ type PageBannerProps = {
   imageSrc?: string;
   imageAlt?: string;
   className?: string;
+  children?: ReactNode;
 };
 
 export function PageBanner({
@@ -18,6 +20,7 @@ export function PageBanner({
   imageSrc,
   imageAlt,
   className,
+  children,
 }: PageBannerProps) {
   return (
     <header
@@ -40,7 +43,9 @@ export function PageBanner({
       ) : null}
       <div className={styles.copy}>
         <h1 className={styles.title}>{title}</h1>
+        <span className={styles.accent} aria-hidden />
         <p className={styles.lead}>{lead}</p>
+        {children ? <div className={styles.actions}>{children}</div> : null}
         {imageAlt ? (
           <span className={styles.srOnly}>{imageAlt}</span>
         ) : null}
