@@ -139,6 +139,25 @@
   background: var(--dark-red);
 }
 
+.admin {
+  font-size: var(--text-body-lg);
+  font-weight: 550;
+  color: #fff;
+  text-decoration: none;
+  padding: 0.5rem 1.25rem;
+  border-radius: 9999px;
+  background: var(--eon-red);
+  transition: background 0.15s ease;
+}
+
+.admin:hover {
+  background: var(--dark-red);
+}
+
+.adminActive {
+  background: var(--dark-red);
+}
+
 .profile {
   display: inline-flex;
   align-items: center;
@@ -272,7 +291,8 @@
   }
 
   .login,
-  .register {
+  .register,
+  .admin {
     text-align: center;
     width: 100%;
   }

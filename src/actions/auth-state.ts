@@ -2,7 +2,10 @@ export type RegisterFormState = {
   status: "idle" | "error";
   message: string | null;
   fieldErrors: Partial<
-    Record<"fullName" | "email" | "password" | "passwordConfirm", string>
+    Record<
+      "fullName" | "email" | "password" | "passwordConfirm" | "privacyAccepted",
+      string
+    >
   >;
 };
 
