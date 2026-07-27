@@ -1,0 +1,124 @@
+.banner {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  min-height: clamp(14rem, 38vw, 22rem);
+  isolation: isolate;
+  overflow: hidden;
+  background: var(--warm-taupe);
+}
+
+.bannerPlain {
+  min-height: 0;
+  justify-content: flex-start;
+  background: var(--eggshell);
+  border-bottom: 1px solid var(--stone);
+}
+
+.media {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+}
+
+.mediaImage {
+  object-fit: cover;
+  object-position: center 45%;
+  animation: bannerMediaIn 1.2s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.scrim {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background:
+    linear-gradient(
+      to top,
+      rgb(253 252 252 / 96%) 0%,
+      rgb(253 252 252 / 72%) 42%,
+      rgb(253 252 252 / 18%) 72%,
+      transparent 100%
+    );
+  pointer-events: none;
+}
+
+.copy {
+  max-width: 40rem;
+  padding: 3.5rem 1.5rem 2.25rem;
+  animation: bannerRise 0.85s cubic-bezier(0.22, 1, 0.36, 1) 0.1s both;
+}
+
+.title {
+  margin: 0 0 0.85rem;
+  font-size: clamp(2.25rem, 6vw, 3.5rem);
+  font-weight: 500;
+  line-height: 1.05;
+  letter-spacing: -0.035em;
+  color: var(--ink);
+}
+
+.accent {
+  display: block;
+  width: 2.75rem;
+  height: 2px;
+  margin: 0 0 1rem;
+  background: var(--eon-red);
+}
+
+.lead {
+  margin: 0;
+  max-width: 30rem;
+  font-size: var(--text-subheading);
+  font-weight: 500;
+  line-height: 1.45;
+  color: var(--graphite);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1rem;
+  margin-top: 1.35rem;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@keyframes bannerMediaIn {
+  from {
+    opacity: 0;
+    transform: scale(1.04);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes bannerRise {
+  from {
+    opacity: 0;
+    transform: translateY(0.6rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (min-width: 768px) {
+  .copy {
+    padding: 4.5rem 2.5rem 2.75rem;
+  }
+}

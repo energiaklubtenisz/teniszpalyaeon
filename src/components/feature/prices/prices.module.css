@@ -1,0 +1,171 @@
+.page {
+  min-height: calc(100dvh - 4rem);
+  background: var(--background);
+  overflow-x: clip;
+}
+
+.inner,
+.innerWide {
+  max-width: 40rem;
+  padding: 4.5rem 1.5rem;
+}
+
+.innerWide {
+  max-width: 48rem;
+}
+
+.bandIntro {
+  background: var(--warm-taupe);
+}
+
+.bandPasses {
+  background: var(--eggshell);
+  border-top: 1px solid var(--stone);
+}
+
+.bandHourly {
+  background: var(--eggshell);
+  padding-bottom: 1rem;
+}
+
+.sectionTitle {
+  margin: 0 0 1.5rem;
+  font-size: clamp(1.75rem, 4vw, 2.5rem);
+  font-weight: 500;
+  line-height: 1.12;
+  letter-spacing: -0.03em;
+  color: var(--ink);
+}
+
+.sectionLead {
+  margin: -0.5rem 0 1.75rem;
+  font-size: var(--text-subheading);
+  font-weight: 500;
+  line-height: 1.45;
+  color: var(--graphite);
+}
+
+.body {
+  margin: 0 0 1rem;
+  font-size: var(--text-body);
+  line-height: 1.7;
+  color: var(--smoke);
+}
+
+.body:last-child {
+  margin-bottom: 0;
+}
+
+.priceList {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.priceRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem 1.5rem;
+  padding: 1.35rem 0;
+  border-bottom: 1px solid var(--stone);
+}
+
+.bandPasses .priceRow:first-child {
+  padding-top: 0;
+}
+
+.bandPasses .priceRow:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.hourlyPanel {
+  padding: 1.75rem 1.5rem;
+  background: var(--warm-taupe);
+  border: 1px solid var(--stone);
+}
+
+.hourlyPanel .priceRow {
+  border-bottom: none;
+  padding: 0;
+  padding-top: 0.25rem;
+}
+
+.priceCopy {
+  flex: 1 1 12rem;
+  min-width: 0;
+}
+
+.priceName {
+  margin: 0;
+  font-size: var(--text-body-lg);
+  font-weight: 500;
+  line-height: 1.35;
+  color: var(--ink);
+}
+
+.priceNote {
+  margin: 0.35rem 0 0;
+  font-size: var(--text-body-sm);
+  line-height: 1.5;
+  color: var(--smoke);
+}
+
+.priceValue {
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.35rem;
+  flex-shrink: 0;
+}
+
+.priceAmount {
+  font-size: clamp(1.5rem, 3vw, 1.85rem);
+  font-weight: 500;
+  letter-spacing: -0.03em;
+  color: var(--ink);
+}
+
+.priceUnit {
+  font-size: var(--text-body-sm);
+  color: var(--smoke);
+}
+
+@media (min-width: 768px) {
+  .inner,
+  .innerWide {
+    padding: 5.5rem 2.5rem;
+  }
+
+  .intro .inner {
+    padding-bottom: 4rem;
+  }
+
+  .lead,
+  .sectionLead {
+    font-size: var(--text-body-lg);
+  }
+
+  .body {
+    font-size: var(--text-subheading);
+    line-height: 1.65;
+  }
+
+  .priceRow {
+    padding: 1.6rem 0;
+  }
+
+  .hourlyPanel {
+    padding: 2.25rem 2rem;
+  }
+
+  .bandHourly {
+    padding-bottom: 2rem;
+  }
+}

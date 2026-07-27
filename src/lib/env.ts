@@ -18,8 +18,23 @@ const publicEnvSchema = z
     },
   );
 
+const emptyToUndefined = (value: unknown) =>
+  value === "" || value === undefined || value === null ? undefined : value;
+
 const serverEnvSchema = z.object({
-  SUPABASE_SERVICE_ROLE_KEY: z.string().min(1).optional(),
+  SUPABASE_SERVICE_ROLE_KEY: z.preprocess(
+    emptyToUndefined,
+    z.string().min(1).optional(),
+  ),
+  RESEND_API_KEY: z.preprocess(emptyToUndefined, z.string().min(1).optional()),
+  CONTACT_TO_EMAIL: z.preprocess(
+    emptyToUndefined,
+    z.string().email().optional(),
+  ),
+  CONTACT_FROM_EMAIL: z.preprocess(
+    emptyToUndefined,
+    z.string().min(1).optional(),
+  ),
 });
 
 function parsePublicEnv() {
@@ -34,6 +49,9 @@ function parsePublicEnv() {
 function parseServerEnv() {
   return serverEnvSchema.parse({
     SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
+    RESEND_API_KEY: process.env.RESEND_API_KEY,
+    CONTACT_TO_EMAIL: process.env.CONTACT_TO_EMAIL,
+    CONTACT_FROM_EMAIL: process.env.CONTACT_FROM_EMAIL,
   });
 }
 
@@ -56,4 +74,22 @@ export function getSupabaseUrl(): string {
 
 export function getSupabaseServiceRoleKey(): string | undefined {
   return parseServerEnv().SUPABASE_SERVICE_ROLE_KEY;
+}
+
+export function getContactEmailConfig(): {
+  apiKey: string;
+  to: string;
+  from: string;
+} {
+  const env = parseServerEnv();
+
+  if (!env.RESEND_API_KEY || !env.CONTACT_TO_EMAIL || !env.CONTACT_FROM_EMAIL) {
+    throw new Error("Contact email is not configured");
+  }
+
+  return {
+    apiKey: env.RESEND_API_KEY,
+    to: env.CONTACT_TO_EMAIL,
+    from: env.CONTACT_FROM_EMAIL,
+  };
 }
