@@ -11,6 +11,7 @@ export const site = {
       { label: "Foglalás", href: "/booking" },
       { label: "Kapcsolat", href: "/contact" },
     ],
+    legal: [{ label: "Adatvédelmi tájékoztató", href: "/adatvedelem" }],
     auth: {
       login: { label: "Bejelentkezés", href: "/login" },
       register: { label: "Regisztráció", href: "/register" },
