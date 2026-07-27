@@ -6,6 +6,7 @@ import {
   isBefore,
   startOfDay,
 } from "date-fns";
+import { hu } from "date-fns/locale";
 
 import {
   BOOKING_TIMEZONE,
@@ -110,6 +111,23 @@ export function formatBudapestTime(date: Date): TimeLabel {
   const hour = parts.find((part) => part.type === "hour")?.value ?? "00";
   const minute = parts.find((part) => part.type === "minute")?.value ?? "00";
   return `${hour}:${minute}` as TimeLabel;
+}
+
+/** Calendar date label in Budapest timezone, e.g. `2026. július 27. (hétfő)`. */
+export function formatBudapestDateLabel(date: Date): string {
+  const dateKey = budapestDateKey(date);
+  const { year, monthIndex, day } = parseDateKey(dateKey);
+  return format(new Date(year, monthIndex, day), "yyyy. MMMM d. (EEEE)", {
+    locale: hu,
+  });
+}
+
+/** Same label from a `YYYY-MM-DD` date key (no timezone conversion). */
+export function formatDateKeyLabel(dateKey: string): string {
+  const { year, monthIndex, day } = parseDateKey(dateKey);
+  return format(new Date(year, monthIndex, day), "yyyy. MMMM d. (EEEE)", {
+    locale: hu,
+  });
 }
 
 export function isHalfHourAligned(date: Date): boolean {

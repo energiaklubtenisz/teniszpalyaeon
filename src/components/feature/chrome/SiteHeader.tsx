@@ -130,7 +130,11 @@ export function SiteHeader({ isAuthenticated }: SiteHeaderProps) {
                 className={cn(
                   styles.profile,
                   (profileMenuOpen ||
-                    isActivePath(pathname, site.nav.auth.profile.href)) &&
+                    isActivePath(pathname, site.nav.auth.profile.href) ||
+                    isActivePath(
+                      pathname,
+                      site.nav.auth.myBookings.href
+                    )) &&
                     styles.profileActive
                 )}
                 aria-label={site.nav.auth.profile.menuLabel}
@@ -160,6 +164,17 @@ export function SiteHeader({ isAuthenticated }: SiteHeaderProps) {
                     }}
                   >
                     {site.nav.auth.profile.label}
+                  </Link>
+                  <Link
+                    href={site.nav.auth.myBookings.href}
+                    role="menuitem"
+                    className={styles.profileDropdownItem}
+                    onClick={() => {
+                      closeProfileMenu();
+                      closeMenu();
+                    }}
+                  >
+                    {site.nav.auth.myBookings.label}
                   </Link>
                   <form action={logout} className={styles.profileDropdownForm}>
                     <button

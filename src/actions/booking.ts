@@ -37,6 +37,17 @@ export type CourtAvailability = {
   available: boolean;
 };
 
+export type UserBooking = {
+  id: string;
+  startsAt: string;
+  endsAt: string;
+  bookingType: Database["public"]["Enums"]["booking_type"];
+  playerCount: number;
+  guestPlayerNames: string[];
+  priceHuf: number | null;
+  court: { number: number; name: string };
+};
+
 const timeLabelSchema = z
   .string()
   .regex(/^([01]\d|2[0-3]):(00|30)$/, "Érvénytelen időpont");
@@ -214,7 +225,66 @@ export async function createBooking(
   }
 
   revalidatePath("/booking");
+  revalidatePath("/foglalasaim");
   return actionSuccess({ id: data.id });
+}
+
+export async function getUserBookings(): Promise<ActionResult<UserBooking[]>> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return actionError("A foglalások megtekintéséhez be kell jelentkeznie.");
+  }
+
+  const { data, error } = await supabase
+    .from("bookings")
+    .select(
+      `
+      id,
+      starts_at,
+      ends_at,
+      booking_type,
+      player_count,
+      guest_player_names,
+      price_huf,
+      court:courts(number, name)
+    `,
+    )
+    .eq("status", "confirmed")
+    .eq("user_id", user.id)
+    .order("starts_at", { ascending: true });
+
+  if (error) {
+    return actionError("Nem sikerült betölteni a foglalásokat.");
+  }
+
+  const bookings: UserBooking[] = (data ?? []).flatMap((row) => {
+    const court = row.court;
+    if (!court || Array.isArray(court)) {
+      return [];
+    }
+
+    return [
+      {
+        id: row.id,
+        startsAt: row.starts_at,
+        endsAt: row.ends_at,
+        bookingType: row.booking_type,
+        playerCount: row.player_count,
+        guestPlayerNames: row.guest_player_names,
+        priceHuf: row.price_huf,
+        court: {
+          number: court.number,
+          name: court.name,
+        },
+      },
+    ];
+  });
+
+  return actionSuccess(bookings);
 }
 
 export async function getBookingSession(): Promise<{

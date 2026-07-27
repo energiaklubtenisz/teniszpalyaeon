@@ -2,8 +2,6 @@
 
 import { useEffect, useMemo, useState, useTransition } from "react";
 import Link from "next/link";
-import { format } from "date-fns";
-import { hu } from "date-fns/locale";
 
 import {
   createBooking,
@@ -13,9 +11,9 @@ import {
 import { booking } from "@/content/booking";
 import {
   calculateOneTimePriceHuf,
+  formatDateKeyLabel,
   formatPriceHuf,
   isValidBookingRange,
-  parseDateKey,
   type TimeLabel,
 } from "@/lib/booking/time";
 import { cn } from "@/lib/utils";
@@ -40,13 +38,6 @@ type BookingWizardProps = {
   bookerName: string | null;
   onSuccess: () => void;
 };
-
-function formatDateLabel(dateKey: string): string {
-  const { year, monthIndex, day } = parseDateKey(dateKey);
-  return format(new Date(year, monthIndex, day), "yyyy. MMMM d. (EEEE)", {
-    locale: hu,
-  });
-}
 
 function guestNamesComplete(
   playerCount: PlayerCountChoice | null,
@@ -372,7 +363,7 @@ export function BookingWizard({
             </div>
             <div>
               <dt>{booking.steps.confirm.date}</dt>
-              <dd>{dateKey ? formatDateLabel(dateKey) : "—"}</dd>
+              <dd>{dateKey ? formatDateKeyLabel(dateKey) : "—"}</dd>
             </div>
             <div>
               <dt>{booking.steps.confirm.time}</dt>

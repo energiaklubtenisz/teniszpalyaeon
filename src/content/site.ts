@@ -15,6 +15,7 @@ export const site = {
       login: { label: "Bejelentkezés", href: "/login" },
       register: { label: "Regisztráció", href: "/register" },
       profile: { label: "Profil", href: "/profil", menuLabel: "Fiók menü" },
+      myBookings: { label: "Foglalásaim", href: "/foglalasaim" },
       logout: { label: "Kijelentkezés" },
     },
   },
