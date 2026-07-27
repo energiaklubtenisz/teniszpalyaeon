@@ -16,34 +16,39 @@ export function LandingSections() {
         className={styles.bandCourt}
         aria-labelledby="court-heading"
       >
-        <div className={styles.sectionInner}>
-          <h2 id="court-heading" className={styles.sectionTitle}>
-            {court.title}
-          </h2>
-          <p className={styles.sectionLead}>{court.lead}</p>
-          <div className={styles.courtPhoto}>
-            <Image
-              src={assets.gallery[0].src}
-              alt={assets.gallery[0].alt}
-              fill
-              className={styles.courtPhotoImage}
-              sizes="(max-width: 768px) 100vw, 40rem"
-            />
+        <div className={styles.sectionInnerWide}>
+          <p className={styles.sectionLabel}>01 — Helyszín</p>
+          <div className={styles.courtLayout}>
+            <div className={styles.courtPhoto}>
+              <Image
+                src={assets.gallery[0].src}
+                alt={assets.gallery[0].alt}
+                fill
+                className={styles.courtPhotoImage}
+                sizes="(max-width: 768px) 100vw, 50vw"
+              />
+            </div>
+            <div className={styles.courtCopy}>
+              <h2 id="court-heading" className={styles.sectionTitle}>
+                {court.title}
+              </h2>
+              <p className={styles.sectionLead}>{court.lead}</p>
+              <div className={styles.prose}>
+                {court.paragraphs.map((paragraph) => (
+                  <p key={paragraph}>{paragraph}</p>
+                ))}
+              </div>
+              <Link
+                href={court.map.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={styles.mapLink}
+              >
+                <span>{court.map.label}</span>
+                <ArrowUpRight className={styles.mapIcon} aria-hidden />
+              </Link>
+            </div>
           </div>
-          <div className={styles.prose}>
-            {court.paragraphs.map((paragraph) => (
-              <p key={paragraph}>{paragraph}</p>
-            ))}
-          </div>
-          <Link
-            href={court.map.href}
-            target="_blank"
-            rel="noopener noreferrer"
-            className={styles.mapLink}
-          >
-            <span>{court.map.label}</span>
-            <ArrowUpRight className={styles.mapIcon} aria-hidden />
-          </Link>
         </div>
       </section>
 
@@ -52,6 +57,7 @@ export function LandingSections() {
         aria-labelledby="mission-heading"
       >
         <div className={styles.sectionInner}>
+          <p className={styles.sectionLabel}>02 — Küldetés</p>
           <h2 id="mission-heading" className={styles.sectionTitle}>
             {mission.title}
           </h2>
@@ -69,7 +75,8 @@ export function LandingSections() {
         className={styles.bandLeadership}
         aria-labelledby="leadership-heading"
       >
-        <div className={styles.sectionInner}>
+        <div className={styles.sectionInnerWide}>
+          <p className={styles.sectionLabel}>03 — Vezetőség</p>
           <h2 id="leadership-heading" className={styles.sectionTitle}>
             {leadership.title}
           </h2>

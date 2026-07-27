@@ -129,11 +129,55 @@
   background: var(--warm-taupe);
 }
 
+.bandMission {
+  background: var(--eggshell);
+  border-top: 1px solid var(--stone);
+}
+
+.bandLeadership {
+  background: var(--stone);
+  border-top: 1px solid color-mix(in srgb, var(--ash) 35%, var(--stone));
+}
+
+.sectionInner,
+.sectionInnerWide {
+  max-width: 42rem;
+  padding: 4.5rem 1.5rem;
+}
+
+.sectionInnerWide {
+  max-width: 72rem;
+}
+
+.sectionLabel {
+  margin: 0 0 1.25rem;
+  padding-bottom: 0.85rem;
+  font-size: var(--text-body-sm);
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ash);
+  border-bottom: 1px solid var(--stone);
+}
+
+.bandCourt .sectionLabel {
+  border-bottom-color: color-mix(in srgb, var(--ash) 40%, var(--warm-taupe));
+}
+
+.bandLeadership .sectionLabel {
+  border-bottom-color: color-mix(in srgb, var(--ash) 45%, var(--stone));
+}
+
+.courtLayout {
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+}
+
 .courtPhoto {
   position: relative;
   width: 100%;
   aspect-ratio: 16 / 10;
-  margin: 0 0 1.75rem;
   overflow: hidden;
   background: var(--stone);
 }
@@ -143,17 +187,9 @@
   object-position: center;
 }
 
-.bandMission {
-  background: var(--eggshell);
-}
-
-.bandLeadership {
-  background: var(--stone);
-}
-
-.sectionInner {
-  max-width: 40rem;
-  padding: 4.5rem 1.5rem;
+.courtCopy {
+  display: flex;
+  flex-direction: column;
 }
 
 .sectionTitle {
@@ -217,24 +253,40 @@
 
 .closing {
   margin: 2rem 0 0;
+  padding-top: 1.5rem;
   max-width: 28rem;
   font-size: clamp(1.25rem, 2.5vw, 1.5rem);
   font-weight: 500;
   line-height: 1.35;
   letter-spacing: -0.02em;
   color: var(--ink);
+  border-top: 1px solid var(--stone);
 }
 
 .people {
   margin: 0;
   display: flex;
   flex-direction: column;
-  gap: 1.75rem;
+  gap: 0;
 }
 
-.personRow {
+.personRow,
+.boardBlock {
   display: grid;
-  gap: 0.25rem;
+  gap: 0.35rem;
+  padding: 1.35rem 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--ash) 40%, var(--stone));
+}
+
+.personRow:first-child,
+.boardBlock:first-child {
+  padding-top: 0;
+}
+
+.personRow:last-child,
+.boardBlock:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
 }
 
 .personRow dt,
@@ -254,11 +306,6 @@
   font-weight: 500;
   line-height: 1.4;
   color: var(--ink);
-}
-
-.boardBlock {
-  display: grid;
-  gap: 0.5rem;
 }
 
 .boardList {
@@ -325,7 +372,8 @@
     font-size: var(--text-subheading);
   }
 
-  .sectionInner {
+  .sectionInner,
+  .sectionInnerWide {
     padding: 6rem 2.5rem;
   }
 
@@ -338,17 +386,46 @@
     line-height: 1.65;
   }
 
-  .bandLeadership .sectionInner {
-    max-width: 48rem;
+  .courtLayout {
+    display: grid;
+    grid-template-columns: 1.05fr 1fr;
+    gap: 2.5rem 3rem;
+    align-items: start;
+  }
+
+  .courtPhoto {
+    aspect-ratio: 4 / 5;
+    min-height: 28rem;
   }
 
   .people {
-    gap: 2rem;
+    display: grid;
+    grid-template-columns: 1fr 1.4fr;
+    gap: 0 2.5rem;
+  }
+
+  .personRow:first-child {
+    grid-column: 1;
+    border-bottom: 1px solid color-mix(in srgb, var(--ash) 40%, var(--stone));
+    padding-bottom: 1.35rem;
+  }
+
+  .boardBlock {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    border-bottom: none;
+    border-left: 1px solid color-mix(in srgb, var(--ash) 40%, var(--stone));
+    padding: 0 0 0 2.5rem;
+  }
+
+  .personRow:last-child {
+    grid-column: 1;
+    padding-top: 1.35rem;
   }
 
   .boardList {
     grid-template-columns: 1fr 1fr;
-    column-gap: 2rem;
+    column-gap: 1.5rem;
     row-gap: 0.5rem;
   }
 }
@@ -361,5 +438,9 @@
 
   .brand {
     max-width: 16ch;
+  }
+
+  .courtLayout {
+    gap: 3rem 4rem;
   }
 }

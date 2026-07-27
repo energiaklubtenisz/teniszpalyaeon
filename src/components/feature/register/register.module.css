@@ -17,6 +17,27 @@
   padding: 4rem 1.5rem 6rem;
 }
 
+.brandMark {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.85rem;
+  margin-bottom: 1.5rem;
+}
+
+.brandLogo {
+  width: auto;
+  height: 2.75rem;
+  object-fit: contain;
+}
+
+.brandAccent {
+  display: block;
+  width: 2.5rem;
+  height: 2px;
+  background: var(--eon-red);
+}
+
 .title {
   margin: 0 0 0.75rem;
   font-size: var(--text-heading);
@@ -162,6 +183,15 @@
 
 .footerLink:hover {
   color: var(--eon-red);
+}
+
+.brandFoot {
+  margin: 2.5rem 0 0;
+  padding-top: 1.25rem;
+  font-size: var(--text-body-sm);
+  line-height: 1.5;
+  color: var(--ash);
+  border-top: 1px solid var(--stone);
 }
 
 @media (min-width: 768px) {

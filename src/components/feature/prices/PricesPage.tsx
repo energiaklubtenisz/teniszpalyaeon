@@ -1,5 +1,6 @@
 import { PageBanner } from "@/components/feature/chrome/PageBanner";
 import { prices } from "@/content/prices";
+import { assets } from "@/lib/assets";
 
 import styles from "./prices.module.css";
 
@@ -8,7 +9,12 @@ export function PricesPage() {
 
   return (
     <main className={styles.page}>
-      <PageBanner title={prices.title} lead={prices.lead} />
+      <PageBanner
+        title={prices.title}
+        lead={prices.lead}
+        imageSrc={assets.pages.prices}
+        imageAlt="Árak hangulatkép — teniszpálya"
+      />
 
       <section className={styles.bandIntro} aria-labelledby="intro-heading">
         <div className={styles.inner}>
@@ -49,16 +55,18 @@ export function PricesPage() {
 
       <section className={styles.bandHourly} aria-labelledby="hourly-heading">
         <div className={styles.innerWide}>
-          <h2 id="hourly-heading" className={styles.sectionTitle}>
-            {hourly.title}
-          </h2>
-          <p className={styles.sectionLead}>{hourly.lead}</p>
-          <div className={styles.priceRow}>
-            <p className={styles.priceName}>{hourly.name}</p>
-            <p className={styles.priceValue}>
-              <span className={styles.priceAmount}>{hourly.price}</span>
-              <span className={styles.priceUnit}>{hourly.unit}</span>
-            </p>
+          <div className={styles.hourlyPanel}>
+            <h2 id="hourly-heading" className={styles.sectionTitle}>
+              {hourly.title}
+            </h2>
+            <p className={styles.sectionLead}>{hourly.lead}</p>
+            <div className={styles.priceRow}>
+              <p className={styles.priceName}>{hourly.name}</p>
+              <p className={styles.priceValue}>
+                <span className={styles.priceAmount}>{hourly.price}</span>
+                <span className={styles.priceUnit}>{hourly.unit}</span>
+              </p>
+            </div>
           </div>
         </div>
       </section>

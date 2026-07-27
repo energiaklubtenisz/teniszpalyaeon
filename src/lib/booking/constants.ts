@@ -3,8 +3,20 @@ export const BOOKING_TIMEZONE = "Europe/Budapest";
 /** Opening hour inclusive (local). */
 export const OPEN_HOUR = 8;
 
-/** Closing hour exclusive for starts; bookings must end by this hour (local). */
-export const CLOSE_HOUR = 20;
+/**
+ * Standard closing hour for bookings that start before the late-evening window.
+ * Bookings must end by this hour unless the start is at/after LATE_EVENING_START_HOUR.
+ */
+export const STANDARD_CLOSE_HOUR = 20;
+
+/**
+ * Absolute closing hour (local). Bookings must end by this hour.
+ * Ends after STANDARD_CLOSE_HOUR are only allowed for late-evening starts.
+ */
+export const CLOSE_HOUR = 21;
+
+/** Starts at or after this hour may end up to CLOSE_HOUR (20:30 / 21:00). */
+export const LATE_EVENING_START_HOUR = 19;
 
 /** Minimum booking length in minutes. */
 export const MIN_DURATION_MINUTES = 60;

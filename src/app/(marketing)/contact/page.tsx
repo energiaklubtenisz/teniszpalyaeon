@@ -8,6 +8,11 @@ export const metadata: Metadata = {
   description: contact.lead,
 };
 
-export default function ContactRoute() {
-  return <ContactPage />;
+type ContactRouteProps = {
+  searchParams: Promise<{ help?: string }>;
+};
+
+export default async function ContactRoute({ searchParams }: ContactRouteProps) {
+  const params = await searchParams;
+  return <ContactPage helpTopic={params.help ?? null} />;
 }

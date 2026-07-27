@@ -18,7 +18,9 @@ export type Database = {
           court_id: string
           created_at: string
           ends_at: string
+          guest_player_names: string[]
           id: string
+          player_count: number
           price_huf: number | null
           starts_at: string
           status: Database["public"]["Enums"]["booking_status"]
@@ -29,7 +31,9 @@ export type Database = {
           court_id: string
           created_at?: string
           ends_at: string
+          guest_player_names: string[]
           id?: string
+          player_count: number
           price_huf?: number | null
           starts_at: string
           status?: Database["public"]["Enums"]["booking_status"]
@@ -40,7 +44,9 @@ export type Database = {
           court_id?: string
           created_at?: string
           ends_at?: string
+          guest_player_names?: string[]
           id?: string
+          player_count?: number
           price_huf?: number | null
           starts_at?: string
           status?: Database["public"]["Enums"]["booking_status"]

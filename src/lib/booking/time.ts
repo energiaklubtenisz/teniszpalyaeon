@@ -11,10 +11,12 @@ import {
   BOOKING_TIMEZONE,
   CLOSE_HOUR,
   HOURLY_RATE_HUF,
+  LATE_EVENING_START_HOUR,
   MAX_BOOKING_DAYS_AHEAD,
   MIN_DURATION_MINUTES,
   OPEN_HOUR,
   SLOT_STEP_MINUTES,
+  STANDARD_CLOSE_HOUR,
 } from "@/lib/booking/constants";
 
 export type TimeLabel = `${string}:${string}`;
@@ -138,11 +140,21 @@ export function durationMinutes(start: TimeLabel, end: TimeLabel): number {
   return labelToMinutes(end) - labelToMinutes(start);
 }
 
+/** Latest allowed end time (minutes from midnight) for a given start. */
+export function maxEndMinutesForStart(startMinutes: number): number {
+  if (startMinutes >= LATE_EVENING_START_HOUR * 60) {
+    return CLOSE_HOUR * 60;
+  }
+  return STANDARD_CLOSE_HOUR * 60;
+}
+
 export function isValidBookingRange(start: TimeLabel, end: TimeLabel): boolean {
   const duration = durationMinutes(start, end);
   if (duration < MIN_DURATION_MINUTES) return false;
   if (labelToMinutes(start) < OPEN_HOUR * 60) return false;
-  if (labelToMinutes(end) > CLOSE_HOUR * 60) return false;
+  if (labelToMinutes(end) > maxEndMinutesForStart(labelToMinutes(start))) {
+    return false;
+  }
   if (labelToMinutes(start) % SLOT_STEP_MINUTES !== 0) return false;
   if (labelToMinutes(end) % SLOT_STEP_MINUTES !== 0) return false;
   return true;

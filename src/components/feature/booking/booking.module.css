@@ -6,12 +6,13 @@
 
 .inner,
 .innerWide {
-  max-width: 40rem;
-  padding: 4.5rem 1.5rem;
+  max-width: 48rem;
+  padding: 3.5rem 1.5rem 4.5rem;
+  margin-inline: auto;
 }
 
 .innerWide {
-  max-width: 44rem;
+  max-width: 52rem;
 }
 
 .band {
@@ -20,46 +21,58 @@
 
 .wizard {
   display: grid;
-  gap: 1.75rem;
+  gap: 1.5rem;
 }
 
 .progress {
   display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 0.5rem;
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
-@media (min-width: 720px) {
-  .progress {
-    grid-template-columns: repeat(5, minmax(0, 1fr));
-    gap: 0.75rem;
-  }
+.progressItemWrap {
+  min-width: 0;
 }
 
 .progressItem {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 0.55rem;
+  justify-content: flex-start;
+  gap: 0.4rem;
+  width: 100%;
+  min-height: 3.5rem;
+  padding: 0.55rem 0.25rem;
+  border: none;
+  background: transparent;
+  text-align: center;
   color: var(--smoke);
+  cursor: default;
 }
 
 .progressIndex {
   display: inline-grid;
   place-items: center;
-  width: 1.6rem;
-  height: 1.6rem;
+  flex-shrink: 0;
+  width: 1.75rem;
+  height: 1.75rem;
   border-radius: 999px;
   border: 1px solid var(--stone);
   background: var(--eggshell);
   font-size: var(--text-body-sm);
   font-weight: 600;
+  line-height: 1;
 }
 
 .progressLabel {
-  font-size: var(--text-body-sm);
+  font-size: var(--text-caption);
   font-weight: 500;
+  letter-spacing: 0.02em;
+  line-height: 1.2;
+  white-space: nowrap;
 }
 
 .progressCurrent {
@@ -76,6 +89,24 @@
   border-color: var(--graphite);
   background: var(--graphite);
   color: white;
+}
+
+.progressClickable {
+  cursor: pointer;
+}
+
+.progressClickable:hover .progressIndex {
+  border-color: var(--ink);
+  background: var(--ink);
+  color: white;
+}
+
+.progressClickable:hover {
+  color: var(--ink);
+}
+
+.progressItem:disabled {
+  cursor: default;
 }
 
 .authBanner {
@@ -118,12 +149,12 @@
 
 .stepPanel {
   display: grid;
-  gap: 1.25rem;
+  gap: 1.15rem;
 }
 
 .stepTitle {
   margin: 0;
-  font-size: clamp(1.5rem, 3.5vw, 2rem);
+  font-size: clamp(1.4rem, 3vw, 1.85rem);
   font-weight: 500;
   letter-spacing: -0.03em;
   color: var(--ink);
@@ -131,21 +162,24 @@
 
 .stepLead {
   margin: 0;
-  max-width: 36rem;
+  max-width: 40rem;
   font-size: var(--text-body);
-  line-height: 1.6;
+  line-height: 1.55;
   color: var(--smoke);
 }
 
 .schematic {
   width: 100%;
+  display: grid;
+  gap: 0.85rem;
 }
 
 .schematicFrame {
   display: grid;
-  gap: 0.85rem;
-  padding: 1rem;
-  background: linear-gradient(180deg, var(--eggshell), var(--stone));
+  gap: 0.75rem;
+  padding: 1rem 1rem 1.15rem;
+  background:
+    linear-gradient(180deg, color-mix(in srgb, #3f7a4a 10%, var(--eggshell)), var(--stone));
   border: 1px solid color-mix(in srgb, var(--graphite) 12%, transparent);
 }
 
@@ -160,63 +194,226 @@
 
 .courtGrid {
   display: grid;
-  gap: 0.65rem;
+  gap: 0.75rem;
 }
 
 .courtRow {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 0.65rem;
+  gap: 0.75rem;
 }
 
 .courtTile,
 .courtMissing {
   display: grid;
-  gap: 0.2rem;
-  min-height: 4.5rem;
-  padding: 0.9rem 0.85rem;
+  gap: 0.45rem;
+  padding: 0.55rem;
   border: 1px solid color-mix(in srgb, var(--graphite) 18%, transparent);
-  background: color-mix(in srgb, #7a8f5c 18%, var(--eggshell));
   color: var(--ink);
-  text-align: left;
+  text-align: center;
   cursor: pointer;
   transition:
     transform 160ms ease,
     border-color 160ms ease,
-    background 160ms ease;
+    background 160ms ease,
+    box-shadow 160ms ease;
 }
 
-.courtTile:hover {
+.courtSurface {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 100 / 140;
+}
+
+.courtClay {
+  fill: #c47a4a;
+}
+
+.courtTileFree .courtClay {
+  fill: #3f7a4a;
+}
+
+.courtTileBusy .courtClay {
+  fill: color-mix(in srgb, var(--eon-red) 42%, #7a4530);
+}
+
+.courtLines {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.92);
+  stroke-width: 1.4;
+  vector-effect: non-scaling-stroke;
+}
+
+.courtNet {
+  stroke: rgba(20, 20, 20, 0.75);
+  stroke-width: 2.2;
+  vector-effect: non-scaling-stroke;
+}
+
+.courtSvgNumber {
+  fill: rgba(255, 255, 255, 0.95);
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.courtMeta {
+  display: grid;
+  gap: 0.1rem;
+}
+
+.courtTileFree {
+  background: color-mix(in srgb, #3f7a4a 18%, var(--eggshell));
+  border-color: color-mix(in srgb, #3f7a4a 45%, transparent);
+}
+
+.courtTileBusy {
+  background: color-mix(in srgb, var(--eon-red) 10%, var(--eggshell));
+  border-color: color-mix(in srgb, var(--eon-red) 35%, transparent);
+  cursor: not-allowed;
+  opacity: 0.9;
+}
+
+.courtTileFree:hover:not(:disabled) {
   transform: translateY(-1px);
-  border-color: var(--graphite);
+  border-color: #3f7a4a;
 }
 
 .courtTileSelected {
-  border-color: var(--eon-red);
-  background: color-mix(in srgb, var(--eon-red) 12%, var(--eggshell));
-  box-shadow: inset 0 0 0 1px var(--eon-red);
+  box-shadow: inset 0 0 0 2px var(--ink);
+  border-color: var(--ink);
+}
+
+.courtTile:disabled {
+  cursor: not-allowed;
 }
 
 .courtMissing {
   opacity: 0.4;
   cursor: default;
-}
-
-.courtNumber {
-  font-size: 1.25rem;
-  font-weight: 600;
-  letter-spacing: -0.02em;
+  background: var(--stone);
 }
 
 .courtName {
   font-size: var(--text-body-sm);
+  font-weight: 500;
   color: var(--graphite);
+}
+
+.courtStatus {
+  font-size: var(--text-caption);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--smoke);
+}
+
+.swatchCourtFree {
+  background: #3f7a4a;
+}
+
+.swatchCourtBusy {
+  background: color-mix(in srgb, var(--eon-red) 55%, #7a4530);
+}
+
+.loadError {
+  margin: 0;
+  max-width: 36rem;
+  font-size: var(--text-body);
+  line-height: 1.6;
+  color: var(--dark-red);
+}
+
+.typeBlock {
+  display: grid;
+  gap: 1.35rem;
+  max-width: 36rem;
+}
+
+.namesBlock {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.nameField {
+  display: grid;
+  gap: 0.3rem;
+}
+
+.nameLabel {
+  font-size: var(--text-body-sm);
+  font-weight: 500;
+  color: var(--graphite);
+}
+
+.nameInput {
+  min-height: 2.75rem;
+  padding: 0.65rem 0.85rem;
+  border: 1px solid color-mix(in srgb, var(--graphite) 18%, transparent);
+  background: var(--eggshell);
+  color: var(--ink);
+  font-size: var(--text-body);
+}
+
+.nameInput:focus {
+  outline: 2px solid color-mix(in srgb, var(--eon-red) 55%, transparent);
+  outline-offset: 1px;
+}
+
+.nameInputReadonly {
+  background: color-mix(in srgb, var(--graphite) 6%, var(--eggshell));
+  color: var(--smoke);
+  cursor: default;
+}
+
+.playersTitle {
+  margin: 0;
+  font-size: var(--text-body);
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.playersHint {
+  margin: 0;
+  font-size: var(--text-body-sm);
+  color: var(--smoke);
+}
+
+.playersList {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.65rem;
+}
+
+.playerOption {
+  min-height: 3rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid color-mix(in srgb, var(--graphite) 18%, transparent);
+  background: var(--eggshell);
+  color: var(--ink);
+  font-size: var(--text-body-sm);
+  font-weight: 500;
+  cursor: pointer;
+  transition:
+    border-color 160ms ease,
+    background 160ms ease;
+}
+
+.playerOption:hover {
+  border-color: var(--graphite);
+}
+
+.playerOptionSelected {
+  border-color: var(--ink);
+  background: color-mix(in srgb, var(--ink) 6%, var(--eggshell));
+  box-shadow: inset 0 0 0 1px var(--ink);
 }
 
 .calendar {
   display: grid;
   gap: 0.85rem;
-  max-width: 24rem;
+  width: 100%;
+  max-width: 28rem;
 }
 
 .calendarHeader {
@@ -265,11 +462,11 @@
 }
 
 .dayEmpty {
-  min-height: 2.4rem;
+  min-height: 2.5rem;
 }
 
 .dayCell {
-  min-height: 2.4rem;
+  min-height: 2.5rem;
   border: 1px solid transparent;
   background: var(--eggshell);
   color: var(--ink);
@@ -298,7 +495,8 @@
 
 .timeBlock {
   display: grid;
-  gap: 0.9rem;
+  gap: 0.85rem;
+  max-width: 40rem;
 }
 
 .legend {
@@ -354,7 +552,7 @@
 }
 
 .timeCell {
-  min-height: 2.5rem;
+  min-height: 2.55rem;
   border: 1px solid color-mix(in srgb, var(--graphite) 16%, transparent);
   background: var(--eggshell);
   color: var(--ink);
@@ -380,7 +578,8 @@
 }
 
 .timeBooked,
-.timePast {
+.timePast,
+.timeCell:disabled {
   opacity: 0.45;
   cursor: not-allowed;
   background: var(--stone);
@@ -435,6 +634,7 @@
   display: grid;
   gap: 0.85rem;
   margin: 0;
+  max-width: 32rem;
 }
 
 .summary > div {
@@ -469,13 +669,21 @@
   justify-content: space-between;
   align-items: center;
   gap: 1rem;
-  margin-top: 0.5rem;
+  width: 100%;
+  margin-top: 0.75rem;
+  padding-top: 1.15rem;
+  border-top: 1px solid color-mix(in srgb, var(--graphite) 12%, transparent);
+}
+
+.actionsSingle {
+  justify-content: flex-end;
 }
 
 .primaryButton,
 .secondaryButton {
   min-height: 2.75rem;
-  padding: 0.65rem 1.2rem;
+  min-width: 7.5rem;
+  padding: 0.65rem 1.35rem;
   border: 1px solid transparent;
   font-size: var(--text-body);
   font-weight: 600;
@@ -506,10 +714,67 @@
   border-color: var(--graphite);
 }
 
-.successPanel {
-  display: grid;
-  gap: 1rem;
-  max-width: 28rem;
+.successActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1rem;
+}
+
+a.secondaryButton {
+  display: inline-grid;
+  place-items: center;
+  text-decoration: none;
+}
+
+.helpTextLink {
+  font-size: var(--text-body-sm);
+  font-weight: 500;
+  color: var(--graphite);
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+
+.helpTextLink:hover {
+  color: var(--ink);
+}
+
+.helpCard {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem 1.5rem;
+  padding: 1rem 1.1rem;
+  border: 1px solid color-mix(in srgb, var(--graphite) 14%, transparent);
+  background: color-mix(in srgb, var(--graphite) 4%, var(--eggshell));
+}
+
+.helpTitle {
+  margin: 0 0 0.25rem;
+  font-size: var(--text-body);
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.helpBody {
+  margin: 0;
+  max-width: 32rem;
+  font-size: var(--text-body-sm);
+  line-height: 1.5;
+  color: var(--smoke);
+}
+
+.helpLink {
+  flex-shrink: 0;
+  font-size: var(--text-body-sm);
+  font-weight: 600;
+  color: var(--eon-red);
+  text-decoration: none;
+}
+
+.helpLink:hover {
+  text-decoration: underline;
 }
 
 .inlineError {

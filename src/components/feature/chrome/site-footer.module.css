@@ -1,0 +1,89 @@
+.footer {
+  margin-top: auto;
+  background: var(--warm-taupe);
+  border-top: 1px solid var(--stone);
+}
+
+.inner {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  max-width: 72rem;
+  padding: 2.75rem 1.5rem 3rem;
+}
+
+.brand {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.logoLink {
+  position: relative;
+  display: block;
+  width: 7rem;
+  height: 4.5rem;
+  margin-bottom: 0.25rem;
+}
+
+.logoImage {
+  object-fit: contain;
+  object-position: left center;
+}
+
+.brandName {
+  margin: 0;
+  font-size: var(--text-body);
+  font-weight: 500;
+  line-height: 1.4;
+  color: var(--ink);
+}
+
+.address {
+  margin: 0;
+  font-size: var(--text-body-sm);
+  line-height: 1.5;
+  color: var(--smoke);
+}
+
+.nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--stone);
+}
+
+.link {
+  font-size: var(--text-body-sm);
+  font-weight: 500;
+  color: var(--graphite);
+  text-decoration: none;
+  transition: color 160ms ease;
+}
+
+.link:hover {
+  color: var(--eon-red);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .link {
+    transition: none;
+  }
+}
+
+@media (min-width: 768px) {
+  .inner {
+    flex-direction: row;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 3rem;
+    padding: 3.25rem 2.5rem 3.5rem;
+  }
+
+  .nav {
+    padding-top: 0;
+    border-top: none;
+    justify-content: flex-end;
+  }
+}

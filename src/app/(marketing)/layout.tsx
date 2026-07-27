@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 
 import { AuthToast } from "@/components/feature/chrome/AuthToast";
+import { SiteFooter } from "@/components/feature/chrome/SiteFooter";
 import { SiteHeader } from "@/components/feature/chrome/SiteHeader";
 import { createClient } from "@/lib/supabase/server";
 
@@ -21,6 +22,7 @@ export default async function MarketingLayout({
         <AuthToast />
       </Suspense>
       {children}
+      <SiteFooter />
     </>
   );
 }
