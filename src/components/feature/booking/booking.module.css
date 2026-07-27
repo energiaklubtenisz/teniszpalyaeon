@@ -493,6 +493,19 @@
   cursor: not-allowed;
 }
 
+.dayFullyBooked {
+  background: color-mix(in srgb, var(--eon-red) 20%, var(--eggshell));
+  color: var(--eon-red);
+  border-color: color-mix(in srgb, var(--eon-red) 40%, transparent);
+  cursor: not-allowed;
+}
+
+.dayFullyBooked.daySelected {
+  background: var(--eon-red);
+  color: white;
+  border-color: var(--eon-red);
+}
+
 .timeBlock {
   display: grid;
   gap: 0.85rem;
@@ -526,6 +539,11 @@
 
 .swatchBooked {
   background: color-mix(in srgb, var(--graphite) 35%, var(--stone));
+}
+
+.swatchFullyBooked {
+  background: color-mix(in srgb, var(--eon-red) 35%, var(--eggshell));
+  border-color: color-mix(in srgb, var(--eon-red) 45%, transparent);
 }
 
 .swatchPast {

@@ -5,10 +5,12 @@ import Link from "next/link";
 
 import {
   createBooking,
+  getBusyIntervalsForDate,
   getCourtsAvailabilityForWindow,
   type CourtOption,
 } from "@/actions/booking";
 import { booking } from "@/content/booking";
+import type { BusyInterval } from "@/lib/booking/availability";
 import {
   calculateOneTimePriceHuf,
   formatDateKeyLabel,
@@ -69,6 +71,7 @@ export function BookingWizard({
   >({});
   const [availabilityError, setAvailabilityError] = useState<string | null>(null);
   const [loadingAvailability, setLoadingAvailability] = useState(false);
+  const [dayBusyIntervals, setDayBusyIntervals] = useState<BusyInterval[]>([]);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
@@ -118,6 +121,22 @@ export function BookingWizard({
       cancelled = true;
     };
   }, [step, dateKey, startLabel, endLabel]);
+
+  useEffect(() => {
+    if (step !== "time" || !dateKey) {
+      return;
+    }
+
+    let cancelled = false;
+    void getBusyIntervalsForDate(dateKey).then((result) => {
+      if (cancelled) return;
+      setDayBusyIntervals(result.success ? result.data : []);
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [step, dateKey]);
 
   const canGoNext = (() => {
     switch (step) {
@@ -286,6 +305,7 @@ export function BookingWizard({
               setPlayerCount(null);
               setGuestPlayerNames([]);
               setAvailabilityByCourtId({});
+              setDayBusyIntervals([]);
             }}
           />
         ) : null}
@@ -293,7 +313,7 @@ export function BookingWizard({
         {step === "time" && dateKey ? (
           <TimeSlotPicker
             dateKey={dateKey}
-            busy={[]}
+            busy={dayBusyIntervals}
             startLabel={startLabel}
             endLabel={endLabel}
             onChange={(start, end) => {

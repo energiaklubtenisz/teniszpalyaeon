@@ -101,6 +101,47 @@ export function budapestLocalToUtc(
   return new Date(zoned.getTime());
 }
 
+/** Postgres `timestamp without time zone` value for Budapest local booking times. */
+export function toBudapestNaiveDateTime(
+  dateKey: string,
+  timeLabel: TimeLabel,
+): string {
+  return `${dateKey} ${timeLabel}:00`;
+}
+
+/**
+ * Parse booking timestamps from the database.
+ * Naive values are interpreted as Europe/Budapest; ISO strings with offset/Z use that instant.
+ */
+export function parseBookingTimestamp(value: string): Date {
+  const trimmed = value.trim();
+  if (/[zZ]$|[+-]\d{2}:?\d{2}$/.test(trimmed)) {
+    return new Date(trimmed);
+  }
+
+  const normalized = trimmed.includes("T")
+    ? trimmed.replace("T", " ")
+    : trimmed;
+  const [datePart, timePart] = normalized.split(" ");
+  if (!datePart || !timePart) {
+    return new Date(trimmed);
+  }
+
+  const [year, month, day] = datePart.split("-").map(Number);
+  const [hours, minutes, seconds = "0"] = timePart.split(":");
+  const zoned = new TZDate(
+    year,
+    month - 1,
+    day,
+    Number(hours),
+    Number(minutes),
+    Number(seconds),
+    0,
+    BOOKING_TIMEZONE,
+  );
+  return new Date(zoned.getTime());
+}
+
 export function formatBudapestTime(date: Date): TimeLabel {
   const parts = new Intl.DateTimeFormat("hu-HU", {
     timeZone: BOOKING_TIMEZONE,
