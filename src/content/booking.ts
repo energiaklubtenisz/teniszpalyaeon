@@ -19,6 +19,8 @@ export const booking = {
       lead: "Válasszon napot a foglaláshoz.",
       lead2: "",
       weekdays: ["H", "K", "Sze", "Cs", "P", "Szo", "V"],
+      available: "Szabad",
+      fullyBooked: "Teljesen foglalt",
     },
     time: {
       title: "Idősáv",

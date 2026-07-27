@@ -1,13 +1,16 @@
 "use client";
 
-import type { BusyInterval } from "@/actions/booking";
+import type { BusyInterval } from "@/lib/booking/availability";
 import { booking } from "@/content/booking";
 import {
   CLOSE_HOUR,
   MIN_DURATION_MINUTES,
 } from "@/lib/booking/constants";
 import {
-  budapestLocalToUtc,
+  canStartOneHourBooking,
+  rangeHasBusy,
+} from "@/lib/booking/availability";
+import {
   durationMinutes,
   getBoundaryLabels,
   isSlotInPast,
@@ -15,7 +18,6 @@ import {
   labelToMinutes,
   maxEndMinutesForStart,
   minutesToLabel,
-  rangesOverlap,
   type TimeLabel,
 } from "@/lib/booking/time";
 import { cn } from "@/lib/utils";
@@ -32,40 +34,6 @@ type TimeSlotPickerProps = {
 
 const CLOSE_MINUTES = CLOSE_HOUR * 60;
 const LAST_START_MINUTES = CLOSE_MINUTES - MIN_DURATION_MINUTES;
-
-function rangeHasBusy(
-  dateKey: string,
-  start: TimeLabel,
-  end: TimeLabel,
-  busy: BusyInterval[],
-): boolean {
-  const rangeStart = budapestLocalToUtc(dateKey, start);
-  const rangeEnd = budapestLocalToUtc(dateKey, end);
-  return busy.some((interval) =>
-    rangesOverlap(
-      rangeStart,
-      rangeEnd,
-      new Date(interval.startsAt),
-      new Date(interval.endsAt),
-    ),
-  );
-}
-
-function canStartAt(
-  dateKey: string,
-  label: TimeLabel,
-  busy: BusyInterval[],
-): boolean {
-  const minutes = labelToMinutes(label);
-  if (minutes > LAST_START_MINUTES) return false;
-  if (isSlotInPast(dateKey, label)) return false;
-
-  const minEndMinutes = minutes + MIN_DURATION_MINUTES;
-  if (minEndMinutes > maxEndMinutesForStart(minutes)) return false;
-
-  const end = minutesToLabel(minEndMinutes);
-  return !rangeHasBusy(dateKey, label, end, busy);
-}
 
 function canEndAt(
   dateKey: string,
@@ -91,7 +59,7 @@ export function TimeSlotPicker({
 
   const selectAsStart = (label: TimeLabel) => {
     const minutes = labelToMinutes(label);
-    if (!canStartAt(dateKey, label, busy)) return;
+    if (!canStartOneHourBooking(dateKey, label, busy)) return;
 
     if (minutes === LAST_START_MINUTES) {
       onChange(label, minutesToLabel(CLOSE_MINUTES));
@@ -170,12 +138,12 @@ export function TimeSlotPicker({
             if (label === startLabel) {
               disabled = false;
             } else if (minutes < startMinutes) {
-              disabled = !canStartAt(dateKey, label, busy);
+              disabled = !canStartOneHourBooking(dateKey, label, busy);
             } else {
               disabled = !canEndAt(dateKey, startLabel!, label, busy);
             }
           } else if (!startLabel || (startLabel && endLabel)) {
-            disabled = isClose || !canStartAt(dateKey, label, busy);
+            disabled = isClose || !canStartOneHourBooking(dateKey, label, busy);
           }
 
           const inSelection =

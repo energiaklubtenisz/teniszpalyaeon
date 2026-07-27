@@ -14,10 +14,6 @@ type ContactPageProps = {
 
 export function ContactPage({ helpTopic = null }: ContactPageProps) {
   const { address, people, access, form, map } = contact;
-  const bookingHelp = helpTopic === "booking";
-  const formTitle = bookingHelp ? form.helpBooking.title : form.title;
-  const formLead = bookingHelp ? form.helpBooking.lead : form.lead;
-  const defaultMessage = bookingHelp ? form.helpBooking.defaultMessage : "";
 
   return (
     <main className={styles.page}>
@@ -132,10 +128,10 @@ export function ContactPage({ helpTopic = null }: ContactPageProps) {
       <section className={styles.bandForm} aria-labelledby="form-heading">
         <div className={styles.inner}>
           <h2 id="form-heading" className={styles.sectionTitle}>
-            {formTitle}
+            {form.title}
           </h2>
-          <p className={styles.sectionLead}>{formLead}</p>
-          <ContactForm defaultMessage={defaultMessage} />
+          <p className={styles.sectionLead}>{form.lead}</p>
+          <ContactForm defaultMessage={""} />
         </div>
       </section>
 
