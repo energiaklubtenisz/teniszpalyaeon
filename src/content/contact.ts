@@ -71,12 +71,6 @@ export const contact = {
   form: {
     title: "Írjon nekünk",
     lead: "Küldjön üzenetet a klubnak — válaszolunk, amint tudunk.",
-    helpBooking: {
-      title: "Segítség a foglaláshoz",
-      lead: "Írja le, miben tudunk segíteni a pályafoglalással kapcsolatban.",
-      defaultMessage:
-        "Segítségre van szükségem a pályafoglaláshoz:\n\n",
-    },
     optional: "opcionális",
     submit: "Üzenet küldése",
     submitting: "Küldés…",
