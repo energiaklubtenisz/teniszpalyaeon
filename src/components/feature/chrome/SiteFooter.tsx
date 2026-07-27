@@ -32,6 +32,14 @@ export function SiteFooter() {
             </Link>
           ))}
         </nav>
+
+        <nav className={styles.legalNav} aria-label="Jogi információk">
+          {site.nav.legal.map((item) => (
+            <Link key={item.href} href={item.href} className={styles.legalLink}>
+              {item.label}
+            </Link>
+          ))}
+        </nav>
       </div>
     </footer>
   );

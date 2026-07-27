@@ -137,6 +137,37 @@
   background: rgb(234 28 44 / 8%);
 }
 
+.checkboxRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.checkbox {
+  margin-top: 0.2rem;
+  width: 1.125rem;
+  height: 1.125rem;
+  flex-shrink: 0;
+  accent-color: var(--eon-red);
+}
+
+.checkboxLabel {
+  font-size: var(--text-body-sm);
+  line-height: 1.5;
+  color: var(--graphite);
+}
+
+.privacyLink {
+  color: var(--ink);
+  font-weight: 500;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+.privacyLink:hover {
+  color: var(--eon-red);
+}
+
 .submit {
   align-self: stretch;
   margin-top: 0.25rem;
