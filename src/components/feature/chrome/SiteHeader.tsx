@@ -22,9 +22,13 @@ function isActivePath(pathname: string, href: string): boolean {
 
 type SiteHeaderProps = {
   isAuthenticated: boolean;
+  isAdmin?: boolean;
 };
 
-export function SiteHeader({ isAuthenticated }: SiteHeaderProps) {
+export function SiteHeader({
+  isAuthenticated,
+  isAdmin = false,
+}: SiteHeaderProps) {
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
@@ -124,70 +128,84 @@ export function SiteHeader({ isAuthenticated }: SiteHeaderProps) {
 
         <div className={styles.auth}>
           {isAuthenticated ? (
-            <div className={styles.profileMenu} ref={profileMenuRef}>
-              <button
-                type="button"
-                className={cn(
-                  styles.profile,
-                  (profileMenuOpen ||
-                    isActivePath(pathname, site.nav.auth.profile.href) ||
-                    isActivePath(
-                      pathname,
-                      site.nav.auth.myBookings.href
-                    )) &&
-                    styles.profileActive
-                )}
-                aria-label={site.nav.auth.profile.menuLabel}
-                aria-expanded={profileMenuOpen}
-                aria-haspopup="menu"
-                aria-controls={profileMenuId}
-                onClick={() => {
-                  setProfileMenuOpen((open) => !open);
-                }}
-              >
-                <User className={styles.profileIcon} aria-hidden />
-              </button>
-
-              {profileMenuOpen ? (
-                <div
-                  id={profileMenuId}
-                  className={styles.profileDropdown}
-                  role="menu"
+            <>
+              {isAdmin ? (
+                <Link
+                  href="/admin"
+                  className={cn(
+                    styles.admin,
+                    isActivePath(pathname, "/admin") && styles.adminActive
+                  )}
+                  onClick={closeMenu}
                 >
-                  <Link
-                    href={site.nav.auth.profile.href}
-                    role="menuitem"
-                    className={styles.profileDropdownItem}
-                    onClick={() => {
-                      closeProfileMenu();
-                      closeMenu();
-                    }}
+                  Admin
+                </Link>
+              ) : null}
+              <div className={styles.profileMenu} ref={profileMenuRef}>
+                <button
+                  type="button"
+                  className={cn(
+                    styles.profile,
+                    (profileMenuOpen ||
+                      isActivePath(pathname, site.nav.auth.profile.href) ||
+                      isActivePath(
+                        pathname,
+                        site.nav.auth.myBookings.href
+                      )) &&
+                      styles.profileActive
+                  )}
+                  aria-label={site.nav.auth.profile.menuLabel}
+                  aria-expanded={profileMenuOpen}
+                  aria-haspopup="menu"
+                  aria-controls={profileMenuId}
+                  onClick={() => {
+                    setProfileMenuOpen((open) => !open);
+                  }}
+                >
+                  <User className={styles.profileIcon} aria-hidden />
+                </button>
+
+                {profileMenuOpen ? (
+                  <div
+                    id={profileMenuId}
+                    className={styles.profileDropdown}
+                    role="menu"
                   >
-                    {site.nav.auth.profile.label}
-                  </Link>
-                  <Link
-                    href={site.nav.auth.myBookings.href}
-                    role="menuitem"
-                    className={styles.profileDropdownItem}
-                    onClick={() => {
-                      closeProfileMenu();
-                      closeMenu();
-                    }}
-                  >
-                    {site.nav.auth.myBookings.label}
-                  </Link>
-                  <form action={logout} className={styles.profileDropdownForm}>
-                    <button
-                      type="submit"
+                    <Link
+                      href={site.nav.auth.profile.href}
                       role="menuitem"
                       className={styles.profileDropdownItem}
+                      onClick={() => {
+                        closeProfileMenu();
+                        closeMenu();
+                      }}
                     >
-                      {site.nav.auth.logout.label}
-                    </button>
-                  </form>
-                </div>
-              ) : null}
-            </div>
+                      {site.nav.auth.profile.label}
+                    </Link>
+                    <Link
+                      href={site.nav.auth.myBookings.href}
+                      role="menuitem"
+                      className={styles.profileDropdownItem}
+                      onClick={() => {
+                        closeProfileMenu();
+                        closeMenu();
+                      }}
+                    >
+                      {site.nav.auth.myBookings.label}
+                    </Link>
+                    <form action={logout} className={styles.profileDropdownForm}>
+                      <button
+                        type="submit"
+                        role="menuitem"
+                        className={styles.profileDropdownItem}
+                      >
+                        {site.nav.auth.logout.label}
+                      </button>
+                    </form>
+                  </div>
+                ) : null}
+              </div>
+            </>
           ) : (
             <>
               <Link
