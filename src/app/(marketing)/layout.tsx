@@ -15,9 +15,21 @@ export default async function MarketingLayout({
     data: { user },
   } = await supabase.auth.getUser();
 
+  let isAdmin = false;
+
+  if (user) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .maybeSingle();
+
+    isAdmin = profile?.role === "admin";
+  }
+
   return (
     <>
-      <SiteHeader isAuthenticated={Boolean(user)} />
+      <SiteHeader isAuthenticated={Boolean(user)} isAdmin={isAdmin} />
       <Suspense fallback={null}>
         <AuthToast />
       </Suspense>
