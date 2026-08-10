@@ -12,10 +12,10 @@
   line-height: 1.4;
   color: var(--ink);
   text-align: left;
-  background: #fff;
+  background: var(--elevated);
   border: 1px solid var(--stone);
-  border-radius: 0.75rem;
-  box-shadow: 0 8px 24px rgb(28 25 23 / 10%);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-soft);
   opacity: 1;
   transform: translateY(0);
   animation: auth-toast-in 150ms ease forwards;

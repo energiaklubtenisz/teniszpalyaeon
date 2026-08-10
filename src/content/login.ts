@@ -10,7 +10,7 @@ export const login = {
     logout: "Sikeres kijelentkezés.",
   },
   fields: {
-    email: { label: "Email" },
+    email: { label: "E-mail" },
     password: { label: "Jelszó" },
   },
 } as const;

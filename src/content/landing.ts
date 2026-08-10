@@ -21,7 +21,7 @@ export const landing = {
   },
   mission: {
     title: "A klub célja",
-    lead: "Szervezett testedzés, szabadidő és közösség - az E.ON dolgozóknak és a város sportszeretőinek.",
+    lead: "Szervezett testedzés, szabadidő és közösség — az E.ON dolgozóknak és a város sportszeretőinek.",
     paragraphs: [
       "A klub célja, hogy biztosítsa az E.ON dolgozók és közvetlen hozzátartozóik szervezett körülmények közötti testedzését és szabadidős tevékenységét.",
       "Lehetőséget biztosítunk a városban és vonzáskörzetében élő sportszerető embereknek a tenisz szabadidős gyakorlására, és segítjük a város sport- és tenisztársadalmi életének fellendítését.",

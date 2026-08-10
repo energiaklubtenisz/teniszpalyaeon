@@ -21,7 +21,7 @@ export function ContactPage({ helpTopic = null }: ContactPageProps) {
         title={contact.title}
         lead={contact.lead}
         imageSrc={assets.pages.contact}
-        imageAlt="Salakpálya hangulatkép — kapcsolat"
+        imageAlt="Kapcsolat — klub helyszín"
       />
 
       <section className={styles.bandAddress} aria-labelledby="address-heading">

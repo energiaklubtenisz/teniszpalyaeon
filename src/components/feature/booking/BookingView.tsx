@@ -4,9 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 
 import type { CourtOption } from "@/actions/booking";
-import { PageBanner } from "@/components/feature/chrome/PageBanner";
 import { booking } from "@/content/booking";
-import { assets } from "@/lib/assets";
 
 import { BookingWizard } from "./BookingWizard";
 import styles from "./booking.module.css";
@@ -25,13 +23,17 @@ export function BookingView({
   const [succeeded, setSucceeded] = useState(false);
 
   return (
-    <>
-      <PageBanner
-        title={succeeded ? booking.steps.confirm.success : booking.title}
-        lead={succeeded ? booking.steps.confirm.successBody : booking.lead}
-        imageSrc={succeeded ? undefined : assets.pages.booking}
-        imageAlt={succeeded ? undefined : "Pályafoglalás hangulatkép"}
-      >
+    <div className={styles.workspace}>
+      <header className={styles.workspaceHeader}>
+        <div>
+          <p className={styles.workspaceEyebrow}>Foglalási rendszer</p>
+          <h1 className={styles.workspaceTitle}>
+            {succeeded ? booking.steps.confirm.success : booking.title}
+          </h1>
+          <p className={styles.workspaceLead}>
+            {succeeded ? booking.steps.confirm.successBody : booking.lead}
+          </p>
+        </div>
         {succeeded ? (
           <div className={styles.successActions}>
             <Link href="/" className={styles.secondaryButton}>
@@ -49,17 +51,16 @@ export function BookingView({
             </Link>
           </div>
         ) : null}
-      </PageBanner>
+      </header>
+
       {!succeeded ? (
-        <div className={styles.inner}>
-          <BookingWizard
-            courts={courts}
-            isAuthenticated={isAuthenticated}
-            bookerName={bookerName}
-            onSuccess={() => setSucceeded(true)}
-          />
-        </div>
+        <BookingWizard
+          courts={courts}
+          isAuthenticated={isAuthenticated}
+          bookerName={bookerName}
+          onSuccess={() => setSucceeded(true)}
+        />
       ) : null}
-    </>
+    </div>
   );
 }

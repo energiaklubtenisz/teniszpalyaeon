@@ -1,11 +1,10 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { format } from "date-fns";
 import { hu } from "date-fns/locale";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
-import { getFullyBookedDateKeys } from "@/actions/booking";
 import { booking } from "@/content/booking";
 import {
   budapestDateKey,
@@ -30,20 +29,6 @@ export function DayPicker({ selectedDateKey, onSelect }: DayPickerProps) {
     const [y, m] = key.split("-").map(Number);
     return new Date(y, m - 1, 1);
   });
-  const [fullyBookedKeys, setFullyBookedKeys] = useState<Set<string>>(
-    () => new Set(),
-  );
-
-  useEffect(() => {
-    let cancelled = false;
-    void getFullyBookedDateKeys().then((result) => {
-      if (cancelled || !result.success) return;
-      setFullyBookedKeys(new Set(result.data));
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
 
   const weeks = useMemo(() => monthMatrix(anchor), [anchor]);
   const label = format(anchor, "yyyy. MMMM", { locale: hu });
@@ -91,8 +76,6 @@ export function DayPicker({ selectedDateKey, onSelect }: DayPickerProps) {
             }
             const dateKey = toDateKey(day);
             const bookable = isDateKeyBookable(dateKey);
-            const fullyBooked = fullyBookedKeys.has(dateKey);
-            const selectable = bookable && !fullyBooked;
             const selected = dateKey === selectedDateKey;
             const isToday = dateKey === todayKey;
 
@@ -100,20 +83,14 @@ export function DayPicker({ selectedDateKey, onSelect }: DayPickerProps) {
               <button
                 key={dateKey}
                 type="button"
-                disabled={!selectable}
+                disabled={!bookable}
                 className={cn(
                   styles.dayCell,
                   isToday && styles.dayToday,
                   selected && styles.daySelected,
-                  fullyBooked && bookable && styles.dayFullyBooked,
                   !bookable && styles.dayDisabled,
                 )}
                 aria-pressed={selected}
-                aria-label={
-                  fullyBooked && bookable
-                    ? `${day.getDate()}, ${booking.steps.day.fullyBooked}`
-                    : undefined
-                }
                 onClick={() => onSelect(dateKey)}
               >
                 {day.getDate()}
@@ -127,10 +104,6 @@ export function DayPicker({ selectedDateKey, onSelect }: DayPickerProps) {
         <span>
           <i className={cn(styles.swatch, styles.swatchFree)} />{" "}
           {booking.steps.day.available}
-        </span>
-        <span>
-          <i className={cn(styles.swatch, styles.swatchFullyBooked)} />{" "}
-          {booking.steps.day.fullyBooked}
         </span>
       </div>
     </div>
