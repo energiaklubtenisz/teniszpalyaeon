@@ -5,7 +5,6 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-  /* DESIGN.md brand palette */
   --color-eggshell: var(--eggshell);
   --color-warm-taupe: var(--warm-taupe);
   --color-stone: var(--stone);
@@ -15,13 +14,19 @@
   --color-ash: var(--ash);
   --color-eon-red: var(--eon-red);
   --color-dark-red: var(--dark-red);
+  --color-surface: var(--surface);
+  --color-elevated: var(--elevated);
+  --color-panel: var(--panel);
+  --color-panel-ink: var(--panel-ink);
+  --color-court: var(--court);
+  --color-shell: var(--shell);
+  --color-header: var(--header);
 
-  /* shadcn semantic → brand mapping */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-savee), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-display), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-geist-mono);
-  --font-heading: var(--font-savee), ui-sans-serif, system-ui, sans-serif;
+  --font-heading: var(--font-display), ui-sans-serif, system-ui, sans-serif;
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -59,7 +64,6 @@
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
 
-  /* DESIGN.md type scale */
   --text-caption: 0.625rem;
   --text-body-sm: 0.875rem;
   --text-body: 1rem;
@@ -71,84 +75,91 @@
 }
 
 :root {
-  /* DESIGN.md raw brand tokens */
-  --eggshell: #fdfcfc;
-  --warm-taupe: #f5f3f1;
-  --stone: #ebe8e4;
-  --ink: #000000;
-  --graphite: #44403b;
-  --smoke: #777169;
-  --ash: #a59f97;
-  --eon-red: #ea1c2c;
-  --dark-red: #b21520;
+  /*
+   * Bright shell: white surfaces on a light gray page canvas.
+   */
+  --shell: #f3f4f6;
+  --header: #ffffff;
+  --eggshell: #ffffff;
+  --warm-taupe: #eef0f3;
+  --stone: #e2e5ea;
+  --ink: #1a1d24;
+  --graphite: #3d4450;
+  --smoke: #5c6470;
+  --ash: #8b929e;
+  --eon-red: #e11d48;
+  --dark-red: #be123c;
+  --surface: #eef0f3;
+  --elevated: #ffffff;
+  --on-accent: #ffffff;
+  --panel: #ffffff;
+  --panel-ink: #1a1d24;
+  --court: #16a34a;
+  --scrim: 243 244 246;
+  --shadow-card: 0 8px 24px rgb(26 29 36 / 8%);
+  --shadow-soft: 0 2px 10px rgb(26 29 36 / 5%);
 
-  /* Semantic tokens mapped to brand (light theme) */
-  --background: var(--eggshell);
+  --background: var(--shell);
   --foreground: var(--ink);
-  --card: var(--eggshell);
+  --card: var(--elevated);
   --card-foreground: var(--ink);
-  --popover: var(--eggshell);
+  --popover: var(--elevated);
   --popover-foreground: var(--ink);
-  --primary: var(--ink);
-  --primary-foreground: var(--eggshell);
-  --secondary: var(--warm-taupe);
+  --primary: var(--eon-red);
+  --primary-foreground: var(--on-accent);
+  --secondary: var(--surface);
   --secondary-foreground: var(--ink);
-  --muted: var(--warm-taupe);
+  --muted: var(--surface);
   --muted-foreground: var(--smoke);
-  --accent: var(--warm-taupe);
+  --accent: var(--surface);
   --accent-foreground: var(--ink);
   --destructive: var(--eon-red);
   --border: var(--stone);
-  --input: var(--stone);
-  --ring: var(--graphite);
-  --chart-1: var(--graphite);
-  --chart-2: var(--smoke);
-  --chart-3: var(--ash);
-  --chart-4: var(--stone);
-  --chart-5: var(--warm-taupe);
-  --radius: 1.25rem;
-  --sidebar: var(--eggshell);
+  --input: var(--surface);
+  --ring: var(--eon-red);
+  --chart-1: var(--eon-red);
+  --chart-2: #3b82f6;
+  --chart-3: #22c55e;
+  --chart-4: #f59e0b;
+  --chart-5: #a855f7;
+  --radius: 0.85rem;
+  --sidebar: var(--elevated);
   --sidebar-foreground: var(--ink);
-  --sidebar-primary: var(--ink);
-  --sidebar-primary-foreground: var(--eggshell);
-  --sidebar-accent: var(--warm-taupe);
+  --sidebar-primary: var(--eon-red);
+  --sidebar-primary-foreground: var(--on-accent);
+  --sidebar-accent: var(--surface);
   --sidebar-accent-foreground: var(--ink);
   --sidebar-border: var(--stone);
-  --sidebar-ring: var(--graphite);
+  --sidebar-ring: var(--eon-red);
 }
 
 .dark {
-  --background: var(--ink);
-  --foreground: var(--eggshell);
-  --card: #1a1a1a;
-  --card-foreground: var(--eggshell);
-  --popover: #1a1a1a;
-  --popover-foreground: var(--eggshell);
-  --primary: var(--eggshell);
-  --primary-foreground: var(--ink);
-  --secondary: #2a2a2a;
-  --secondary-foreground: var(--eggshell);
-  --muted: #2a2a2a;
+  --background: var(--shell);
+  --foreground: var(--panel-ink);
+  --card: #252a35;
+  --card-foreground: var(--panel-ink);
+  --popover: #252a35;
+  --popover-foreground: var(--panel-ink);
+  --primary: var(--eon-red);
+  --primary-foreground: var(--on-accent);
+  --secondary: #2d3340;
+  --secondary-foreground: var(--panel-ink);
+  --muted: #2d3340;
   --muted-foreground: var(--ash);
-  --accent: #2a2a2a;
-  --accent-foreground: var(--eggshell);
+  --accent: #2d3340;
+  --accent-foreground: var(--panel-ink);
   --destructive: var(--eon-red);
   --border: rgb(255 255 255 / 10%);
-  --input: rgb(255 255 255 / 15%);
-  --ring: var(--ash);
-  --chart-1: var(--ash);
-  --chart-2: var(--smoke);
-  --chart-3: var(--graphite);
-  --chart-4: var(--stone);
-  --chart-5: var(--warm-taupe);
-  --sidebar: #1a1a1a;
-  --sidebar-foreground: var(--eggshell);
-  --sidebar-primary: var(--eggshell);
-  --sidebar-primary-foreground: var(--ink);
-  --sidebar-accent: #2a2a2a;
-  --sidebar-accent-foreground: var(--eggshell);
+  --input: rgb(255 255 255 / 10%);
+  --ring: var(--eon-red);
+  --sidebar: #252a35;
+  --sidebar-foreground: var(--panel-ink);
+  --sidebar-primary: var(--eon-red);
+  --sidebar-primary-foreground: var(--on-accent);
+  --sidebar-accent: #2d3340;
+  --sidebar-accent-foreground: var(--panel-ink);
   --sidebar-border: rgb(255 255 255 / 10%);
-  --sidebar-ring: var(--ash);
+  --sidebar-ring: var(--eon-red);
 }
 
 @layer base {
@@ -157,8 +168,14 @@
   }
   body {
     @apply bg-background text-foreground;
+    background-color: var(--shell);
   }
   html {
     @apply font-sans;
+    color-scheme: light;
+  }
+  ::selection {
+    background: rgb(225 29 72 / 22%);
+    color: var(--ink);
   }
 }

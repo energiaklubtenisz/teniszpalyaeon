@@ -5,7 +5,6 @@ import {
 } from "@/lib/booking/constants";
 import {
   budapestLocalToUtc,
-  getBoundaryLabels,
   isSlotInPast,
   labelToMinutes,
   maxEndMinutesForStart,
@@ -60,41 +59,6 @@ export function canStartOneHourBooking(
   return !rangeHasBusy(dateKey, label, end, busy);
 }
 
-/**
- * A day is fully booked when no contiguous 1-hour window remains.
- * Isolated half-hour gaps between bookings do not count as available.
- */
-export function isDayFullyBooked(
-  dateKey: string,
-  busy: BusyInterval[],
-  now?: Date,
-): boolean {
-  const starts = getBoundaryLabels().filter(
-    (label) => labelToMinutes(label) <= LAST_START_MINUTES,
-  );
-
-  return !starts.some((label) =>
-    canStartOneHourBooking(dateKey, label, busy, now),
-  );
-}
-
-/**
- * Day is fully booked only when every court has no remaining 1-hour window.
- * Half-hour gaps on a court still leave that court fully booked for the day.
- */
-export function isDayFullyBookedAcrossCourts(
-  dateKey: string,
-  courtIds: string[],
-  busyByCourtId: Record<string, BusyInterval[]>,
-  now?: Date,
-): boolean {
-  if (courtIds.length === 0) return true;
-
-  return courtIds.every((courtId) =>
-    isDayFullyBooked(dateKey, busyByCourtId[courtId] ?? [], now),
-  );
-}
-
 export function groupBusyByCourtId(
   rows: Array<{ court_id: string; starts_at: string; ends_at: string }>,
 ): Record<string, BusyInterval[]> {
@@ -105,4 +69,51 @@ export function groupBusyByCourtId(
     result[row.court_id] = list;
   }
   return result;
+}
+
+/** True if at least one court can host a 1-hour booking starting here. */
+export function canStartOneHourBookingOnAnyCourt(
+  dateKey: string,
+  label: TimeLabel,
+  courtIds: string[],
+  busyByCourtId: Record<string, BusyInterval[]>,
+  now?: Date,
+): boolean {
+  if (courtIds.length === 0) return false;
+  return courtIds.some((courtId) =>
+    canStartOneHourBooking(
+      dateKey,
+      label,
+      busyByCourtId[courtId] ?? [],
+      now,
+    ),
+  );
+}
+
+/** True if at least one court is free for the whole range. */
+export function rangeFreeOnAnyCourt(
+  dateKey: string,
+  start: TimeLabel,
+  end: TimeLabel,
+  courtIds: string[],
+  busyByCourtId: Record<string, BusyInterval[]>,
+): boolean {
+  if (courtIds.length === 0) return false;
+  return courtIds.some(
+    (courtId) => !rangeHasBusy(dateKey, start, end, busyByCourtId[courtId] ?? []),
+  );
+}
+
+/** True when every court is busy for this half-hour segment. */
+export function segmentBusyOnAllCourts(
+  dateKey: string,
+  start: TimeLabel,
+  end: TimeLabel,
+  courtIds: string[],
+  busyByCourtId: Record<string, BusyInterval[]>,
+): boolean {
+  if (courtIds.length === 0) return true;
+  return courtIds.every((courtId) =>
+    rangeHasBusy(dateKey, start, end, busyByCourtId[courtId] ?? []),
+  );
 }

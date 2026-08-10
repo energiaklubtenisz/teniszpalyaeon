@@ -88,7 +88,7 @@ export function SiteHeader({
           fill
           unoptimized
           className={styles.logoImage}
-          sizes="px"
+          sizes="120px"
           priority
         />
       </Link>

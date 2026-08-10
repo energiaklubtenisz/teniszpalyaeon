@@ -16,8 +16,8 @@ export function LoginPage() {
           <Image
             src={assets.brand.logo}
             alt=""
-            width={72}
-            height={48}
+            width={112}
+            height={72}
             className={styles.brandLogo}
           />
           <span className={styles.brandAccent} aria-hidden />

@@ -1,48 +1,50 @@
 .page {
   min-height: calc(100dvh - 4rem);
-  background: var(--background);
+  background: transparent;
   overflow-x: clip;
+  color: var(--ink);
 }
 
 .inner,
 .innerWide {
+  position: relative;
   max-width: 40rem;
-  padding: 4.5rem 1.5rem;
+  margin-inline: auto;
+  padding: 2.25rem 1.35rem;
 }
 
 .innerWide {
   max-width: 48rem;
 }
 
-.bandIntro {
-  background: var(--warm-taupe);
-}
-
-.bandPasses {
-  background: var(--eggshell);
-  border-top: 1px solid var(--stone);
+.bandIntro,
+.bandPasses,
+.bandHourly {
+  margin: 0 0.85rem 0.85rem;
+  background: var(--elevated);
+  border-radius: calc(var(--radius) * 1.15);
+  box-shadow: var(--shadow-soft);
 }
 
 .bandHourly {
-  background: var(--eggshell);
-  padding-bottom: 1rem;
+  padding-bottom: 0.35rem;
 }
 
 .sectionTitle {
-  margin: 0 0 1.5rem;
-  font-size: clamp(1.75rem, 4vw, 2.5rem);
-  font-weight: 500;
-  line-height: 1.12;
-  letter-spacing: -0.03em;
+  margin: 0 0 1.15rem;
+  font-size: clamp(1.55rem, 3.5vw, 2.15rem);
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.035em;
   color: var(--ink);
 }
 
 .sectionLead {
-  margin: -0.5rem 0 1.75rem;
-  font-size: var(--text-subheading);
+  margin: -0.35rem 0 1.5rem;
+  font-size: var(--text-body);
   font-weight: 500;
   line-height: 1.45;
-  color: var(--graphite);
+  color: var(--smoke);
 }
 
 .body {
@@ -62,7 +64,7 @@
   list-style: none;
   display: flex;
   flex-direction: column;
-  gap: 0;
+  gap: 0.55rem;
 }
 
 .priceRow {
@@ -71,29 +73,32 @@
   align-items: baseline;
   justify-content: space-between;
   gap: 0.5rem 1.5rem;
-  padding: 1.35rem 0;
-  border-bottom: 1px solid var(--stone);
-}
-
-.bandPasses .priceRow:first-child {
-  padding-top: 0;
-}
-
-.bandPasses .priceRow:last-child {
-  border-bottom: none;
-  padding-bottom: 0;
+  padding: 1rem 1.05rem;
+  background: var(--surface);
+  border-radius: var(--radius);
 }
 
 .hourlyPanel {
-  padding: 1.75rem 1.5rem;
-  background: var(--warm-taupe);
-  border: 1px solid var(--stone);
+  position: relative;
+  padding: 1.35rem 1.25rem;
+  background: var(--surface);
+  border-radius: var(--radius);
+}
+
+.hourlyPanel::before {
+  content: "";
+  position: absolute;
+  top: 1rem;
+  bottom: 1rem;
+  left: 0;
+  width: 4px;
+  border-radius: 999px;
+  background: var(--eon-red);
 }
 
 .hourlyPanel .priceRow {
-  border-bottom: none;
-  padding: 0;
-  padding-top: 0.25rem;
+  background: transparent;
+  padding: 0.25rem 0 0.25rem 0.65rem;
 }
 
 .priceCopy {
@@ -103,14 +108,14 @@
 
 .priceName {
   margin: 0;
-  font-size: var(--text-body-lg);
-  font-weight: 500;
+  font-size: var(--text-body);
+  font-weight: 700;
   line-height: 1.35;
   color: var(--ink);
 }
 
 .priceNote {
-  margin: 0.35rem 0 0;
+  margin: 0.3rem 0 0;
   font-size: var(--text-body-sm);
   line-height: 1.5;
   color: var(--smoke);
@@ -126,8 +131,8 @@
 }
 
 .priceAmount {
-  font-size: clamp(1.5rem, 3vw, 1.85rem);
-  font-weight: 500;
+  font-size: clamp(1.35rem, 2.8vw, 1.7rem);
+  font-weight: 700;
   letter-spacing: -0.03em;
   color: var(--ink);
 }
@@ -138,34 +143,22 @@
 }
 
 @media (min-width: 768px) {
+  .bandIntro,
+  .bandPasses,
+  .bandHourly {
+    margin-inline: 1.25rem;
+  }
+
   .inner,
   .innerWide {
-    padding: 5.5rem 2.5rem;
+    padding: 2.75rem 1.75rem;
   }
+}
 
-  .intro .inner {
-    padding-bottom: 4rem;
-  }
-
-  .lead,
-  .sectionLead {
-    font-size: var(--text-body-lg);
-  }
-
-  .body {
-    font-size: var(--text-subheading);
-    line-height: 1.65;
-  }
-
-  .priceRow {
-    padding: 1.6rem 0;
-  }
-
-  .hourlyPanel {
-    padding: 2.25rem 2rem;
-  }
-
+@media (min-width: 1024px) {
+  .bandIntro,
+  .bandPasses,
   .bandHourly {
-    padding-bottom: 2rem;
+    margin-inline: max(1.25rem, calc((100vw - 80rem) / 2));
   }
 }
