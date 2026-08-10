@@ -7,7 +7,7 @@ export const register = {
   loginLink: "Bejelentkezés",
   fields: {
     fullName: { label: "Teljes név" },
-    email: { label: "Email" },
+    email: { label: "E-mail" },
     password: { label: "Jelszó" },
     passwordConfirm: { label: "Jelszó megerősítése" },
   },

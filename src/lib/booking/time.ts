@@ -182,10 +182,17 @@ export function getBookableDateKeys(from: Date = nowInBudapest()): string[] {
   const { year, monthIndex, day } = parseDateKey(todayKey);
   const start = new TZDate(year, monthIndex, day, 12, 0, 0, 0, BOOKING_TIMEZONE);
 
-  return Array.from({ length: MAX_BOOKING_DAYS_AHEAD + 1 }, (_, index) => {
-    const next = addDays(start, index);
-    return budapestDateKey(next);
-  });
+  // After the last possible start (20:00), today has no bookable window left.
+  const lastStartLabel = minutesToLabel(CLOSE_HOUR * 60 - MIN_DURATION_MINUTES);
+  const skipToday = isSlotInPast(todayKey, lastStartLabel, from) ? 1 : 0;
+
+  return Array.from(
+    { length: MAX_BOOKING_DAYS_AHEAD + 1 - skipToday },
+    (_, index) => {
+      const next = addDays(start, index + skipToday);
+      return budapestDateKey(next);
+    },
+  );
 }
 
 export function isDateKeyBookable(

@@ -2,6 +2,14 @@
 
 import { useEffect, useMemo, useState, useTransition } from "react";
 import Link from "next/link";
+import {
+  CalendarDays,
+  CheckCircle2,
+  Clock3,
+  HelpCircle,
+  LayoutGrid,
+  Users,
+} from "lucide-react";
 
 import {
   createBooking,
@@ -33,6 +41,14 @@ import styles from "./booking.module.css";
 type StepId = "day" | "time" | "court" | "type" | "confirm";
 
 const STEPS: StepId[] = ["day", "time", "court", "type", "confirm"];
+
+const STEP_ICONS = {
+  day: CalendarDays,
+  time: Clock3,
+  court: LayoutGrid,
+  type: Users,
+  confirm: CheckCircle2,
+} as const;
 
 type BookingWizardProps = {
   courts: CourtOption[];
@@ -71,7 +87,9 @@ export function BookingWizard({
   >({});
   const [availabilityError, setAvailabilityError] = useState<string | null>(null);
   const [loadingAvailability, setLoadingAvailability] = useState(false);
-  const [dayBusyIntervals, setDayBusyIntervals] = useState<BusyInterval[]>([]);
+  const [dayBusyByCourtId, setDayBusyByCourtId] = useState<
+    Record<string, BusyInterval[]>
+  >({});
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
@@ -80,6 +98,8 @@ export function BookingWizard({
     () => courts.find((court) => court.id === courtId) ?? null,
     [courts, courtId],
   );
+
+  const courtIds = useMemo(() => courts.map((court) => court.id), [courts]);
 
   useEffect(() => {
     if (
@@ -130,7 +150,11 @@ export function BookingWizard({
     let cancelled = false;
     void getBusyIntervalsForDate(dateKey).then((result) => {
       if (cancelled) return;
-      setDayBusyIntervals(result.success ? result.data : []);
+      if (!result.success) {
+        setDayBusyByCourtId({});
+        return;
+      }
+      setDayBusyByCourtId(result.data.busyByCourtId);
     });
 
     return () => {
@@ -217,8 +241,42 @@ export function BookingWizard({
     if (index < 0 || index >= STEPS.length) return;
     if (index > furthestStepIndex) return;
     if (index === stepIndex) return;
+
+    const hasTime = Boolean(
+      startLabel && endLabel && isValidBookingRange(startLabel, endLabel),
+    );
+    if (index >= 2 && !hasTime) {
+      setSubmitError(null);
+      setStepIndex(1);
+      return;
+    }
+
     setSubmitError(null);
     setStepIndex(index);
+  };
+
+  const applyTimeChange = (
+    start: TimeLabel | null,
+    end: TimeLabel | null,
+  ) => {
+    setStartLabel(start);
+    setEndLabel(end);
+    setCourtId(null);
+    setBookingType(null);
+    setPlayerCount(null);
+    setGuestPlayerNames([]);
+    setAvailabilityByCourtId({});
+    setSubmitError(null);
+
+    const complete =
+      Boolean(start) &&
+      Boolean(end) &&
+      isValidBookingRange(start as TimeLabel, end as TimeLabel);
+
+    if (!complete) {
+      setFurthestStepIndex((furthest) => Math.min(furthest, 1));
+      setStepIndex((current) => Math.min(current, 1));
+    }
   };
 
   const priceLabel =
@@ -236,202 +294,45 @@ export function BookingWizard({
         : "—";
 
   return (
-    <div className={styles.wizard}>
-      <ol className={styles.progress} aria-label="Foglalási lépések">
-        {STEPS.map((id, index) => {
-          const isCurrent = index === stepIndex;
-          const isReached = index <= furthestStepIndex;
-          const isDone = index < stepIndex;
-          const canJump = isReached && !isCurrent;
+    <div className={styles.dashboard}>
+      <aside className={styles.sidebar} aria-label="Foglalási lépések">
+        <p className={styles.sidebarLabel}>Lépések</p>
+        <ol className={styles.progress}>
+          {STEPS.map((id, index) => {
+            const isCurrent = index === stepIndex;
+            const isReached = index <= furthestStepIndex;
+            const isDone = index < stepIndex;
+            const canJump = isReached && !isCurrent;
+            const Icon = STEP_ICONS[id];
 
-          return (
-            <li key={id} className={styles.progressItemWrap}>
-              <button
-                type="button"
-                className={cn(
-                  styles.progressItem,
-                  isCurrent && styles.progressCurrent,
-                  (isDone || (isReached && !isCurrent)) && styles.progressDone,
-                  canJump && styles.progressClickable,
-                )}
-                disabled={!canJump}
-                aria-current={isCurrent ? "step" : undefined}
-                aria-label={`${index + 1}. ${booking.steps[id].shortTitle}`}
-                onClick={() => goToStep(index)}
-              >
-                <span className={styles.progressIndex}>{index + 1}</span>
-                <span className={styles.progressLabel}>
-                  {booking.steps[id].shortTitle}
-                </span>
-              </button>
-            </li>
-          );
-        })}
-      </ol>
+            return (
+              <li key={id} className={styles.progressItemWrap}>
+                <button
+                  type="button"
+                  className={cn(
+                    styles.progressItem,
+                    isCurrent && styles.progressCurrent,
+                    (isDone || (isReached && !isCurrent)) && styles.progressDone,
+                    canJump && styles.progressClickable,
+                  )}
+                  disabled={!canJump}
+                  aria-current={isCurrent ? "step" : undefined}
+                  aria-label={`${index + 1}. ${booking.steps[id].shortTitle}`}
+                  onClick={() => goToStep(index)}
+                >
+                  <span className={styles.progressIcon}>
+                    <Icon size={18} aria-hidden />
+                  </span>
+                  <span className={styles.progressLabel}>
+                    {booking.steps[id].shortTitle}
+                  </span>
+                </button>
+              </li>
+            );
+          })}
+        </ol>
 
-      {!isAuthenticated ? (
-        <aside className={styles.authBanner}>
-          <p>
-            <strong>{booking.loginRequired.title}</strong> —{" "}
-            {booking.loginRequired.body}
-          </p>
-          <div className={styles.authLinks}>
-            <Link href="/login" className={styles.authLink}>
-              {booking.loginRequired.login}
-            </Link>
-            <Link href="/register" className={styles.authLinkMuted}>
-              {booking.loginRequired.register}
-            </Link>
-          </div>
-        </aside>
-      ) : null}
-
-      <section className={styles.stepPanel} aria-labelledby="booking-step-title">
-        <h2 id="booking-step-title" className={styles.stepTitle}>
-          {booking.steps[step].title}
-        </h2>
-        <p className={styles.stepLead}>{booking.steps[step].lead}</p>
-        <p className={styles.stepLead}>{booking.steps[step].lead2}</p>
-
-        {step === "day" ? (
-          <DayPicker
-            selectedDateKey={dateKey}
-            onSelect={(key) => {
-              setDateKey(key);
-              setStartLabel(null);
-              setEndLabel(null);
-              setCourtId(null);
-              setBookingType(null);
-              setPlayerCount(null);
-              setGuestPlayerNames([]);
-              setAvailabilityByCourtId({});
-              setDayBusyIntervals([]);
-            }}
-          />
-        ) : null}
-
-        {step === "time" && dateKey ? (
-          <TimeSlotPicker
-            dateKey={dateKey}
-            busy={dayBusyIntervals}
-            startLabel={startLabel}
-            endLabel={endLabel}
-            onChange={(start, end) => {
-              setStartLabel(start);
-              setEndLabel(end);
-              setCourtId(null);
-              setBookingType(null);
-              setPlayerCount(null);
-              setGuestPlayerNames([]);
-              setAvailabilityByCourtId({});
-            }}
-          />
-        ) : null}
-
-        {step === "court" ? (
-          <>
-            {loadingAvailability ? (
-              <p className={styles.muted}>{booking.steps.court.loading}</p>
-            ) : null}
-            {availabilityError ? (
-              <p className={styles.inlineError}>{availabilityError}</p>
-            ) : null}
-            {!loadingAvailability && !availabilityError ? (
-              <CourtSchematic
-                courts={courts}
-                selectedCourtId={courtId}
-                availabilityByCourtId={availabilityByCourtId}
-                onSelect={(id) => {
-                  setCourtId(id);
-                  setBookingType(null);
-                  setPlayerCount(null);
-                  setGuestPlayerNames([]);
-                }}
-              />
-            ) : null}
-          </>
-        ) : null}
-
-        {step === "type" && startLabel && endLabel ? (
-          <BookingTypeStep
-            value={bookingType}
-            playerCount={playerCount}
-            guestPlayerNames={guestPlayerNames}
-            bookerName={bookerName}
-            startLabel={startLabel}
-            endLabel={endLabel}
-            onChangeType={setBookingType}
-            onChangePlayers={(count) => {
-              setPlayerCount(count);
-              setGuestPlayerNames(Array.from({ length: count - 1 }, () => ""));
-            }}
-            onChangeGuestName={(index, value) => {
-              setGuestPlayerNames((current) => {
-                const next = [...current];
-                next[index] = value;
-                return next;
-              });
-            }}
-          />
-        ) : null}
-
-        {step === "confirm" ? (
-          <dl className={styles.summary}>
-            <div>
-              <dt>{booking.steps.confirm.court}</dt>
-              <dd>{selectedCourt?.name ?? "—"}</dd>
-            </div>
-            <div>
-              <dt>{booking.steps.confirm.date}</dt>
-              <dd>{dateKey ? formatDateKeyLabel(dateKey) : "—"}</dd>
-            </div>
-            <div>
-              <dt>{booking.steps.confirm.time}</dt>
-              <dd>
-                {startLabel && endLabel ? `${startLabel}–${endLabel}` : "—"}
-              </dd>
-            </div>
-            <div>
-              <dt>{booking.steps.confirm.type}</dt>
-              <dd>
-                {bookingType === "season_pass"
-                  ? booking.steps.type.seasonPass.title
-                  : booking.steps.type.oneTime.title}
-              </dd>
-            </div>
-            <div>
-              <dt>{booking.steps.confirm.players}</dt>
-              <dd>{playersLabel}</dd>
-            </div>
-            <div>
-              <dt>{booking.steps.confirm.playerNames}</dt>
-              <dd>
-                {[
-                  bookerName ?? booking.steps.type.names.bookerFallback,
-                  ...guestPlayerNames.map((name) => name.trim()).filter(Boolean),
-                ].join(", ")}
-              </dd>
-            </div>
-            <div>
-              <dt>{booking.steps.confirm.price}</dt>
-              <dd>{priceLabel}</dd>
-            </div>
-            {bookingType === "one_time" ? (
-              <p className={styles.paymentNote}>
-                {booking.steps.confirm.paymentNote}
-              </p>
-            ) : null}
-          </dl>
-        ) : null}
-
-        {submitError ? <p className={styles.inlineError}>{submitError}</p> : null}
-
-        <div
-          className={cn(
-            styles.actions,
-            stepIndex === 0 && styles.actionsSingle,
-          )}
-        >
+        <div className={styles.sidebarActions}>
           {stepIndex > 0 ? (
             <button
               type="button"
@@ -446,7 +347,7 @@ export function BookingWizard({
             <button
               type="button"
               className={styles.primaryButton}
-              disabled={isPending || !isAuthenticated}
+              disabled={isPending}
               onClick={handleConfirm}
             >
               {isPending
@@ -464,16 +365,257 @@ export function BookingWizard({
             </button>
           )}
         </div>
+      </aside>
+
+      <section className={styles.mainPanel} aria-labelledby="booking-step-title">
+        <div className={styles.stepPanel}>
+          <div className={styles.stepHeader}>
+            <h2 id="booking-step-title" className={styles.stepTitle}>
+              {booking.steps[step].title}
+            </h2>
+            <p className={styles.stepLead}>{booking.steps[step].lead}</p>
+            {booking.steps[step].lead2 ? (
+              <p className={styles.stepLead}>{booking.steps[step].lead2}</p>
+            ) : null}
+          </div>
+
+          <div className={styles.stepBody}>
+            {step === "day" ? (
+              <DayPicker
+                selectedDateKey={dateKey}
+            onSelect={(key) => {
+              setDateKey(key);
+              setStartLabel(null);
+              setEndLabel(null);
+              setCourtId(null);
+              setBookingType(null);
+              setPlayerCount(null);
+              setGuestPlayerNames([]);
+              setAvailabilityByCourtId({});
+              setDayBusyByCourtId({});
+              setFurthestStepIndex(0);
+            }}
+          />
+        ) : null}
+
+        {step === "time" && dateKey ? (
+          <TimeSlotPicker
+            dateKey={dateKey}
+            courtIds={courtIds}
+            busyByCourtId={dayBusyByCourtId}
+            startLabel={startLabel}
+            endLabel={endLabel}
+            onChange={applyTimeChange}
+          />
+        ) : null}
+
+            {step === "court" ? (
+              <>
+                {loadingAvailability ? (
+                  <p className={styles.muted}>{booking.steps.court.loading}</p>
+                ) : null}
+                {availabilityError ? (
+                  <p className={styles.inlineError}>{availabilityError}</p>
+                ) : null}
+                {!loadingAvailability && !availabilityError ? (
+                  <CourtSchematic
+                    courts={courts}
+                    selectedCourtId={courtId}
+                    availabilityByCourtId={availabilityByCourtId}
+                    onSelect={(id) => {
+                      setCourtId(id);
+                      setBookingType(null);
+                      setPlayerCount(null);
+                      setGuestPlayerNames([]);
+                    }}
+                  />
+                ) : null}
+              </>
+            ) : null}
+
+            {step === "type" && startLabel && endLabel ? (
+              <BookingTypeStep
+                value={bookingType}
+                playerCount={playerCount}
+                guestPlayerNames={guestPlayerNames}
+                bookerName={bookerName}
+                startLabel={startLabel}
+                endLabel={endLabel}
+                onChangeType={setBookingType}
+                onChangePlayers={(count) => {
+                  setPlayerCount(count);
+                  setGuestPlayerNames(Array.from({ length: count - 1 }, () => ""));
+                }}
+                onChangeGuestName={(index, value) => {
+                  setGuestPlayerNames((current) => {
+                    const next = [...current];
+                    next[index] = value;
+                    return next;
+                  });
+                }}
+              />
+            ) : null}
+
+            {step === "confirm" ? (
+              <dl className={styles.summary}>
+                <div>
+                  <dt>{booking.steps.confirm.court}</dt>
+                  <dd>{selectedCourt?.name ?? "—"}</dd>
+                </div>
+                <div>
+                  <dt>{booking.steps.confirm.date}</dt>
+                  <dd>{dateKey ? formatDateKeyLabel(dateKey) : "—"}</dd>
+                </div>
+                <div>
+                  <dt>{booking.steps.confirm.time}</dt>
+                  <dd>
+                    {startLabel && endLabel ? `${startLabel}–${endLabel}` : "—"}
+                  </dd>
+                </div>
+                <div>
+                  <dt>{booking.steps.confirm.type}</dt>
+                  <dd>
+                    {bookingType === "season_pass"
+                      ? booking.steps.type.seasonPass.title
+                      : booking.steps.type.oneTime.title}
+                  </dd>
+                </div>
+                <div>
+                  <dt>{booking.steps.confirm.players}</dt>
+                  <dd>{playersLabel}</dd>
+                </div>
+                <div>
+                  <dt>{booking.steps.confirm.playerNames}</dt>
+                  <dd>
+                    {[
+                      bookerName ?? booking.steps.type.names.bookerFallback,
+                      ...guestPlayerNames.map((name) => name.trim()).filter(Boolean),
+                    ].join(", ")}
+                  </dd>
+                </div>
+                <div>
+                  <dt>{booking.steps.confirm.price}</dt>
+                  <dd>{priceLabel}</dd>
+                </div>
+                {bookingType === "one_time" ? (
+                  <p className={styles.paymentNote}>
+                    {booking.steps.confirm.paymentNote}
+                  </p>
+                ) : null}
+              </dl>
+            ) : null}
+
+            {submitError ? (
+              <p className={styles.inlineError}>{submitError}</p>
+            ) : null}
+          </div>
+
+          <div
+            className={cn(
+              styles.actions,
+              stepIndex === 0 && styles.actionsSingle,
+            )}
+          >
+            {stepIndex > 0 ? (
+              <button
+                type="button"
+                className={styles.secondaryButton}
+                onClick={goBack}
+              >
+                {booking.nav.back}
+              </button>
+            ) : null}
+
+            {step === "confirm" ? (
+              <button
+                type="button"
+                className={styles.primaryButton}
+                disabled={isPending}
+                onClick={handleConfirm}
+              >
+                {isPending
+                  ? booking.steps.confirm.submitting
+                  : booking.steps.confirm.submit}
+              </button>
+            ) : (
+              <button
+                type="button"
+                className={styles.primaryButton}
+                disabled={!canGoNext}
+                onClick={goNext}
+              >
+                {booking.nav.next}
+              </button>
+            )}
+          </div>
+        </div>
       </section>
 
-      <aside className={styles.helpCard}>
-        <div>
-          <p className={styles.helpTitle}>{booking.help.title}</p>
-          <p className={styles.helpBody}>{booking.help.body}</p>
+      <aside className={styles.sidePanel}>
+        <div className={styles.summaryCard}>
+          <p className={styles.sideCardTitle}>Kiválasztás</p>
+          <dl className={styles.sideSummary}>
+            <div>
+              <dt>Nap</dt>
+              <dd>{dateKey ? formatDateKeyLabel(dateKey) : "—"}</dd>
+            </div>
+            <div>
+              <dt>Idő</dt>
+              <dd>
+                {startLabel && endLabel ? `${startLabel}–${endLabel}` : "—"}
+              </dd>
+            </div>
+            <div>
+              <dt>Pálya</dt>
+              <dd>{selectedCourt?.name ?? "—"}</dd>
+            </div>
+            <div>
+              <dt>Típus</dt>
+              <dd>
+                {bookingType === "season_pass"
+                  ? booking.steps.type.seasonPass.title
+                  : bookingType === "one_time"
+                    ? booking.steps.type.oneTime.title
+                    : "—"}
+              </dd>
+            </div>
+          </dl>
         </div>
-        <Link href={booking.help.href} className={styles.helpLink}>
-          {booking.help.cta}
-        </Link>
+
+        <div className={styles.filterCard}>
+          <p className={styles.sideCardTitle}>Jelmagyarázat</p>
+          <ul className={styles.filterList}>
+            <li>
+              <span className={cn(styles.filterDot, styles.filterFree)} />
+              Szabad
+            </li>
+            <li>
+              <span className={cn(styles.filterDot, styles.filterBusy)} />
+              Foglalt
+            </li>
+            <li>
+              <span className={cn(styles.filterDot, styles.filterSelected)} />
+              Kiválasztott
+            </li>
+            <li>
+              <span className={cn(styles.filterDot, styles.filterPast)} />
+              Elmúlt / zárt
+            </li>
+          </ul>
+        </div>
+
+        <aside className={styles.helpCard}>
+          <div className={styles.helpIconWrap}>
+            <HelpCircle size={18} aria-hidden />
+          </div>
+          <div>
+            <p className={styles.helpTitle}>{booking.help.title}</p>
+            <p className={styles.helpBody}>{booking.help.body}</p>
+          </div>
+          <Link href={booking.help.href} className={styles.helpLink}>
+            {booking.help.cta}
+          </Link>
+        </aside>
       </aside>
     </div>
   );

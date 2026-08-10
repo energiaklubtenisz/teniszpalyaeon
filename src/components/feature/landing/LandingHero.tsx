@@ -8,29 +8,35 @@ import { cn } from "@/lib/utils";
 
 import styles from "./landing.module.css";
 
-export function LandingHero() {
+type LandingHeroProps = {
+  isAuthenticated?: boolean;
+};
+
+export function LandingHero({ isAuthenticated = false }: LandingHeroProps) {
   const { hero } = landing;
 
   return (
     <section className={styles.hero} aria-labelledby="hero-brand">
-      <div className={styles.media} aria-hidden>
+      <div className={styles.heroMedia} aria-hidden>
         <Image
           src={assets.landing.hero}
           alt=""
           fill
           priority
-          className={styles.mediaImage}
+          className={styles.heroImage}
           sizes="100vw"
         />
+        <div className={styles.heroScrim} />
       </div>
-      <div className={styles.scrim} aria-hidden />
 
-      <div className={styles.copy}>
+      <div className={styles.heroPanel}>
+        <p className={styles.heroKicker}>Nagykanizsa · Salakpálya</p>
         <p id="hero-brand" className={styles.brand}>
           {hero.brand}
         </p>
         <h1 className={styles.headline}>{hero.headline}</h1>
         <p className={styles.support}>{hero.support}</p>
+
         <div className={styles.actions}>
           <Link
             href={hero.primaryCta.href}
@@ -38,15 +44,17 @@ export function LandingHero() {
           >
             {hero.primaryCta.label}
           </Link>
-          <Link
-            href={hero.secondaryCta.href}
-            className={cn(
-              buttonVariants({ variant: "outline", size: "lg" }),
-              styles.secondaryCta,
-            )}
-          >
-            {hero.secondaryCta.label}
-          </Link>
+          {!isAuthenticated ? (
+            <Link
+              href={hero.secondaryCta.href}
+              className={cn(
+                buttonVariants({ variant: "outline", size: "lg" }),
+                styles.secondaryCta,
+              )}
+            >
+              {hero.secondaryCta.label}
+            </Link>
+          ) : null}
         </div>
       </div>
     </section>

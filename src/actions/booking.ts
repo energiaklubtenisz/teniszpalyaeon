@@ -6,13 +6,12 @@ import { z } from "zod";
 import { CLOSE_HOUR, OPEN_HOUR } from "@/lib/booking/constants";
 import {
   groupBusyByCourtId,
-  isDayFullyBookedAcrossCourts,
+  type BusyInterval,
 } from "@/lib/booking/availability";
 import {
   buildWindow,
   budapestDateKey,
   calculateOneTimePriceHuf,
-  getBookableDateKeys,
   isDateKeyBookable,
   isHalfHourAligned,
   isSlotInPast,
@@ -99,26 +98,24 @@ export async function getCourts(): Promise<ActionResult<CourtOption[]>> {
   return actionSuccess(data ?? []);
 }
 
-/**
- * Returns bookable date keys where no court has a contiguous 1-hour window left
- * (isolated half-hour gaps do not keep the day open).
- */
-export async function getFullyBookedDateKeys(): Promise<
-  ActionResult<string[]>
+export async function getBusyIntervalsForDate(
+  dateKey: string,
+): Promise<
+  ActionResult<{
+    courtIds: string[];
+    busyByCourtId: Record<string, BusyInterval[]>;
+  }>
 > {
-  const dateKeys = getBookableDateKeys();
-  if (dateKeys.length === 0) {
-    return actionSuccess([]);
+  if (!isDateKeyBookable(dateKey)) {
+    return actionError("Ez a nap nem foglalható.");
   }
 
-  const firstKey = dateKeys[0];
-  const lastKey = dateKeys[dateKeys.length - 1];
-  const rangeStart = toBudapestNaiveDateTime(
-    firstKey,
+  const dayStart = toBudapestNaiveDateTime(
+    dateKey,
     minutesToLabel(OPEN_HOUR * 60),
   );
-  const rangeEnd = toBudapestNaiveDateTime(
-    lastKey,
+  const dayEnd = toBudapestNaiveDateTime(
+    dateKey,
     minutesToLabel(CLOSE_HOUR * 60),
   );
 
@@ -135,58 +132,18 @@ export async function getFullyBookedDateKeys(): Promise<
       .from("bookings")
       .select("court_id, starts_at, ends_at")
       .eq("status", "confirmed")
-      .lt("starts_at", rangeEnd)
-      .gt("ends_at", rangeStart),
+      .lt("starts_at", dayEnd)
+      .gt("ends_at", dayStart),
   ]);
 
   if (courtsError || busyError) {
     return actionError("Nem sikerült betölteni a foglaltságot.");
   }
 
-  const courtIds = (courts ?? []).map((court) => court.id);
-  const busyByCourtId = groupBusyByCourtId(busy ?? []);
-
-  const fullyBooked = dateKeys.filter((dateKey) =>
-    isDayFullyBookedAcrossCourts(dateKey, courtIds, busyByCourtId),
-  );
-
-  return actionSuccess(fullyBooked);
-}
-
-export async function getBusyIntervalsForDate(
-  dateKey: string,
-): Promise<ActionResult<Array<{ startsAt: string; endsAt: string }>>> {
-  if (!isDateKeyBookable(dateKey)) {
-    return actionError("Ez a nap nem foglalható.");
-  }
-
-  const dayStart = toBudapestNaiveDateTime(
-    dateKey,
-    minutesToLabel(OPEN_HOUR * 60),
-  );
-  const dayEnd = toBudapestNaiveDateTime(
-    dateKey,
-    minutesToLabel(CLOSE_HOUR * 60),
-  );
-
-  const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("bookings")
-    .select("starts_at, ends_at")
-    .eq("status", "confirmed")
-    .lt("starts_at", dayEnd)
-    .gt("ends_at", dayStart);
-
-  if (error) {
-    return actionError("Nem sikerült betölteni a foglaltságot.");
-  }
-
-  return actionSuccess(
-    (data ?? []).map((row) => ({
-      startsAt: row.starts_at,
-      endsAt: row.ends_at,
-    })),
-  );
+  return actionSuccess({
+    courtIds: (courts ?? []).map((court) => court.id),
+    busyByCourtId: groupBusyByCourtId(busy ?? []),
+  });
 }
 
 export async function getCourtsAvailabilityForWindow(

@@ -1,20 +1,23 @@
 .page {
+  position: relative;
   display: flex;
   justify-content: center;
   min-height: calc(100dvh - 4rem);
-  background:
-    radial-gradient(
-      ellipse 80% 50% at 10% 0%,
-      rgb(245 243 241 / 90%),
-      transparent 55%
-    ),
-    var(--eggshell);
+  background: transparent;
+  overflow: hidden;
+  color: var(--ink);
 }
 
 .article {
+  position: relative;
+  z-index: 1;
   width: 100%;
   max-width: 42rem;
-  padding: 4rem 1.5rem 6rem;
+  margin: 1.15rem 0.85rem 1.5rem;
+  padding: 1.75rem 1.25rem 2rem;
+  background: var(--elevated);
+  border-radius: calc(var(--radius) * 1.15);
+  box-shadow: var(--shadow-card);
 }
 
 .header {
@@ -106,7 +109,7 @@
   font-size: var(--text-body-sm);
   line-height: 1.55;
   color: var(--smoke);
-  background: color-mix(in srgb, var(--warm-taupe) 70%, #fff);
+  background: color-mix(in srgb, var(--warm-taupe) 70%, var(--eggshell));
   border-left: 3px solid var(--ash);
   border-radius: 0 0.5rem 0.5rem 0;
 }
@@ -125,7 +128,7 @@
   flex-direction: column;
   gap: 0.25rem;
   padding: 0.9rem 1rem;
-  background: #fff;
+  background: var(--warm-taupe);
   border: 1px solid var(--stone);
   border-radius: 0.75rem;
 }

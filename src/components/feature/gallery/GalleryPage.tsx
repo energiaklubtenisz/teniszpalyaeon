@@ -1,37 +1,34 @@
-import Image from "next/image";
-
 import { PageBanner } from "@/components/feature/chrome/PageBanner";
 import { gallery } from "@/content/gallery";
-import { assets } from "@/lib/assets";
 
 import styles from "./gallery.module.css";
 
 export function GalleryPage() {
+  const placeholders = Array.from(
+    { length: gallery.placeholderCount },
+    (_, index) => index,
+  );
+
   return (
     <main className={styles.page}>
-      <PageBanner
-        title={gallery.title}
-        lead={gallery.lead}
-        imageSrc={assets.pages.gallery}
-        imageAlt="Galéria hangulatkép — salakpálya"
-      />
+      <PageBanner title={gallery.title} lead={gallery.lead} />
 
       <section className={styles.gridSection} aria-label={gallery.title}>
         <ul className={styles.grid}>
-          {assets.gallery.map((item, index) => (
+          {placeholders.map((index) => (
             <li
-              key={item.src}
+              key={index}
               className={styles.item}
               style={{ animationDelay: `${Math.min(index, 8) * 60}ms` }}
             >
-              <div className={styles.frame}>
-                <Image
-                  src={item.src}
-                  alt={item.alt}
-                  fill
-                  className={styles.image}
-                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                />
+              <div
+                className={styles.frame}
+                role="img"
+                aria-label={gallery.placeholderLabel}
+              >
+                <span className={styles.placeholderMark} aria-hidden>
+                  {String(index + 1).padStart(2, "0")}
+                </span>
               </div>
             </li>
           ))}
