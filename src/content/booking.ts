@@ -2,7 +2,7 @@ import { HOURLY_RATE_HUF } from "@/lib/booking/constants";
 
 export const booking = {
   title: "Foglalás",
-  lead: "Válasszon napot és időpontot, majd pályát — legalább egy órára, félórás határokkal.",
+  lead: "Válassza ki az időpontot és pályát, majd adja meg a játékosok számát és nevét.",
   loadError: {
     empty: "Jelenleg nincs elérhető pálya. Próbálja később.",
   },
