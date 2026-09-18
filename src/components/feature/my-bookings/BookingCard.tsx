@@ -9,6 +9,7 @@ import {
   formatBudapestDateLabel,
   formatBudapestTime,
   formatPriceHuf,
+  parseBookingTimestamp,
 } from "@/lib/booking/time";
 import { cn } from "@/lib/utils";
 
@@ -28,8 +29,8 @@ export function BookingCard({
   const [expanded, setExpanded] = useState(false);
   const detailsId = useId();
 
-  const startsAt = new Date(booking.startsAt);
-  const endsAt = new Date(booking.endsAt);
+  const startsAt = parseBookingTimestamp(booking.startsAt);
+  const endsAt = parseBookingTimestamp(booking.endsAt);
   const isSeasonPass = booking.bookingType === "season_pass";
   const typeLabel = isSeasonPass
     ? myBookings.card.type.seasonPass
