@@ -1,20 +1,23 @@
 .page {
+  position: relative;
   display: flex;
   justify-content: center;
   min-height: calc(100dvh - 4rem);
-  background:
-    radial-gradient(
-      ellipse 80% 50% at 10% 0%,
-      rgb(245 243 241 / 90%),
-      transparent 55%
-    ),
-    var(--eggshell);
+  background: transparent;
+  overflow: hidden;
+  color: var(--ink);
 }
 
 .section {
+  position: relative;
+  z-index: 1;
   width: 100%;
   max-width: 32rem;
-  padding: 4rem 1.5rem 6rem;
+  margin: 1.15rem 0.85rem 1.5rem;
+  padding: 1.75rem 1.25rem 2rem;
+  background: var(--elevated);
+  border-radius: calc(var(--radius) * 1.15);
+  box-shadow: var(--shadow-card);
 }
 
 .title {
@@ -89,9 +92,9 @@
   font-size: var(--text-body);
   line-height: 1.4;
   color: var(--ink);
-  background: #fff;
-  border: 1px solid var(--ash);
-  border-radius: 0.75rem;
+  background: var(--surface);
+  border: 1px solid var(--stone);
+  border-radius: calc(var(--radius) * 0.8);
   outline: none;
   transition:
     border-color 160ms ease,
@@ -99,12 +102,12 @@
 }
 
 .input:hover:not(:disabled) {
-  border-color: var(--smoke);
+  border-color: var(--ash);
 }
 
 .input:focus-visible {
-  border-color: var(--graphite);
-  box-shadow: 0 0 0 3px rgb(68 64 59 / 12%);
+  border-color: var(--eon-red);
+  box-shadow: 0 0 0 3px rgb(225 29 72 / 18%);
 }
 
 .input[aria-invalid="true"] {
@@ -142,20 +145,22 @@
   line-height: 1.5;
   border-radius: 0.75rem;
   color: var(--ink);
-  background: rgb(68 64 59 / 8%);
+  background: rgb(241 238 231 / 8%);
 }
 
 .submit {
   align-self: stretch;
   margin-top: 0.25rem;
   background: var(--eon-red);
-  color: #fff;
+  color: var(--on-accent);
   border-color: transparent;
+  border-radius: 999px;
+  box-shadow: 0 8px 18px rgb(225 29 72 / 28%);
 }
 
 .submit:hover:not(:disabled) {
   background: var(--dark-red);
-  color: #fff;
+  color: var(--on-accent);
 }
 
 .deleteSubmit {

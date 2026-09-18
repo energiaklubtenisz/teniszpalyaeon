@@ -1,15 +1,16 @@
 "use client";
 
 import type { BusyInterval } from "@/lib/booking/availability";
+import {
+  canStartOneHourBookingOnAnyCourt,
+  rangeFreeOnAnyCourt,
+  segmentBusyOnAllCourts,
+} from "@/lib/booking/availability";
 import { booking } from "@/content/booking";
 import {
   CLOSE_HOUR,
   MIN_DURATION_MINUTES,
 } from "@/lib/booking/constants";
-import {
-  canStartOneHourBooking,
-  rangeHasBusy,
-} from "@/lib/booking/availability";
 import {
   durationMinutes,
   getBoundaryLabels,
@@ -26,7 +27,8 @@ import styles from "./booking.module.css";
 
 type TimeSlotPickerProps = {
   dateKey: string;
-  busy: BusyInterval[];
+  courtIds: string[];
+  busyByCourtId: Record<string, BusyInterval[]>;
   startLabel: TimeLabel | null;
   endLabel: TimeLabel | null;
   onChange: (start: TimeLabel | null, end: TimeLabel | null) => void;
@@ -39,18 +41,20 @@ function canEndAt(
   dateKey: string,
   start: TimeLabel,
   end: TimeLabel,
-  busy: BusyInterval[],
+  courtIds: string[],
+  busyByCourtId: Record<string, BusyInterval[]>,
 ): boolean {
   const startMinutes = labelToMinutes(start);
   const endMinutes = labelToMinutes(end);
   if (endMinutes - startMinutes < MIN_DURATION_MINUTES) return false;
   if (endMinutes > maxEndMinutesForStart(startMinutes)) return false;
-  return !rangeHasBusy(dateKey, start, end, busy);
+  return rangeFreeOnAnyCourt(dateKey, start, end, courtIds, busyByCourtId);
 }
 
 export function TimeSlotPicker({
   dateKey,
-  busy,
+  courtIds,
+  busyByCourtId,
   startLabel,
   endLabel,
   onChange,
@@ -59,7 +63,9 @@ export function TimeSlotPicker({
 
   const selectAsStart = (label: TimeLabel) => {
     const minutes = labelToMinutes(label);
-    if (!canStartOneHourBooking(dateKey, label, busy)) return;
+    if (!canStartOneHourBookingOnAnyCourt(dateKey, label, courtIds, busyByCourtId)) {
+      return;
+    }
 
     if (minutes === LAST_START_MINUTES) {
       onChange(label, minutesToLabel(CLOSE_MINUTES));
@@ -96,7 +102,7 @@ export function TimeSlotPicker({
       return;
     }
 
-    if (!canEndAt(dateKey, startLabel, label, busy)) return;
+    if (!canEndAt(dateKey, startLabel, label, courtIds, busyByCourtId)) return;
     onChange(startLabel, label);
   };
 
@@ -109,6 +115,10 @@ export function TimeSlotPicker({
         <span>
           <i className={cn(styles.swatch, styles.swatchFree)} />{" "}
           {booking.steps.time.available}
+        </span>
+        <span>
+          <i className={cn(styles.swatch, styles.swatchBooked)} />{" "}
+          {booking.steps.time.fullyBooked}
         </span>
         <span>
           <i className={cn(styles.swatch, styles.swatchPast)} />{" "}
@@ -138,12 +148,30 @@ export function TimeSlotPicker({
             if (label === startLabel) {
               disabled = false;
             } else if (minutes < startMinutes) {
-              disabled = !canStartOneHourBooking(dateKey, label, busy);
+              disabled = !canStartOneHourBookingOnAnyCourt(
+                dateKey,
+                label,
+                courtIds,
+                busyByCourtId,
+              );
             } else {
-              disabled = !canEndAt(dateKey, startLabel!, label, busy);
+              disabled = !canEndAt(
+                dateKey,
+                startLabel!,
+                label,
+                courtIds,
+                busyByCourtId,
+              );
             }
           } else if (!startLabel || (startLabel && endLabel)) {
-            disabled = isClose || !canStartOneHourBooking(dateKey, label, busy);
+            disabled =
+              isClose ||
+              !canStartOneHourBookingOnAnyCourt(
+                dateKey,
+                label,
+                courtIds,
+                busyByCourtId,
+              );
           }
 
           const inSelection =
@@ -157,7 +185,10 @@ export function TimeSlotPicker({
             (item) => labelToMinutes(item) === minutes + 30,
           );
           const segmentBusy =
-            !isClose && next && rangeHasBusy(dateKey, label, next, busy);
+            !isClose &&
+            next != null &&
+            segmentBusyOnAllCourts(dateKey, label, next, courtIds, busyByCourtId);
+          const fullyBooked = segmentBusy && !past;
 
           return (
             <button
@@ -166,12 +197,18 @@ export function TimeSlotPicker({
               disabled={disabled}
               className={cn(
                 styles.timeCell,
-                disabled && styles.timePast,
-                segmentBusy && !selectingEnd && !disabled && styles.timeBooked,
+                past && styles.timePast,
+                fullyBooked && styles.timeBooked,
+                disabled && !past && !fullyBooked && styles.timePast,
                 inSelection && styles.timeSelected,
                 isStart && styles.timeStartOnly,
                 isEnd && styles.timeSelected,
               )}
+              aria-label={
+                fullyBooked
+                  ? `${label}, ${booking.steps.time.fullyBooked}`
+                  : undefined
+              }
               onClick={() => handleSelect(label)}
             >
               {label}

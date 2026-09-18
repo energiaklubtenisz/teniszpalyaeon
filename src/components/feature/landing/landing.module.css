@@ -1,212 +1,179 @@
 .page {
   min-height: 100%;
-  background: var(--background);
+  background: transparent;
   overflow-x: clip;
 }
 
-/* ——— Hero ——— */
-
 .hero {
   position: relative;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  min-height: calc(100dvh - 4rem);
+  display: grid;
+  min-height: calc(100dvh - 4.5rem);
   isolation: isolate;
+  overflow: hidden;
+  margin: 0.85rem;
+  border-radius: calc(var(--radius) * 1.25);
+  box-shadow: var(--shadow-card);
 }
 
-.media {
+.heroMedia {
   position: absolute;
   inset: 0;
   z-index: -2;
-  background: var(--warm-taupe);
+  background: var(--header);
+  border-radius: inherit;
   overflow: hidden;
 }
 
-.mediaImage {
+.heroImage {
   object-fit: cover;
   object-position: center 40%;
-  animation: mediaIn 1.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+  filter: saturate(0.95) contrast(1.04) brightness(0.78);
+  animation: mediaIn 1.25s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
-.scrim {
+.heroScrim {
   position: absolute;
   inset: 0;
-  z-index: -1;
   background:
     linear-gradient(
-      to top,
-      rgb(253 252 252 / 96%) 0%,
-      rgb(253 252 252 / 78%) 28%,
-      rgb(253 252 252 / 18%) 58%,
-      transparent 78%
+      105deg,
+      rgb(18 21 28 / 88%) 0%,
+      rgb(18 21 28 / 55%) 42%,
+      rgb(18 21 28 / 22%) 72%,
+      transparent 100%
     ),
     linear-gradient(
-      to right,
-      rgb(253 252 252 / 35%) 0%,
-      transparent 45%
+      to top,
+      rgb(18 21 28 / 55%) 0%,
+      transparent 40%
     );
   pointer-events: none;
 }
 
-.copy {
+.heroPanel {
+  position: relative;
+  z-index: 1;
   display: flex;
   flex-direction: column;
-  gap: 0.875rem;
-  max-width: 44rem;
-  padding: 0 1.5rem 3.5rem;
+  justify-content: flex-end;
+  gap: 0.85rem;
+  max-width: 36rem;
+  margin: 0;
+  padding: 2.5rem 1.35rem 2.75rem;
+}
+
+.heroKicker {
+  position: relative;
+  margin: 0;
+  font-size: var(--text-caption);
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgb(255 255 255 / 65%);
+  animation: riseIn 0.75s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 .brand {
+  position: relative;
   margin: 0;
-  max-width: 18ch;
-  font-size: clamp(2.35rem, 7.5vw, 4.25rem);
-  font-weight: 500;
+  max-width: 14ch;
+  font-size: clamp(2.25rem, 7vw, 4rem);
+  font-weight: 700;
   line-height: 1.02;
-  letter-spacing: -0.035em;
-  color: var(--ink);
-  animation: riseIn 0.9s cubic-bezier(0.22, 1, 0.36, 1) 0.12s both;
+  letter-spacing: -0.04em;
+  color: #fff;
+  animation: riseIn 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.08s both;
 }
 
 .headline {
+  position: relative;
   margin: 0;
-  max-width: 28rem;
-  font-size: clamp(1.125rem, 2.4vw, 1.5rem);
+  max-width: 26rem;
+  font-size: clamp(1.15rem, 2.6vw, 1.45rem);
   font-weight: 500;
-  line-height: 1.3;
+  line-height: 1.35;
   letter-spacing: -0.015em;
-  color: var(--graphite);
-  animation: riseIn 0.9s cubic-bezier(0.22, 1, 0.36, 1) 0.22s both;
+  color: rgb(255 255 255 / 82%);
+  animation: riseIn 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.16s both;
 }
 
 .support {
+  position: relative;
   margin: 0;
-  max-width: 28rem;
+  max-width: 26rem;
   font-size: var(--text-body);
   line-height: 1.55;
-  color: var(--smoke);
-  animation: riseIn 0.9s cubic-bezier(0.22, 1, 0.36, 1) 0.32s both;
+  color: rgb(255 255 255 / 68%);
+  animation: riseIn 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.24s both;
 }
 
 .actions {
+  position: relative;
   display: flex;
   flex-wrap: wrap;
-  gap: 0.75rem;
-  margin-top: 0.5rem;
-  animation: riseIn 0.9s cubic-bezier(0.22, 1, 0.36, 1) 0.42s both;
+  gap: 0.65rem;
+  margin-top: 0.45rem;
+  animation: riseIn 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.32s both;
 }
 
-.actions .primaryCta {
-  background: var(--eon-red);
-  color: #fff;
-  border-color: transparent;
+.primaryCta {
+  background: var(--eon-red) !important;
+  color: var(--on-accent) !important;
+  border-color: transparent !important;
+  border-radius: 999px !important;
+  font-weight: 700;
+  box-shadow: 0 10px 24px rgb(225 29 72 / 35%);
 }
 
-.actions .primaryCta:hover {
-  background: var(--dark-red);
-  color: #fff;
+.primaryCta:hover {
+  background: var(--dark-red) !important;
 }
 
-.actions .secondaryCta {
-  background: rgb(253 252 252 / 72%);
-  border-color: var(--stone);
-  backdrop-filter: blur(6px);
+.secondaryCta {
+  background: rgb(255 255 255 / 12%) !important;
+  border-color: rgb(255 255 255 / 28%) !important;
+  color: #fff !important;
+  border-radius: 999px !important;
+  font-weight: 600;
+  backdrop-filter: blur(8px);
 }
 
-.actions .secondaryCta:hover {
-  background: var(--eggshell);
-  border-color: var(--ash);
+.secondaryCta:hover {
+  background: #fff !important;
+  color: var(--ink) !important;
 }
-
-/* ——— Sections ——— */
 
 .sections {
   display: flex;
   flex-direction: column;
+  gap: 0.85rem;
+  margin: 0 0.85rem 0.85rem;
 }
 
-.bandCourt {
-  background: var(--warm-taupe);
-}
-
-.bandMission {
-  background: var(--eggshell);
-  border-top: 1px solid var(--stone);
-}
-
-.bandLeadership {
-  background: var(--stone);
-  border-top: 1px solid color-mix(in srgb, var(--ash) 35%, var(--stone));
-}
-
-.sectionInner,
-.sectionInnerWide {
-  max-width: 42rem;
-  padding: 4.5rem 1.5rem;
-}
-
-.sectionInnerWide {
-  max-width: 72rem;
-}
-
-.sectionLabel {
-  margin: 0 0 1.25rem;
-  padding-bottom: 0.85rem;
-  font-size: var(--text-body-sm);
-  font-weight: 500;
-  letter-spacing: 0.06em;
+.sectionKicker {
+  margin: 0 0 0.55rem;
+  font-size: var(--text-caption);
+  font-weight: 700;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--ash);
-  border-bottom: 1px solid var(--stone);
-}
-
-.bandCourt .sectionLabel {
-  border-bottom-color: color-mix(in srgb, var(--ash) 40%, var(--warm-taupe));
-}
-
-.bandLeadership .sectionLabel {
-  border-bottom-color: color-mix(in srgb, var(--ash) 45%, var(--stone));
-}
-
-.courtLayout {
-  display: flex;
-  flex-direction: column;
-  gap: 1.75rem;
-}
-
-.courtPhoto {
-  position: relative;
-  width: 100%;
-  aspect-ratio: 16 / 10;
-  overflow: hidden;
-  background: var(--stone);
-}
-
-.courtPhotoImage {
-  object-fit: cover;
-  object-position: center;
-}
-
-.courtCopy {
-  display: flex;
-  flex-direction: column;
+  color: var(--eon-red);
 }
 
 .sectionTitle {
-  margin: 0 0 0.75rem;
-  font-size: clamp(1.75rem, 4vw, 2.5rem);
-  font-weight: 500;
-  line-height: 1.12;
-  letter-spacing: -0.03em;
+  margin: 0 0 0.65rem;
+  font-size: clamp(1.65rem, 3.5vw, 2.35rem);
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.035em;
   color: var(--ink);
 }
 
 .sectionLead {
-  margin: 0 0 1.75rem;
-  font-size: var(--text-subheading);
+  margin: 0 0 1.35rem;
+  font-size: var(--text-body);
   font-weight: 500;
   line-height: 1.45;
-  color: var(--graphite);
+  color: var(--smoke);
 }
 
 .prose {
@@ -222,26 +189,61 @@
   color: var(--smoke);
 }
 
+.courtSection,
+.missionSection,
+.leadershipSection {
+  background: var(--elevated);
+  border-radius: calc(var(--radius) * 1.15);
+  box-shadow: var(--shadow-soft);
+  overflow: hidden;
+  color: var(--ink);
+}
+
+.courtShell {
+  display: grid;
+  gap: 0;
+}
+
+.courtPhoto {
+  position: relative;
+  aspect-ratio: 16 / 11;
+  background: var(--surface);
+  border-bottom: 1px solid var(--stone);
+  overflow: hidden;
+}
+
+.courtIndex {
+  position: absolute;
+  left: 1rem;
+  bottom: 1rem;
+  font-size: clamp(2.25rem, 5vw, 3.5rem);
+  font-weight: 700;
+  letter-spacing: -0.05em;
+  line-height: 1;
+  color: color-mix(in srgb, var(--ash) 65%, var(--surface));
+}
+
+.courtCopy {
+  padding: 1.75rem 1.35rem 2rem;
+}
+
 .mapLink {
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-  margin-top: 2rem;
-  padding: 0.65rem 0;
-  font-size: var(--text-body);
-  font-weight: 500;
-  color: var(--ink);
+  margin-top: 1.5rem;
+  padding: 0.65rem 1rem;
+  font-size: var(--text-body-sm);
+  font-weight: 700;
+  color: #fff;
   text-decoration: none;
-  border-bottom: 1px solid var(--ink);
-  transition:
-    color 180ms ease,
-    border-color 180ms ease,
-    gap 180ms ease;
+  background: var(--eon-red);
+  border-radius: 999px;
+  transition: background 160ms ease, gap 160ms ease;
 }
 
 .mapLink:hover {
-  color: var(--eon-red);
-  border-color: var(--eon-red);
+  background: var(--dark-red);
   gap: 0.55rem;
 }
 
@@ -251,60 +253,119 @@
   flex-shrink: 0;
 }
 
-.closing {
-  margin: 2rem 0 0;
-  padding-top: 1.5rem;
-  max-width: 28rem;
-  font-size: clamp(1.25rem, 2.5vw, 1.5rem);
+.missionSection {
+  padding: 2rem 1.35rem;
+}
+
+.missionFrame {
+  position: relative;
+  max-width: 52rem;
+  margin-inline: auto;
+  padding: 1.5rem 1.15rem;
+}
+
+.missionCorner,
+.missionCornerB {
+  display: none;
+}
+
+.missionSection .sectionKicker {
+  text-align: center;
+}
+
+.missionSection .sectionTitle {
+  text-align: center;
+}
+
+.missionLead {
+  margin: 0 auto 1.5rem;
+  max-width: 34rem;
+  text-align: center;
+  font-size: var(--text-body);
   font-weight: 500;
+  line-height: 1.45;
+  color: var(--smoke);
+}
+
+.missionGrid {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.missionGrid p {
+  margin: 0;
+  padding: 1rem 1.05rem;
+  font-size: var(--text-body-sm);
+  line-height: 1.65;
+  color: var(--graphite);
+  background: var(--surface);
+  border-radius: var(--radius);
+}
+
+.closing {
+  margin: 1.5rem 0 0;
+  padding-top: 1.15rem;
+  border-top: 1px solid var(--stone);
+  text-align: center;
+  font-size: clamp(1.05rem, 2.2vw, 1.25rem);
+  font-weight: 700;
   line-height: 1.35;
   letter-spacing: -0.02em;
   color: var(--ink);
-  border-top: 1px solid var(--stone);
 }
 
-.people {
-  margin: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 0;
+.leadershipSection {
+  padding: 2rem 1.35rem 2.25rem;
 }
 
-.personRow,
-.boardBlock {
+.leadershipHead {
+  max-width: 36rem;
+  margin-inline: auto;
+  margin-bottom: 1.35rem;
+  text-align: center;
+}
+
+.peopleGrid {
   display: grid;
-  gap: 0.35rem;
-  padding: 1.35rem 0;
-  border-bottom: 1px solid color-mix(in srgb, var(--ash) 40%, var(--stone));
+  gap: 0.75rem;
+  max-width: 56rem;
+  margin-inline: auto;
 }
 
-.personRow:first-child,
-.boardBlock:first-child {
-  padding-top: 0;
+.personCard,
+.boardCard {
+  position: relative;
+  padding: 1.2rem 1.15rem;
+  background: var(--surface);
+  border-radius: var(--radius);
 }
 
-.personRow:last-child,
-.boardBlock:last-child {
-  border-bottom: none;
-  padding-bottom: 0;
+.personCard::before,
+.boardCard::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 1.15rem;
+  right: 1.15rem;
+  height: 3px;
+  border-radius: 999px;
+  background: var(--eon-red);
 }
 
-.personRow dt,
-.boardBlock dt {
-  margin: 0;
-  font-size: var(--text-body-sm);
-  font-weight: 500;
-  letter-spacing: 0.04em;
+.personRole {
+  margin: 0.35rem 0 0.35rem;
+  font-size: var(--text-caption);
+  font-weight: 700;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--ash);
 }
 
-.personRow dd,
-.boardBlock dd {
+.personName {
   margin: 0;
   font-size: var(--text-body-lg);
-  font-weight: 500;
-  line-height: 1.4;
+  font-weight: 700;
+  line-height: 1.3;
   color: var(--ink);
 }
 
@@ -313,19 +374,17 @@
   padding: 0;
   list-style: none;
   display: grid;
-  gap: 0.35rem;
-  font-size: var(--text-body-lg);
-  font-weight: 500;
-  line-height: 1.4;
+  gap: 0.4rem;
+  font-size: var(--text-body);
+  font-weight: 600;
+  line-height: 1.35;
   color: var(--ink);
 }
-
-/* ——— Motion ——— */
 
 @keyframes mediaIn {
   from {
     opacity: 0;
-    transform: scale(1.04);
+    transform: scale(1.05);
   }
   to {
     opacity: 1;
@@ -336,7 +395,7 @@
 @keyframes riseIn {
   from {
     opacity: 0;
-    transform: translateY(1.1rem);
+    transform: translateY(0.9rem);
   }
   to {
     opacity: 1;
@@ -345,11 +404,12 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .mediaImage,
+  .heroKicker,
   .brand,
   .headline,
   .support,
-  .actions {
+  .actions,
+  .heroImage {
     animation: none;
   }
 
@@ -360,87 +420,81 @@
 
 @media (min-width: 768px) {
   .hero {
-    min-height: calc(100dvh - 5rem);
+    margin: 1.25rem;
+    min-height: calc(100dvh - 5.5rem);
   }
 
-  .copy {
-    padding: 0 2.5rem 5.5rem;
-    gap: 1rem;
+  .heroPanel {
+    justify-content: center;
+    padding: 3.5rem 2.25rem 3.75rem;
+    max-width: 40rem;
   }
 
-  .support {
-    font-size: var(--text-subheading);
+  .sections {
+    margin: 0 1.25rem 1.25rem;
+    gap: 1.15rem;
   }
 
-  .sectionInner,
-  .sectionInnerWide {
-    padding: 6rem 2.5rem;
-  }
-
-  .sectionLead {
-    font-size: var(--text-body-lg);
-  }
-
-  .prose p {
-    font-size: var(--text-subheading);
-    line-height: 1.65;
-  }
-
-  .courtLayout {
-    display: grid;
+  .courtShell {
     grid-template-columns: 1.05fr 1fr;
-    gap: 2.5rem 3rem;
-    align-items: start;
+    align-items: stretch;
   }
 
   .courtPhoto {
-    aspect-ratio: 4 / 5;
+    aspect-ratio: auto;
     min-height: 28rem;
   }
 
-  .people {
-    display: grid;
-    grid-template-columns: 1fr 1.4fr;
-    gap: 0 2.5rem;
+  .courtCopy {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 2.5rem 2.25rem;
   }
 
-  .personRow:first-child {
-    grid-column: 1;
-    border-bottom: 1px solid color-mix(in srgb, var(--ash) 40%, var(--stone));
-    padding-bottom: 1.35rem;
+  .missionSection {
+    padding: 2.75rem 2rem;
   }
 
-  .boardBlock {
-    grid-column: 2;
-    grid-row: 1 / span 2;
-    border-bottom: none;
-    border-left: 1px solid color-mix(in srgb, var(--ash) 40%, var(--stone));
-    padding: 0 0 0 2.5rem;
+  .missionFrame {
+    padding: 0.5rem 1rem;
   }
 
-  .personRow:last-child {
-    grid-column: 1;
-    padding-top: 1.35rem;
+  .missionGrid {
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 0.85rem;
+  }
+
+  .leadershipSection {
+    padding: 2.75rem 2rem 3rem;
+  }
+
+  .peopleGrid {
+    grid-template-columns: 1fr 1.35fr 1fr;
+    gap: 0.85rem;
   }
 
   .boardList {
     grid-template-columns: 1fr 1fr;
-    column-gap: 1.5rem;
-    row-gap: 0.5rem;
+    column-gap: 1.15rem;
   }
 }
 
 @media (min-width: 1024px) {
-  .copy {
-    max-width: 48rem;
-    padding-bottom: 6.5rem;
+  .hero,
+  .sections {
+    margin-inline: max(1.25rem, calc((100vw - 80rem) / 2));
+  }
+
+  .heroPanel {
+    padding-left: 2.75rem;
   }
 
   .brand {
-    max-width: 16ch;
+    max-width: 12ch;
   }
 
-  .courtLayout {
-    gap: 3rem 4rem;
+  .support {
+    font-size: var(--text-subheading);
   }
 }

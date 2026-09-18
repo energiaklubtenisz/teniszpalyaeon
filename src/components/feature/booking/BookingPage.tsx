@@ -1,3 +1,5 @@
+import { redirect } from "next/navigation";
+
 import {
   getBookingSession,
   getCourts,
@@ -15,6 +17,10 @@ export async function BookingPage() {
     getBookingSession(),
   ]);
 
+  if (!session.isAuthenticated) {
+    redirect("/login");
+  }
+
   if (!courtsResult.success) {
     return (
       <main className={styles.page}>
@@ -22,7 +28,7 @@ export async function BookingPage() {
           title={booking.title}
           lead={booking.lead}
           imageSrc={assets.pages.booking}
-          imageAlt="Pályafoglalás hangulatkép"
+          imageAlt="Pályafoglalás"
         />
         <div className={styles.inner}>
           <p className={styles.loadError}>{courtsResult.error}</p>
@@ -38,7 +44,7 @@ export async function BookingPage() {
           title={booking.title}
           lead={booking.lead}
           imageSrc={assets.pages.booking}
-          imageAlt="Pályafoglalás hangulatkép"
+          imageAlt="Pályafoglalás"
         />
         <div className={styles.inner}>
           <p className={styles.loadError}>{booking.loadError.empty}</p>

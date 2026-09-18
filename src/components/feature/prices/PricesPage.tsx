@@ -13,7 +13,7 @@ export function PricesPage() {
         title={prices.title}
         lead={prices.lead}
         imageSrc={assets.pages.prices}
-        imageAlt="Árak hangulatkép — teniszpálya"
+        imageAlt="Árak — teniszpálya"
       />
 
       <section className={styles.bandIntro} aria-labelledby="intro-heading">

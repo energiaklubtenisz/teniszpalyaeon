@@ -1,7 +1,7 @@
 export const profile = {
   title: "Profil",
   support: "Kezelje a fiókját és a kapcsolattartási adatait.",
-  emailLabel: "Email",
+  emailLabel: "E-mail",
   sections: {
     details: {
       title: "Profil adatok",

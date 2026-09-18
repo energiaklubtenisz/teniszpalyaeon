@@ -2,7 +2,7 @@ import { HOURLY_RATE_HUF } from "@/lib/booking/constants";
 
 export const booking = {
   title: "Foglalás",
-  lead: "Válasszon napot és időpontot, majd pályát — legalább egy órára, félórás határokkal.",
+  lead: "Válassza ki az időpontot és pályát, majd adja meg a játékosok számát és nevét.",
   loadError: {
     empty: "Jelenleg nincs elérhető pálya. Próbálja később.",
   },
@@ -20,7 +20,6 @@ export const booking = {
       lead2: "",
       weekdays: ["H", "K", "Sze", "Cs", "P", "Szo", "V"],
       available: "Szabad",
-      fullyBooked: "Teljesen foglalt",
     },
     time: {
       title: "Idősáv",
@@ -32,6 +31,7 @@ export const booking = {
       selected: "Kiválasztott sáv",
       past: "Elmúlt",
       available: "Választható",
+      fullyBooked: "Teljesen foglalt",
     },
     court: {
       title: "Pályaválasztás",
@@ -45,7 +45,7 @@ export const booking = {
     type: {
       title: "Részletek",
       shortTitle: "Típus",
-      lead: "Válassza ki a foglalás típusát majd adja meg a játékosok számát és nevét.",
+      lead: "Válassza ki a foglalás típusát, majd adja meg a játékosok számát és nevét.",
       lead2: "",
       seasonPass: {
         title: "Szezonbérletem van",

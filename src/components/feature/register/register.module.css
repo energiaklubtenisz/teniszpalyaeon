@@ -1,20 +1,23 @@
 .page {
+  position: relative;
   display: flex;
   justify-content: center;
   min-height: calc(100dvh - 4rem);
-  background:
-    radial-gradient(
-      ellipse 80% 50% at 10% 0%,
-      rgb(245 243 241 / 90%),
-      transparent 55%
-    ),
-    var(--eggshell);
+  background: transparent;
+  overflow: hidden;
+  color: var(--ink);
 }
 
 .section {
+  position: relative;
+  z-index: 1;
   width: 100%;
   max-width: 28rem;
-  padding: 4rem 1.5rem 6rem;
+  margin: 1.15rem 0.85rem 1.5rem;
+  padding: 1.75rem 1.25rem 2rem;
+  background: var(--elevated);
+  border-radius: calc(var(--radius) * 1.15);
+  box-shadow: var(--shadow-card);
 }
 
 .brandMark {
@@ -27,21 +30,22 @@
 
 .brandLogo {
   width: auto;
-  height: 2.75rem;
+  height: 3.5rem;
   object-fit: contain;
 }
 
 .brandAccent {
   display: block;
   width: 2.5rem;
-  height: 2px;
+  height: 3px;
   background: var(--eon-red);
+  clip-path: polygon(0 0, 100% 0, calc(100% - 3px) 100%, 0 100%);
 }
 
 .title {
   margin: 0 0 0.75rem;
   font-size: var(--text-heading);
-  font-weight: 500;
+  font-weight: 700;
   line-height: 1.17;
   letter-spacing: -0.02em;
   color: var(--ink);
@@ -93,9 +97,9 @@
   font-size: var(--text-body);
   line-height: 1.4;
   color: var(--ink);
-  background: #fff;
-  border: 1px solid var(--ash);
-  border-radius: 0.75rem;
+  background: var(--surface);
+  border: 1px solid var(--stone);
+  border-radius: calc(var(--radius) * 0.8);
   outline: none;
   transition:
     border-color 160ms ease,
@@ -103,12 +107,12 @@
 }
 
 .input:hover {
-  border-color: var(--smoke);
+  border-color: var(--ash);
 }
 
 .input:focus-visible {
-  border-color: var(--graphite);
-  box-shadow: 0 0 0 3px rgb(68 64 59 / 12%);
+  border-color: var(--eon-red);
+  box-shadow: 0 0 0 3px rgb(225 29 72 / 18%);
 }
 
 .input[aria-invalid="true"] {
@@ -172,13 +176,15 @@
   align-self: stretch;
   margin-top: 0.25rem;
   background: var(--eon-red);
-  color: #fff;
+  color: var(--on-accent);
   border-color: transparent;
+  border-radius: 999px;
+  box-shadow: 0 8px 18px rgb(225 29 72 / 28%);
 }
 
 .submit:hover:not(:disabled) {
   background: var(--dark-red);
-  color: #fff;
+  color: var(--on-accent);
 }
 
 .successCta {
@@ -189,13 +195,15 @@
   margin-top: 0.25rem;
   text-decoration: none;
   background: var(--eon-red);
-  color: #fff;
+  color: var(--on-accent);
   border-color: transparent;
+  border-radius: 999px;
+  box-shadow: 0 8px 18px rgb(225 29 72 / 28%);
 }
 
 .successCta:hover {
   background: var(--dark-red);
-  color: #fff;
+  color: var(--on-accent);
 }
 
 .footer {
@@ -227,7 +235,8 @@
 
 @media (min-width: 768px) {
   .section {
-    padding: 5rem 2.5rem 8rem;
+    margin: 1.75rem auto 3rem;
+    padding: 2.75rem 2rem 3rem;
   }
 
   .title {

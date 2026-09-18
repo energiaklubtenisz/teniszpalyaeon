@@ -1,20 +1,23 @@
 .page {
+  position: relative;
   display: flex;
   justify-content: center;
   min-height: calc(100dvh - 4rem);
-  background:
-    radial-gradient(
-      ellipse 80% 50% at 10% 0%,
-      rgb(245 243 241 / 90%),
-      transparent 55%
-    ),
-    var(--eggshell);
+  background: transparent;
+  overflow: hidden;
+  color: var(--ink);
 }
 
 .section {
+  position: relative;
+  z-index: 1;
   width: 100%;
   max-width: 36rem;
-  padding: 4rem 1.5rem 6rem;
+  margin: 1.15rem 0.85rem 1.5rem;
+  padding: 1.75rem 1.25rem 2rem;
+  background: var(--elevated);
+  border-radius: calc(var(--radius) * 1.15);
+  box-shadow: var(--shadow-card);
 }
 
 .title {
@@ -71,13 +74,15 @@
 .emptyCta {
   margin-top: 0.5rem;
   background: var(--eon-red);
-  color: #fff;
+  color: var(--on-accent);
   border-color: transparent;
+  border-radius: 999px;
+  box-shadow: 0 8px 18px rgb(225 29 72 / 28%);
 }
 
 .emptyCta:hover {
   background: var(--dark-red);
-  color: #fff;
+  color: var(--on-accent);
 }
 
 .listSection {
@@ -115,10 +120,10 @@
   position: relative;
   display: flex;
   overflow: hidden;
-  background: #fff;
+  background: var(--surface);
   border: 1px solid var(--stone);
-  border-radius: 1rem;
-  box-shadow: 0 1px 2px rgb(0 0 0 / 4%);
+  border-radius: var(--radius);
+  box-shadow: none;
   transition:
     border-color 200ms ease,
     box-shadow 200ms ease,
@@ -126,17 +131,17 @@
 }
 
 .card:hover {
-  border-color: color-mix(in srgb, var(--graphite) 22%, var(--stone));
-  box-shadow: 0 8px 24px rgb(0 0 0 / 6%);
+  border-color: color-mix(in srgb, var(--graphite) 18%, var(--stone));
+  box-shadow: var(--shadow-soft);
 }
 
 .cardExpanded {
   border-color: color-mix(in srgb, var(--eon-red) 28%, var(--stone));
-  box-shadow: 0 10px 28px rgb(0 0 0 / 7%);
+  box-shadow: var(--shadow-soft);
 }
 
 .cardMuted {
-  background: color-mix(in srgb, var(--warm-taupe) 72%, #fff);
+  background: color-mix(in srgb, var(--surface) 80%, var(--elevated));
 }
 
 .cardMuted:hover {
@@ -199,7 +204,7 @@
 
 .cardMuted .courtBadge {
   color: var(--graphite);
-  background: color-mix(in srgb, var(--stone) 55%, #fff);
+  background: color-mix(in srgb, var(--stone) 55%, var(--eggshell));
 }
 
 .cardTitles {
@@ -238,7 +243,7 @@
 
 .typeBadgeSeason {
   color: var(--graphite);
-  background: color-mix(in srgb, var(--stone) 70%, #fff);
+  background: color-mix(in srgb, var(--stone) 70%, var(--eggshell));
   border: 1px solid var(--stone);
 }
 
@@ -250,7 +255,7 @@
 
 .cardMuted .typeBadgeOneTime {
   color: var(--smoke);
-  background: color-mix(in srgb, var(--stone) 55%, #fff);
+  background: color-mix(in srgb, var(--stone) 55%, var(--eggshell));
   border-color: var(--stone);
 }
 
@@ -259,13 +264,13 @@
   flex-direction: column;
   gap: 0.45rem;
   padding: 0.85rem 0.9rem;
-  background: color-mix(in srgb, var(--warm-taupe) 55%, #fff);
+  background: color-mix(in srgb, var(--warm-taupe) 55%, var(--eggshell));
   border: 1px solid color-mix(in srgb, var(--stone) 85%, transparent);
   border-radius: 0.85rem;
 }
 
 .cardMuted .cardSchedule {
-  background: color-mix(in srgb, var(--stone) 35%, #fff);
+  background: color-mix(in srgb, var(--stone) 35%, var(--eggshell));
 }
 
 .scheduleRow {
