@@ -6,9 +6,9 @@ ALTER TABLE public.bookings
 
 ALTER TABLE public.bookings
   ALTER COLUMN starts_at TYPE timestamp without time zone
-  USING (starts_at AT TIME ZONE 'Europe/Budapest'),
+  USING (starts_at AT TIME ZONE 'UTC'),
   ALTER COLUMN ends_at TYPE timestamp without time zone
-  USING (ends_at AT TIME ZONE 'Europe/Budapest');
+  USING (ends_at AT TIME ZONE 'UTC');
 
 ALTER TABLE public.bookings
   ADD CONSTRAINT bookings_no_overlap
