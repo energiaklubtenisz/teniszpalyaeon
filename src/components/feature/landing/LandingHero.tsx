@@ -30,7 +30,6 @@ export function LandingHero({ isAuthenticated = false }: LandingHeroProps) {
       </div>
 
       <div className={styles.heroPanel}>
-        <p className={styles.heroKicker}>Nagykanizsa · Salakpálya</p>
         <p id="hero-brand" className={styles.brand}>
           {hero.brand}
         </p>

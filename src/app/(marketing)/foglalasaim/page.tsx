@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { getUserBookings } from "@/actions/booking";
 import { MyBookingsPage } from "@/components/feature/my-bookings/MyBookingsPage";
 import { myBookings } from "@/content/my-bookings";
-import { nowInBudapest } from "@/lib/booking/time";
+import { nowInBudapest, parseBookingTimestamp } from "@/lib/booking/time";
 import { createClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = {
@@ -46,10 +46,10 @@ export default async function MyBookingsRoute() {
 
   const now = nowInBudapest().getTime();
   const upcoming = bookingsResult.data.filter(
-    (booking) => new Date(booking.startsAt).getTime() >= now,
+    (booking) => parseBookingTimestamp(booking.startsAt).getTime() >= now,
   );
   const past = bookingsResult.data
-    .filter((booking) => new Date(booking.startsAt).getTime() < now)
+    .filter((booking) => parseBookingTimestamp(booking.startsAt).getTime() < now)
     .reverse();
 
   return (

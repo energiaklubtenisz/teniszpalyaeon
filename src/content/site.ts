@@ -2,6 +2,19 @@ export const site = {
   name: "Energia Szabadidősport Klub",
   description:
     "Nagykanizsa legnagyobb szabadtéri teniszpályája — 8 salakpálya, Energia Szabadidősport Klub.",
+  url: process.env.NEXT_PUBLIC_SITE_URL || "https://teniszpalyaeon.vercel.app",
+  keywords: [
+    "teniszpálya Nagykanizsa",
+    "tenisz Nagykanizsa",
+    "teniszpálya bérlés Nagykanizsa",
+    "Energia Szabadidősport Klub",
+    "E.ON teniszpálya",
+    "salakpálya Nagykanizsa",
+    "teniszklub Nagykanizsa",
+    "teniszbérlet",
+    "pályafoglalás",
+    "sportegyesület Nagykanizsa",
+  ],
   lang: "hu",
   nav: {
     primary: [

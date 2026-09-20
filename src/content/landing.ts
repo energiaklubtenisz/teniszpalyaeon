@@ -1,7 +1,7 @@
 export const landing = {
   hero: {
     brand: "Energia Szabadidősport Klub",
-    headline: "Nagykanizsa legnagyobb szabadtéri teniszpályája",
+    headline: "Nagykanizsa legnagyobb szabadtéri teniszklubja",
     support:
       "8 salakpálya. Ahol a sport és a közösség találkozik.",
     primaryCta: { label: "Foglalás", href: "/booking" },

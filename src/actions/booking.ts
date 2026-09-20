@@ -246,6 +246,20 @@ export async function createBooking(
     return actionError("A foglaláshoz be kell jelentkeznie.");
   }
 
+  if (bookingType === "season_pass") {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("active_season_pass")
+      .eq("id", user.id)
+      .maybeSingle();
+
+    if (!profile?.active_season_pass) {
+      return actionError(
+        "Bérletes foglaláshoz érvényes aktív bérlet szükséges. Válasszon alkalmi foglalást, vagy vegye fel a kapcsolatot a klubbal.",
+      );
+    }
+  }
+
   const insertRow: Database["public"]["Tables"]["bookings"]["Insert"] = {
     court_id: courtId,
     user_id: user.id,
