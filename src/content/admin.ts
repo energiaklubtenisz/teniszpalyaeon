@@ -1,7 +1,24 @@
 export const adminContent = {
-  title: "Adminisztrációs felület",
+  title: "Adminisztrációs Központ",
   support:
-    "Bérletesek és klubtagok kezelése.",
+    "Tagok, bérletek, foglalások és kimutatások áttekintése.",
+  nav: {
+    seasonPasses: {
+      label: "Bérletesek",
+      href: "/admin",
+      description: "Szezonbérletek kezelése és regisztrációs whitelist",
+    },
+    database: {
+      label: "Adatbázis",
+      href: "/admin/adatbazis",
+      description: "Felhasználói fiókok és összes foglalás kezelése",
+    },
+    reports: {
+      label: "Riportok & Dashboard",
+      href: "/admin/riportok",
+      description: "Statisztikák, pálya-kihasználtság és bevételek",
+    },
+  },
   seasonPass: {
     sectionTitle: "Aktív bérletesek",
     searchPlaceholder: "Keresés név vagy email cím alapján...",
@@ -52,4 +69,102 @@ export const adminContent = {
     revokeSuccess: "A bérlet sikeresen visszavonva ({email}).",
     revokeError: "A bérlet visszavonása nem sikerült.",
   },
+  database: {
+    title: "Adatbázis kezelés",
+    support: "Regisztrált felhasználók és pályafoglalások teljes körű adminisztrációja.",
+    tabs: {
+      users: "Felhasználók",
+      bookings: "Foglalások",
+    },
+    users: {
+      title: "Regisztrált felhasználók",
+      searchPlaceholder: "Keresés név, email vagy telefonszám szerint...",
+      filters: {
+        allRoles: "Összes szerepkör",
+        onlyAdmin: "Csak Adminok",
+        onlyMember: "Csak Tagok",
+        allPass: "Összes bérlet státusz",
+        withPass: "Bérletes",
+        withoutPass: "Nincs bérlete",
+      },
+      columns: {
+        name: "Név",
+        email: "Email cím",
+        phone: "Telefonszám",
+        role: "Szerepkör",
+        seasonPass: "Bérlet",
+        bookings: "Foglalások",
+        createdAt: "Regisztrált",
+        actions: "Műveletek",
+      },
+      actions: {
+        makeAdmin: "Admin jog adása",
+        removeAdmin: "Admin jog elvétele",
+        givePass: "Bérlet adása",
+        revokePass: "Bérlet megvonása",
+        confirmRoleChange: "Biztosan megváltoztatja a felhasználó szerepkörét?",
+      },
+      empty: "Nincs a keresési feltételeknek megfelelő felhasználó.",
+    },
+    bookings: {
+      title: "Rendszerfoglalások",
+      searchPlaceholder: "Keresés foglaló neve, emailje vagy vendégek szerint...",
+      filters: {
+        courtAll: "Összes pálya",
+        courtPrefix: ". pálya",
+        typeAll: "Összes foglalási típus",
+        typeSeasonPass: "Csak bérletes",
+        typeOneTime: "Csak alkalmi (fizetős)",
+        statusAll: "Összes státusz",
+        statusConfirmed: "Megerősített",
+        statusCancelled: "Lemondva",
+        timeAll: "Minden időpont",
+        timeUpcoming: "Közelgő / Jövőbeli",
+        timePast: "Múltbeli",
+        timeToday: "Mai nap",
+      },
+      columns: {
+        court: "Pálya",
+        time: "Időpont",
+        user: "Foglaló",
+        type: "Típus",
+        players: "Játékosok",
+        price: "Összeg",
+        status: "Státusz",
+        actions: "Művelet",
+      },
+      actions: {
+        cancel: "Lemondás",
+        confirmCancel: "Biztosan lemondja ezt a foglalást adminisztrátorként? A művelet nem visszavonható.",
+      },
+      empty: "Nincs a megadott szűrőknek megfelelő foglalás.",
+    },
+  },
+  reports: {
+    title: "Riportok & Vezetői Dashboard",
+    support: "Pályakihasználtság, foglalási szokások és bevételi trendek áttekintése.",
+    kpis: {
+      totalBookings: "Összes foglalás",
+      activeBookings: "Jövőbeli aktív foglalás",
+      totalRevenue: "Alkalmi foglalási bevétel",
+      activePasses: "Aktív bérletes tag",
+      totalMembers: "Regisztrált felhasználó",
+    },
+    charts: {
+      courtUtilization: "Pályák kihasználtsága (foglalt órák összesen)",
+      peakHours: "Idősávok népszerűsége",
+      morning: "Délelőtt (08:00 – 12:00)",
+      afternoon: "Délután (12:00 – 16:00)",
+      evening: "Csúcsidő / Este (16:00 – 20:00+)",
+      bookingTypes: "Foglalási típusok aránya",
+      seasonPassLabel: "Bérletes foglalások",
+      oneTimeLabel: "Alkalmi foglalások",
+    },
+    recent: {
+      title: "Legutóbbi foglalási események",
+      empty: "Még nem történt foglalás.",
+    },
+  },
 } as const;
+
+export type AdminContent = typeof adminContent;

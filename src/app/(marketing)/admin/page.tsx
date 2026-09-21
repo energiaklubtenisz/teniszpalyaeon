@@ -13,11 +13,11 @@ export default async function AdminPage() {
 
   if (!result.success) {
     return (
-      <main className="mx-auto flex min-h-[50vh] max-w-3xl items-center justify-center px-6 py-16">
+      <div className="mx-auto flex min-h-[40vh] max-w-3xl items-center justify-center px-6 py-12">
         <p className="text-center text-lg text-[var(--eon-red)]">
           {result.error}
         </p>
-      </main>
+      </div>
     );
   }
 

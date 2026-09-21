@@ -1,4 +1,6 @@
+import { AdminNavigation } from "@/components/feature/admin/AdminNavigation";
 import { requireAdmin } from "@/lib/auth/require-admin";
+import styles from "@/components/feature/admin/admin.module.css";
 
 export default async function AdminLayout({
   children,
@@ -7,5 +9,13 @@ export default async function AdminLayout({
 }>) {
   await requireAdmin();
 
-  return children;
+  return (
+    <main className={styles.page}>
+      <div className={styles.container}>
+        <AdminNavigation />
+        {children}
+      </div>
+    </main>
+  );
 }
+
