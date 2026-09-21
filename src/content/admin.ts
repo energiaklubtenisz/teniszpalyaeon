@@ -107,7 +107,26 @@ export const adminContent = {
       empty: "Nincs a keresési feltételeknek megfelelő felhasználó.",
     },
     bookings: {
-      title: "Rendszerfoglalások",
+      title: "Pályafoglalások és Napi Menetrend",
+      viewMode: {
+        schedule: "Pályák szerinti menetrend",
+        matrix: "Idősávos órarend",
+        list: "Részletes lista",
+      },
+      dateNav: {
+        prevDay: "Előző nap",
+        nextDay: "Következő nap",
+        today: "Ma",
+        selectDate: "Dátum választása",
+        totalDayStats: "{count} foglalás ({hours} óra játékidő) a kiválasztott napon",
+        noDayBookings: "Ezen a napon még egyetlen pályára sincs foglalás.",
+      },
+      courtCard: {
+        courtPrefix: ". pálya",
+        freeAllDay: "Egész nap szabad",
+        bookingsCount: "{count} foglalás ({hours} óra)",
+        noBookingsNotice: "Nincs foglalás erre a pályára.",
+      },
       searchPlaceholder: "Keresés foglaló neve, emailje vagy vendégek szerint...",
       filters: {
         courtAll: "Összes pálya",

@@ -833,3 +833,483 @@
   color: var(--smoke);
 }
 
+/* ==========================================
+   BOOKING SCHEDULE & DATE NAVIGATION
+   ========================================== */
+.scheduleHeaderBar {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  background: var(--eggshell);
+  border: 1px solid var(--stone);
+  border-radius: 20px;
+  padding: 1.25rem 1.5rem;
+  box-shadow: var(--shadow-card);
+}
+
+.dateNavRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.dateControls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.dateNavBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  height: 2.5rem;
+  padding: 0 1rem;
+  font-size: var(--text-body-sm);
+  font-weight: 500;
+  color: var(--ink);
+  background: var(--warm-taupe);
+  border: 1px solid var(--stone);
+  border-radius: 9999px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.dateNavBtn:hover {
+  background: var(--stone);
+  color: var(--ink);
+}
+
+.todayBtn {
+  background: var(--ink);
+  color: #ffffff;
+  border-color: var(--ink);
+}
+
+.todayBtn:hover {
+  background: #262626;
+  color: #ffffff;
+}
+
+.currentDateBox {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: var(--warm-taupe);
+  border: 1px solid var(--stone);
+  border-radius: 9999px;
+  padding: 0.3rem 0.85rem 0.3rem 1.15rem;
+}
+
+.currentDateText {
+  font-size: var(--text-body);
+  font-weight: 600;
+  color: var(--ink);
+  text-transform: capitalize;
+}
+
+.datePickerInput {
+  border: none;
+  background: transparent;
+  color: var(--smoke);
+  cursor: pointer;
+  outline: none;
+  font-family: inherit;
+  font-size: var(--text-body-sm);
+}
+
+.scheduleSummaryBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--stone);
+}
+
+.scheduleStatsBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: var(--text-body-sm);
+  color: var(--smoke);
+  font-feature-settings: "tnum";
+}
+
+.viewModePills {
+  display: inline-flex;
+  background: var(--warm-taupe);
+  padding: 0.2rem;
+  border-radius: 9999px;
+  border: 1px solid var(--stone);
+}
+
+.viewModeBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.9rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  border-radius: 9999px;
+  border: none;
+  background: transparent;
+  color: var(--smoke);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.viewModeBtn:hover {
+  color: var(--ink);
+}
+
+.viewModeBtnActive {
+  background: var(--eggshell);
+  color: var(--ink);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+/* ==========================================
+   COURT FILTER PILLS (ALL / 1..8)
+   ========================================== */
+.courtFilterRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.courtFilterBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.85rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  border-radius: 9999px;
+  border: 1px solid var(--stone);
+  background: var(--warm-taupe);
+  color: var(--graphite);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.courtFilterBtn:hover {
+  background: var(--stone);
+  color: var(--ink);
+}
+
+.courtFilterBtnActive {
+  background: var(--ink) !important;
+  color: #ffffff !important;
+  border-color: var(--ink) !important;
+}
+
+/* ==========================================
+   COMPACT COURT SCHEDULE STRIPS
+   ========================================== */
+.courtStripsList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.courtStrip {
+  background: var(--eggshell);
+  border: 1px solid var(--stone);
+  border-radius: 16px;
+  padding: 1rem 1.25rem;
+  box-shadow: var(--shadow-card);
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  transition: border-color 0.15s ease;
+}
+
+.courtStrip:hover {
+  border-color: var(--ash);
+}
+
+.courtStripHeader {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.courtStripLeft {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.courtNumberBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.85rem;
+  height: 1.85rem;
+  border-radius: 50%;
+  background: var(--ink);
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 0.8125rem;
+}
+
+.courtNameText {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.courtOccupancyBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.2rem 0.65rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  border-radius: 9999px;
+  background: var(--warm-taupe);
+  color: var(--graphite);
+  border: 1px solid var(--stone);
+}
+
+.courtOccupancyBadgeActive {
+  background: #eff6ff;
+  color: #1e40af;
+  border-color: #bfdbfe;
+}
+
+/* Mini visual day ribbon (08:00 - 20:00) */
+.courtTimelineRibbon {
+  position: relative;
+  width: 100%;
+  max-width: 220px;
+  height: 8px;
+  background: var(--warm-taupe);
+  border-radius: 9999px;
+  overflow: hidden;
+  border: 1px solid var(--stone);
+}
+
+.courtTimelineBlock {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  border-radius: 9999px;
+}
+
+.courtTimelineBlockSeason {
+  background: #2563eb;
+}
+
+.courtTimelineBlockOneTime {
+  background: #7c3aed;
+}
+
+/* Compact Booking Rows */
+.compactRowsList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.compactBookingRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  padding: 0.45rem 0.85rem;
+  background: var(--warm-taupe);
+  border: 1px solid var(--stone);
+  border-radius: 10px;
+  font-size: 0.8125rem;
+  transition: all 0.15s ease;
+}
+
+.compactBookingRow:hover {
+  background: #ece8e3;
+  border-color: var(--ash);
+}
+
+.compactBookingRowCancelled {
+  opacity: 0.55;
+  background: #f3f4f6;
+  border-style: dashed;
+}
+
+.compactTimePill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-weight: 600;
+  color: var(--ink);
+  min-width: 105px;
+  font-feature-settings: "tnum";
+}
+
+.compactUserSection {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  flex: 1;
+  min-width: 180px;
+}
+
+.compactUserName {
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.compactUserContact {
+  font-size: 0.75rem;
+  color: var(--smoke);
+}
+
+.compactMetaSection {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.compactPrice {
+  font-weight: 600;
+  color: var(--ink);
+  font-feature-settings: "tnum";
+  min-width: 65px;
+  text-align: right;
+}
+
+.compactFreeRow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0.75rem;
+  background: rgba(245, 243, 241, 0.4);
+  border: 1px dashed var(--stone);
+  border-radius: 10px;
+  font-size: 0.8125rem;
+  color: var(--smoke);
+}
+
+/* ==========================================
+   TIMETABLE MATRIX VIEW
+   ========================================== */
+.matrixCard {
+  background: var(--eggshell);
+  border: 1px solid var(--stone);
+  border-radius: 20px;
+  padding: 1.5rem;
+  box-shadow: var(--shadow-card);
+  overflow-x: auto;
+}
+
+.matrixTable {
+  width: 100%;
+  min-width: 800px;
+  border-collapse: collapse;
+  text-align: center;
+  font-size: 0.8125rem;
+}
+
+.matrixThTime {
+  width: 90px;
+  padding: 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--smoke);
+  background: var(--warm-taupe);
+  border-bottom: 2px solid var(--stone);
+  position: sticky;
+  left: 0;
+  z-index: 2;
+}
+
+.matrixThCourt {
+  padding: 0.75rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--ink);
+  background: var(--warm-taupe);
+  border-bottom: 2px solid var(--stone);
+  border-left: 1px solid var(--stone);
+}
+
+.matrixRow {
+  border-bottom: 1px solid var(--stone);
+}
+
+.matrixTdTime {
+  padding: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--smoke);
+  background: var(--warm-taupe);
+  border-right: 1px solid var(--stone);
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  font-feature-settings: "tnum";
+}
+
+.matrixTdCell {
+  padding: 0.35rem 0.5rem;
+  border-left: 1px solid var(--stone);
+  vertical-align: middle;
+  height: 48px;
+}
+
+.matrixBlockBooked {
+  background: var(--ink);
+  color: #ffffff;
+  border-radius: 8px;
+  padding: 0.35rem 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  text-align: left;
+  font-size: 0.75rem;
+  cursor: default;
+}
+
+.matrixBlockSeason {
+  background: #1e3a8a;
+}
+
+.matrixBlockOneTime {
+  background: #581c87;
+}
+
+.matrixBlockCancelled {
+  background: #9ca3af;
+  text-decoration: line-through;
+}
+
+.matrixBlockName {
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.matrixBlockTime {
+  font-size: 0.7rem;
+  opacity: 0.85;
+}
+
+.matrixCellEmpty {
+  color: var(--ash);
+  font-size: 0.75rem;
+}
+
+
