@@ -25,19 +25,17 @@ export function AdminSeasonPassManager({
   };
 
   return (
-    <main className={styles.page}>
-      <div className={styles.container}>
-        <header className={styles.header}>
-          <h1 className={styles.title}>{adminContent.title}</h1>
-          <p className={styles.support}>{adminContent.support}</p>
-        </header>
+    <div style={{ display: "flex", flexDirection: "column", gap: "2rem" }}>
+      <header className={styles.header}>
+        <h1 className={styles.title}>{adminContent.title}</h1>
+        <p className={styles.support}>{adminContent.support}</p>
+      </header>
 
-        {/* Add Form */}
-        <AddSeasonPassForm candidates={candidates} onAdded={refreshData} />
+      {/* Add Form */}
+      <AddSeasonPassForm candidates={candidates} onAdded={refreshData} />
 
-        {/* Active Season Pass Table */}
-        <ActiveSeasonPassTable holders={holders} onRevoked={refreshData} />
-      </div>
-    </main>
+      {/* Active Season Pass Table */}
+      <ActiveSeasonPassTable holders={holders} onRevoked={refreshData} />
+    </div>
   );
 }
