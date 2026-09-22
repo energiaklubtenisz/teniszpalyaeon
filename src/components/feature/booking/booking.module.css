@@ -282,7 +282,7 @@
   gap: 0.7rem;
 }
 
-.sideSummary > div {
+.sideSummary>div {
   display: grid;
   gap: 0.15rem;
 }
@@ -798,6 +798,17 @@ a.secondaryButton {
   opacity: 0.9;
 }
 
+.courtTilePractice {
+  background: rgb(234 88 12 / 8%);
+  border-color: rgb(234 88 12 / 28%);
+  cursor: not-allowed;
+  opacity: 0.95;
+}
+
+.courtTilePractice .courtClay {
+  fill: #ea990c;
+}
+
 .courtTileFree:hover:not(:disabled) {
   transform: translateY(-1px);
   box-shadow: var(--shadow-soft);
@@ -832,8 +843,17 @@ a.secondaryButton {
   font-weight: 600;
 }
 
+.courtStatusPractice {
+  color: #ea580c !important;
+  font-weight: 700;
+}
+
 .swatchCourtFree {
   background: #16a34a;
+}
+
+.swatchCourtPractice {
+  background: #ea990c;
 }
 
 .swatchCourtBusy {
@@ -987,7 +1007,7 @@ a.secondaryButton {
   max-width: 34rem;
 }
 
-.summary > div {
+.summary>div {
   display: grid;
   grid-template-columns: 7rem 1fr;
   gap: 0.75rem;

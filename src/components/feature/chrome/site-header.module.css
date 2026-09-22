@@ -460,3 +460,238 @@
     padding-inline: max(1.5rem, calc((100vw - 80rem) / 2));
   }
 }
+
+/* ==========================================
+   Auth Actions (bell + profile wrapper)
+   ========================================== */
+
+.authActions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* ==========================================
+   Notification Bell
+   ========================================== */
+
+.notificationArea {
+  position: relative;
+}
+
+.notificationButton {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  padding: 0;
+  border: 1px solid var(--stone);
+  border-radius: 9999px;
+  background: transparent;
+  color: var(--smoke);
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.notificationButton:hover {
+  background: var(--warm-taupe);
+  color: var(--ink);
+  border-color: var(--ash);
+}
+
+.notificationIcon {
+  width: 1.1rem;
+  height: 1.1rem;
+}
+
+.notificationBadge {
+  position: absolute;
+  top: -3px;
+  right: -3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.1rem;
+  height: 1.1rem;
+  padding: 0 0.25rem;
+  border-radius: 9999px;
+  background: var(--eon-red);
+  color: #ffffff;
+  font-size: 0.6rem;
+  font-weight: 700;
+  line-height: 1;
+  animation: badgePulse 0.3s ease-out;
+}
+
+@keyframes badgePulse {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.notificationDropdown {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 0.5rem);
+  width: 22rem;
+  max-height: 26rem;
+  background: var(--eggshell);
+  border: 1px solid var(--stone);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgb(0 0 0 / 10%);
+  overflow: hidden;
+  z-index: 100;
+  animation: dropdownFadeIn 0.15s ease-out;
+}
+
+@keyframes dropdownFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.notificationDropdownHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem 0.5rem;
+}
+
+.notificationDropdownTitle {
+  font-size: var(--text-body-sm);
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.notificationMarkAll {
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: var(--eon-red);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.2rem 0.5rem;
+  border-radius: 9999px;
+  transition: background 0.15s ease;
+}
+
+.notificationMarkAll:hover {
+  background: rgb(225 29 72 / 8%);
+}
+
+.notificationList {
+  overflow-y: auto;
+  max-height: 20rem;
+  padding: 0.25rem 0.5rem 0.5rem;
+}
+
+.notificationEmpty {
+  text-align: center;
+  color: var(--ash);
+  font-size: var(--text-body-sm);
+  padding: 1.5rem 0;
+}
+
+.notificationItem {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  width: 100%;
+  text-align: left;
+  padding: 0.6rem 0.75rem;
+  border: none;
+  border-radius: 10px;
+  background: transparent;
+  cursor: pointer;
+  transition: background 0.15s ease;
+  font: inherit;
+}
+
+.notificationItem:hover {
+  background: var(--warm-taupe);
+}
+
+.notificationItemUnread {
+  background: rgb(225 29 72 / 5%);
+  border-left: 3px solid var(--eon-red);
+}
+
+.notificationItemTitle {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--ink);
+  line-height: 1.3;
+}
+
+.notificationItemBody {
+  font-size: 0.72rem;
+  color: var(--smoke);
+  line-height: 1.35;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.notificationItemTime {
+  font-size: 0.65rem;
+  color: var(--ash);
+  margin-top: 0.1rem;
+}
+
+/* ==========================================
+   Coach Badge
+   ========================================== */
+
+.profileDropdownCoach {
+  color: var(--ink);
+}
+
+.coachBadge {
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 0.15rem 0.5rem;
+  border-radius: 9999px;
+  background: var(--ink);
+  color: #ffffff;
+  line-height: 1.2;
+}
+
+/* ==========================================
+   Mobile overrides for notifications
+   ========================================== */
+
+@media (max-width: 767px) {
+  .authActions {
+    flex-direction: row;
+    width: 100%;
+    justify-content: flex-end;
+    gap: 0.5rem;
+  }
+
+  .notificationDropdown {
+    position: fixed;
+    left: 0.75rem;
+    right: 0.75rem;
+    top: auto;
+    width: auto;
+    max-height: 60vh;
+  }
+}

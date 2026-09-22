@@ -36,14 +36,17 @@ export type AdminUser = {
   phone: string | null;
   role: Database["public"]["Enums"]["user_role"];
   activeSeasonPass: boolean;
+  coachTitle: string | null;
   createdAt: string;
   totalBookings: number;
 };
 
 export type AdminBooking = {
   id: string;
+  bookingIds: string[];
   courtId: string;
   courtNumber: number;
+  courtNumbers: number[];
   courtName: string;
   userId: string;
   userName: string;
@@ -57,6 +60,8 @@ export type AdminBooking = {
   guestPlayerNames: string[];
   priceHuf: number | null;
   createdAt: string;
+  isCoachBooking: boolean;
+  recurringSeriesId?: string | null;
 };
 
 export type CourtUtilization = {
@@ -121,7 +126,7 @@ export async function getSeasonPassData(): Promise<
   // Fetch all profiles
   const { data: profiles, error: profilesError } = await supabase
     .from("profiles")
-    .select("id, email, full_name, phone, active_season_pass");
+    .select("id, email, full_name, phone, role, active_season_pass");
 
   if (profilesError) {
     return actionError("Nem sikerült lekérdezni a profilokat.");
@@ -149,9 +154,14 @@ export async function getSeasonPassData(): Promise<
 
   const activeEmailSet = new Set((whitelist ?? []).map((w) => w.email.toLowerCase()));
 
-  // Candidates: registered users who do NOT yet have an active season pass
+  // Candidates: registered users who do NOT yet have an active season pass (and are not coaches)
   const candidates: RegisteredUserCandidate[] = (profiles ?? [])
-    .filter((p) => p.email && !activeEmailSet.has(p.email.toLowerCase()))
+    .filter(
+      (p) =>
+        p.email &&
+        !activeEmailSet.has(p.email.toLowerCase()) &&
+        p.role !== "coach",
+    )
     .map((p) => ({
       id: p.id,
       email: p.email as string,
@@ -261,7 +271,8 @@ export async function revokeSeasonPass(
 
 // ==========================================
 // 2. FELHASZNÁLÓK ADATBÁZISA (USERS)
-// ==========================================
+// Cache whether the coach_title column exists in the database
+let hasCoachTitleColumn: boolean | null = null;
 
 export async function getAdminUsersData(): Promise<ActionResult<AdminUser[]>> {
   try {
@@ -272,25 +283,67 @@ export async function getAdminUsersData(): Promise<ActionResult<AdminUser[]>> {
 
   const supabase = createAdminClient();
 
-  const [{ data: profiles, error: profilesError }, { data: bookings, error: bookingsError }] =
-    await Promise.all([
-      supabase
+  const fetchProfiles = async () => {
+    // If we know coach_title exists (or we haven't checked yet), attempt full query
+    if (hasCoachTitleColumn !== false) {
+      const res = await supabase
         .from("profiles")
-        .select("id, email, full_name, phone, role, active_season_pass, created_at")
-        .order("created_at", { ascending: false }),
-      supabase
-        .from("bookings")
-        .select("user_id"),
-    ]);
+        .select("id, email, full_name, phone, role, active_season_pass, coach_title, created_at")
+        .order("created_at", { ascending: false });
 
-  if (profilesError) {
+      if (!res.error) {
+        hasCoachTitleColumn = true;
+        return res.data;
+      }
+
+      // If column doesn't exist yet in the DB (Postgres code 42703), mark as false and fallback silently
+      if (res.error.code === "42703" || res.error.message?.includes("coach_title")) {
+        hasCoachTitleColumn = false;
+      } else {
+        console.error("[getAdminUsersData] Unexpected profiles query error:", res.error);
+        return null;
+      }
+    }
+
+    // Fallback: query without coach_title
+    const fallbackRes = await supabase
+      .from("profiles")
+      .select("id, email, full_name, phone, role, active_season_pass, created_at")
+      .order("created_at", { ascending: false });
+
+    if (fallbackRes.error) {
+      console.error("[getAdminUsersData] Fallback fetch failed:", fallbackRes.error);
+      return null;
+    }
+
+    return (fallbackRes.data ?? []).map((p) => ({
+      ...p,
+      coach_title: null,
+    }));
+  };
+
+  const [profiles, { data: bookings, error: bookingsError }] = await Promise.all([
+    fetchProfiles(),
+    supabase.from("bookings").select("user_id, starts_at, ends_at, is_coach_booking"),
+  ]);
+
+  if (!profiles) {
     return actionError("Nem sikerült lekérdezni a felhasználókat.");
   }
 
-  // Count bookings per user
+  // Count bookings per user (deduplicating multi-court coach interval bookings into 1 session per occasion)
   const bookingCountMap = new Map<string, number>();
+  const coachSessionSeen = new Set<string>();
+
   if (!bookingsError && bookings) {
     for (const b of bookings) {
+      if (b.is_coach_booking) {
+        const sessionKey = `${b.user_id}_${b.starts_at}_${b.ends_at}`;
+        if (coachSessionSeen.has(sessionKey)) {
+          continue;
+        }
+        coachSessionSeen.add(sessionKey);
+      }
       bookingCountMap.set(b.user_id, (bookingCountMap.get(b.user_id) ?? 0) + 1);
     }
   }
@@ -302,6 +355,7 @@ export async function getAdminUsersData(): Promise<ActionResult<AdminUser[]>> {
     phone: p.phone,
     role: p.role,
     activeSeasonPass: p.active_season_pass,
+    coachTitle: p.coach_title ?? null,
     createdAt: p.created_at,
     totalBookings: bookingCountMap.get(p.id) ?? 0,
   }));
@@ -311,8 +365,8 @@ export async function getAdminUsersData(): Promise<ActionResult<AdminUser[]>> {
 
 export async function updateUserRole(
   userId: string,
-  newRole: "member" | "admin",
-): Promise<ActionResult<{ userId: string; role: "member" | "admin" }>> {
+  newRole: "member" | "admin" | "coach",
+): Promise<ActionResult<{ userId: string; role: "member" | "admin" | "coach" }>> {
   let adminUser;
   try {
     const auth = await requireAdmin();
@@ -321,25 +375,86 @@ export async function updateUserRole(
     return actionError(adminContent.seasonPass.addForm.errors.unauthorized);
   }
 
-  // Prevent admin from demoting themselves
+  const supabase = createAdminClient();
+
+  // If the admin is changing their own role to non-admin, ensure they aren't the only remaining admin
   if (adminUser.id === userId && newRole !== "admin") {
-    return actionError("Saját magától nem vonhatja meg az adminisztrátori jogosultságot.");
+    const { count, error: countError } = await supabase
+      .from("profiles")
+      .select("id", { count: "exact", head: true })
+      .eq("role", "admin");
+
+    if (!countError && (count ?? 0) <= 1) {
+      return actionError("Nem vonhatja meg a jogosultságot: Ön az egyetlen adminisztrátor a rendszerben.");
+    }
   }
 
-  const supabase = createAdminClient();
   const { error } = await supabase
     .from("profiles")
     .update({ role: newRole })
     .eq("id", userId);
 
   if (error) {
-    return actionError("Nem sikerült módosítani a szerepkört.");
+    console.error("[updateUserRole] Supabase update error:", error);
+    if (error.code === "22P02" || error.message?.toLowerCase().includes("coach")) {
+      return actionError(
+        "Az 'Edző' (coach) szerepkör még nem aktív az adatbázisban! Futtassa le a Supabase SQL Editorban: ALTER TYPE public.user_role ADD VALUE IF NOT EXISTS 'coach';",
+      );
+    }
+    return actionError("Nem sikerült módosítani a szerepkört: " + (error.message || "Hiba történt"));
   }
 
   revalidatePath("/admin/adatbazis");
+  revalidatePath("/coach");
   revalidatePath("/", "layout");
 
   return actionSuccess({ userId, role: newRole });
+}
+
+export async function setCoachTitle(
+  userId: string,
+  title: string,
+): Promise<ActionResult<{ userId: string; title: string }>> {
+  try {
+    await requireAdmin();
+  } catch {
+    return actionError(adminContent.seasonPass.addForm.errors.unauthorized);
+  }
+
+  const trimmedTitle = title.trim();
+  if (trimmedTitle.length > 100) {
+    return actionError("A cím maximum 100 karakter lehet.");
+  }
+
+  const supabase = createAdminClient();
+
+  // Verify the user has coach role
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", userId)
+    .maybeSingle();
+
+  if (profile?.role !== "coach") {
+    return actionError("Csak edzők kaphatnak edzői címet.");
+  }
+
+  const { error } = await supabase
+    .from("profiles")
+    .update({ coach_title: trimmedTitle || null })
+    .eq("id", userId);
+
+  if (error) {
+    return actionError("Nem sikerült beállítani az edzői címet. Kérjük ellenőrizze, hogy lefutott-e az adatbázis migráció.");
+  }
+
+  hasCoachTitleColumn = true;
+
+  revalidatePath("/admin/adatbazis");
+  revalidatePath("/coach");
+  revalidatePath("/", "layout");
+
+  return actionSuccess({ userId, title: trimmedTitle });
 }
 
 export async function toggleUserSeasonPassByEmail(
@@ -405,6 +520,8 @@ export async function getAdminBookingsData(): Promise<ActionResult<AdminBooking[
         price_huf,
         created_at,
         user_id,
+        is_coach_booking,
+        recurring_series_id,
         court:courts(id, number, name)
       `,
       )
@@ -431,17 +548,59 @@ export async function getAdminBookingsData(): Promise<ActionResult<AdminBooking[
     }
   }
 
-  const bookings: AdminBooking[] = (bookingsData ?? []).flatMap((row) => {
+  // Group coach interval bookings for multiple courts into 1 occasion booking
+  const coachGroups = new Map<string, AdminBooking>();
+  const nonCoachBookings: AdminBooking[] = [];
+
+  for (const row of bookingsData ?? []) {
     const court = row.court as unknown as { id: string; number: number; name: string } | null;
     const profile = profileMap.get(row.user_id);
+    if (!court) continue;
 
-    if (!court) return [];
+    const isCoach = Boolean(row.is_coach_booking);
 
-    return [
-      {
+    if (isCoach) {
+      const groupKey = `${row.user_id}_${row.starts_at}_${row.ends_at}_${row.status}`;
+      const existing = coachGroups.get(groupKey);
+
+      if (existing) {
+        existing.bookingIds.push(row.id);
+        if (!existing.courtNumbers.includes(court.number)) {
+          existing.courtNumbers.push(court.number);
+          existing.courtNumbers.sort((a, b) => a - b);
+          existing.courtName = `${existing.courtNumbers.join("., ")}. pálya`;
+        }
+      } else {
+        coachGroups.set(groupKey, {
+          id: row.id,
+          bookingIds: [row.id],
+          courtId: row.court_id,
+          courtNumber: court.number,
+          courtNumbers: [court.number],
+          courtName: `${court.number}. pálya`,
+          userId: row.user_id,
+          userName: profile?.full_name?.trim() || profile?.email || "Névtelen",
+          userEmail: profile?.email || "Nincs email",
+          userPhone: profile?.phone || null,
+          startsAt: row.starts_at,
+          endsAt: row.ends_at,
+          bookingType: row.booking_type,
+          status: row.status,
+          playerCount: row.player_count,
+          guestPlayerNames: row.guest_player_names ?? [],
+          priceHuf: null,
+          createdAt: row.created_at,
+          isCoachBooking: true,
+          recurringSeriesId: row.recurring_series_id ?? null,
+        });
+      }
+    } else {
+      nonCoachBookings.push({
         id: row.id,
+        bookingIds: [row.id],
         courtId: row.court_id,
         courtNumber: court.number,
+        courtNumbers: [court.number],
         courtName: court.name,
         userId: row.user_id,
         userName: profile?.full_name?.trim() || profile?.email || "Névtelen",
@@ -455,15 +614,22 @@ export async function getAdminBookingsData(): Promise<ActionResult<AdminBooking[
         guestPlayerNames: row.guest_player_names ?? [],
         priceHuf: row.price_huf,
         createdAt: row.created_at,
-      },
-    ];
-  });
+        isCoachBooking: false,
+        recurringSeriesId: row.recurring_series_id ?? null,
+      });
+    }
+  }
+
+  const bookings: AdminBooking[] = [
+    ...Array.from(coachGroups.values()),
+    ...nonCoachBookings,
+  ].sort((a, b) => b.startsAt.localeCompare(a.startsAt));
 
   return actionSuccess(bookings);
 }
 
 export async function adminCancelBooking(
-  bookingId: string,
+  bookingId: string | string[],
 ): Promise<ActionResult<{ id: string }>> {
   try {
     await requireAdmin();
@@ -472,11 +638,12 @@ export async function adminCancelBooking(
   }
 
   const supabase = createAdminClient();
+  const ids = Array.isArray(bookingId) ? bookingId : [bookingId];
 
   const { error } = await supabase
     .from("bookings")
     .update({ status: "cancelled" })
-    .eq("id", bookingId);
+    .in("id", ids);
 
   if (error) {
     return actionError("Nem sikerült lemondani a foglalást.");
@@ -486,8 +653,9 @@ export async function adminCancelBooking(
   revalidatePath("/admin/riportok");
   revalidatePath("/booking");
   revalidatePath("/foglalasaim");
+  revalidatePath("/coach");
 
-  return actionSuccess({ id: bookingId });
+  return actionSuccess({ id: ids[0] });
 }
 
 // ==========================================
@@ -529,6 +697,8 @@ export async function getAdminDashboardMetrics(): Promise<
         price_huf,
         created_at,
         user_id,
+        is_coach_booking,
+        recurring_series_id,
         court:courts(id, number, name)
       `,
       )
@@ -568,8 +738,10 @@ export async function getAdminDashboardMetrics(): Promise<
     return [
       {
         id: row.id,
+        bookingIds: [row.id],
         courtId: row.court_id,
         courtNumber: court.number,
+        courtNumbers: [court.number],
         courtName: court.name,
         userId: row.user_id,
         userName: profile?.full_name?.trim() || profile?.email || "Névtelen",
@@ -583,6 +755,8 @@ export async function getAdminDashboardMetrics(): Promise<
         guestPlayerNames: row.guest_player_names ?? [],
         priceHuf: row.price_huf,
         createdAt: row.created_at,
+        isCoachBooking: Boolean(row.is_coach_booking),
+        recurringSeriesId: row.recurring_series_id ?? null,
       },
     ];
   });

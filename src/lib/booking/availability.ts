@@ -17,6 +17,7 @@ import {
 export type BusyInterval = {
   startsAt: string;
   endsAt: string;
+  isCoachBooking?: boolean;
 };
 
 const CLOSE_MINUTES = CLOSE_HOUR * 60;
@@ -60,12 +61,16 @@ export function canStartOneHourBooking(
 }
 
 export function groupBusyByCourtId(
-  rows: Array<{ court_id: string; starts_at: string; ends_at: string }>,
+  rows: Array<{ court_id: string; starts_at: string; ends_at: string; is_coach_booking?: boolean }>,
 ): Record<string, BusyInterval[]> {
   const result: Record<string, BusyInterval[]> = {};
   for (const row of rows) {
     const list = result[row.court_id] ?? [];
-    list.push({ startsAt: row.starts_at, endsAt: row.ends_at });
+    list.push({
+      startsAt: row.starts_at,
+      endsAt: row.ends_at,
+      isCoachBooking: Boolean(row.is_coach_booking),
+    });
     result[row.court_id] = list;
   }
   return result;

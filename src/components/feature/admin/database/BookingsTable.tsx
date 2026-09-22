@@ -4,6 +4,7 @@ import { useMemo, useState, useTransition } from "react";
 import {
   Calendar,
   Check,
+  GraduationCap,
   Grid,
   List,
   Search,
@@ -30,7 +31,7 @@ export function BookingsTable({ bookings, onMutated }: BookingsTableProps) {
   const [search, setSearch] = useState("");
   const [courtFilter, setCourtFilter] = useState<string>("all");
   const [typeFilter, setTypeFilter] = useState<
-    "all" | "season_pass" | "one_time"
+    "all" | "season_pass" | "one_time" | "coach"
   >("all");
   const [statusFilter, setStatusFilter] = useState<
     "all" | "confirmed" | "cancelled"
@@ -62,14 +63,24 @@ export function BookingsTable({ bookings, onMutated }: BookingsTableProps) {
 
       if (!matchSearch) return false;
 
-      // Court filter
-      if (courtFilter !== "all" && b.courtNumber.toString() !== courtFilter) {
-        return false;
+      // Court filter (matches if any court in the group matches)
+      if (courtFilter !== "all") {
+        const matchesCourt =
+          b.courtNumbers && b.courtNumbers.length > 0
+            ? b.courtNumbers.includes(Number(courtFilter))
+            : b.courtNumber.toString() === courtFilter;
+        if (!matchesCourt) return false;
       }
 
       // Type filter
-      if (typeFilter !== "all" && b.bookingType !== typeFilter) {
-        return false;
+      if (typeFilter !== "all") {
+        if (typeFilter === "coach") {
+          if (!b.isCoachBooking) return false;
+        } else if (typeFilter === "season_pass") {
+          if (b.bookingType !== "season_pass" || b.isCoachBooking) return false;
+        } else if (typeFilter === "one_time") {
+          if (b.bookingType !== "one_time" || b.isCoachBooking) return false;
+        }
       }
 
       // Status filter
@@ -95,16 +106,17 @@ export function BookingsTable({ bookings, onMutated }: BookingsTableProps) {
     todayStr,
   ]);
 
-  const handleCancelBooking = (bookingId: string) => {
+  const handleCancelBooking = (bookingIds: string | string[]) => {
     if (!window.confirm(adminContent.database.bookings.actions.confirmCancel)) {
       return;
     }
 
-    setPendingBookingId(bookingId);
+    const firstId = Array.isArray(bookingIds) ? bookingIds[0] : bookingIds;
+    setPendingBookingId(firstId);
     setFeedback(null);
 
     startTransition(async () => {
-      const res = await adminCancelBooking(bookingId);
+      const res = await adminCancelBooking(bookingIds);
       setPendingBookingId(null);
       if (res.success) {
         setFeedback({
@@ -215,6 +227,7 @@ export function BookingsTable({ bookings, onMutated }: BookingsTableProps) {
                 <option value="one_time">
                   {adminContent.database.bookings.filters.typeOneTime}
                 </option>
+                <option value="coach">Csak edzői</option>
               </select>
 
               <select
@@ -319,13 +332,22 @@ export function BookingsTable({ bookings, onMutated }: BookingsTableProps) {
                     const startTime = booking.startsAt.slice(11, 16);
                     const endTime = booking.endsAt.slice(11, 16);
                     const isBookingPending =
-                      isPending && pendingBookingId === booking.id;
+                      isPending &&
+                      (pendingBookingId === booking.id ||
+                        Boolean(
+                          booking.bookingIds &&
+                            pendingBookingId &&
+                            booking.bookingIds.includes(pendingBookingId),
+                        ));
 
                     return (
                       <tr key={booking.id} className={styles.tr}>
                         <td className={`${styles.td} ${styles.tdStrong}`}>
                           <span className={styles.badgeMember}>
-                            {booking.courtNumber}. pálya
+                            {booking.courtNumbers &&
+                            booking.courtNumbers.length > 1
+                              ? `${booking.courtNumbers.join("., ")}. pálya`
+                              : `${booking.courtNumber}. pálya`}
                           </span>
                         </td>
                         <td className={styles.td}>
@@ -373,44 +395,59 @@ export function BookingsTable({ bookings, onMutated }: BookingsTableProps) {
                           </div>
                         </td>
                         <td className={styles.td}>
-                          {booking.bookingType === "season_pass" ? (
+                          {booking.isCoachBooking ? (
+                            <span className={styles.badgeCoach}>
+                              <GraduationCap
+                                size={12}
+                                style={{ marginRight: 4 }}
+                                aria-hidden
+                              />
+                              Edző
+                            </span>
+                          ) : booking.bookingType === "season_pass" ? (
                             <span className={styles.badgeSeason}>Bérletes</span>
                           ) : (
                             <span className={styles.badgeOneTime}>Alkalmi</span>
                           )}
                         </td>
                         <td className={styles.td}>
-                          <div
-                            style={{
-                              display: "flex",
-                              flexDirection: "column",
-                              gap: 2,
-                            }}
-                          >
-                            <span
+                          {booking.isCoachBooking ? (
+                            <span style={{ color: "var(--smoke)" }}>—</span>
+                          ) : (
+                            <div
                               style={{
-                                display: "inline-flex",
-                                alignItems: "center",
-                                gap: 4,
+                                display: "flex",
+                                flexDirection: "column",
+                                gap: 2,
                               }}
                             >
-                              <Users size={12} aria-hidden />
-                              <strong>{booking.playerCount} fő</strong>
-                            </span>
-                            {booking.guestPlayerNames.length > 0 ? (
                               <span
                                 style={{
-                                  fontSize: "0.75rem",
-                                  color: "var(--smoke)",
+                                  display: "inline-flex",
+                                  alignItems: "center",
+                                  gap: 4,
                                 }}
                               >
-                                {booking.guestPlayerNames.join(", ")}
+                                <Users size={12} aria-hidden />
+                                <strong>{booking.playerCount} fő</strong>
                               </span>
-                            ) : null}
-                          </div>
+                              {booking.guestPlayerNames.length > 0 ? (
+                                <span
+                                  style={{
+                                    fontSize: "0.75rem",
+                                    color: "var(--smoke)",
+                                  }}
+                                >
+                                  {booking.guestPlayerNames.join(", ")}
+                                </span>
+                              ) : null}
+                            </div>
+                          )}
                         </td>
                         <td className={`${styles.td} ${styles.tdStrong}`}>
-                          {booking.priceHuf != null
+                          {booking.isCoachBooking
+                            ? "—"
+                            : booking.priceHuf != null
                             ? `${booking.priceHuf.toLocaleString("hu-HU")} Ft`
                             : "—"}
                         </td>
@@ -433,7 +470,14 @@ export function BookingsTable({ bookings, onMutated }: BookingsTableProps) {
                               type="button"
                               className={`${styles.actionBtn} ${styles.actionBtnDanger}`}
                               disabled={isBookingPending}
-                              onClick={() => handleCancelBooking(booking.id)}
+                              onClick={() =>
+                                handleCancelBooking(
+                                  booking.bookingIds &&
+                                    booking.bookingIds.length > 0
+                                    ? booking.bookingIds
+                                    : booking.id,
+                                )
+                              }
                               title={
                                 adminContent.database.bookings.actions.cancel
                               }
