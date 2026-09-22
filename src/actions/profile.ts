@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 
 import type {
+  AvatarFormState,
   DeleteAccountFormState,
   PasswordFormState,
   ProfileFormState,
@@ -274,3 +275,163 @@ export async function deleteAccount(
   revalidatePath("/", "layout");
   redirect("/?notice=account-deleted");
 }
+
+export async function uploadAvatar(
+  _prevState: AvatarFormState,
+  formData: FormData,
+): Promise<AvatarFormState> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect("/login");
+  }
+
+  const file = formData.get("avatar");
+  if (!file || !(file instanceof File) || file.size === 0) {
+    return {
+      status: "error",
+      message: "Kérjük, válasszon ki egy képfájlt.",
+    };
+  }
+
+  if (file.size > 2 * 1024 * 1024) {
+    return {
+      status: "error",
+      message: "A kép mérete legfeljebb 2 MB lehet.",
+    };
+  }
+
+  const allowedMimeTypes = [
+    "image/jpeg",
+    "image/png",
+    "image/webp",
+    "image/gif",
+  ];
+  if (!allowedMimeTypes.includes(file.type)) {
+    return {
+      status: "error",
+      message: "Csak JPG, PNG, WEBP vagy GIF képformátum tölthető fel.",
+    };
+  }
+
+  const fileExt = file.name.split(".").pop()?.toLowerCase() || "jpg";
+  const filePath = `${user.id}/avatar-${Date.now()}.${fileExt}`;
+  const fileBuffer = Buffer.from(await file.arrayBuffer());
+
+  let uploadError: Error | null = null;
+  const userUpload = await supabase.storage
+    .from("avatars")
+    .upload(filePath, fileBuffer, {
+      contentType: file.type,
+      upsert: true,
+    });
+
+  if (userUpload.error) {
+    try {
+      const adminClient = createAdminClient();
+      const { data: buckets } = await adminClient.storage.listBuckets();
+      if (!buckets?.some((b) => b.name === "avatars")) {
+        await adminClient.storage.createBucket("avatars", {
+          public: true,
+          fileSizeLimit: 2097152,
+          allowedMimeTypes,
+        });
+      }
+
+      const adminUpload = await adminClient.storage
+        .from("avatars")
+        .upload(filePath, fileBuffer, {
+          contentType: file.type,
+          upsert: true,
+        });
+
+      if (adminUpload.error) {
+        uploadError = new Error(adminUpload.error.message);
+      }
+    } catch {
+      uploadError = new Error(userUpload.error.message);
+    }
+  }
+
+  if (uploadError) {
+    return {
+      status: "error",
+      message: `A feltöltés sikertelen: ${uploadError.message}`,
+    };
+  }
+
+  const { data: publicUrlData } = supabase.storage
+    .from("avatars")
+    .getPublicUrl(filePath);
+
+  const avatarUrl = publicUrlData.publicUrl;
+
+  // Update Auth user metadata (always supported out-of-the-box)
+  await supabase.auth.updateUser({
+    data: { avatar_url: avatarUrl },
+  });
+
+  // Also update profiles table if the column exists
+  try {
+    await supabase
+      .from("profiles")
+      .update({
+        avatar_url: avatarUrl,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", user.id);
+  } catch {
+    // Silently ignore if profiles table doesn't have avatar_url column yet
+  }
+
+  revalidatePath("/profil");
+  revalidatePath("/", "layout");
+
+  return {
+    status: "success",
+    message: "A profilkép sikeresen frissítve.",
+    avatarUrl,
+  };
+}
+
+export async function deleteAvatar(): Promise<AvatarFormState> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect("/login");
+  }
+
+  // Remove from Auth user metadata
+  await supabase.auth.updateUser({
+    data: { avatar_url: null },
+  });
+
+  // Also update profiles table if the column exists
+  try {
+    await supabase
+      .from("profiles")
+      .update({
+        avatar_url: null,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", user.id);
+  } catch {
+    // Silently ignore if profiles table doesn't have avatar_url column yet
+  }
+
+  revalidatePath("/profil");
+  revalidatePath("/", "layout");
+
+  return {
+    status: "success",
+    message: "A profilkép eltávolítva.",
+    avatarUrl: null,
+  };
+}
+

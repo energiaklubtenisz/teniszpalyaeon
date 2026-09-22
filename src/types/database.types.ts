@@ -24,8 +24,11 @@ export type Database = {
           ends_at: string
           guest_player_names: string[]
           id: string
+          is_coach_booking: boolean
           player_count: number
+          player_ids: string[]
           price_huf: number | null
+          recurring_series_id: string | null
           starts_at: string
           status: Database["public"]["Enums"]["booking_status"]
           user_id: string
@@ -37,8 +40,11 @@ export type Database = {
           ends_at: string
           guest_player_names?: string[]
           id?: string
+          is_coach_booking?: boolean
           player_count: number
+          player_ids?: string[]
           price_huf?: number | null
+          recurring_series_id?: string | null
           starts_at: string
           status?: Database["public"]["Enums"]["booking_status"]
           user_id: string
@@ -50,8 +56,11 @@ export type Database = {
           ends_at?: string
           guest_player_names?: string[]
           id?: string
+          is_coach_booking?: boolean
           player_count?: number
+          player_ids?: string[]
           price_huf?: number | null
+          recurring_series_id?: string | null
           starts_at?: string
           status?: Database["public"]["Enums"]["booking_status"]
           user_id?: string
@@ -90,9 +99,134 @@ export type Database = {
         }
         Relationships: []
       }
+      coach_players: {
+        Row: {
+          id: string
+          coach_id: string
+          player_id: string
+          status: string
+          responded_at: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          coach_id: string
+          player_id: string
+          status?: string
+          responded_at?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          coach_id?: string
+          player_id?: string
+          status?: string
+          responded_at?: string | null
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "coach_players_coach_id_fkey"
+            columns: ["coach_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "coach_players_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notifications: {
+        Row: {
+          id: string
+          user_id: string
+          type: Database["public"]["Enums"]["notification_type"]
+          title: string
+          body: string
+          data: Record<string, unknown>
+          read: boolean
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          type?: Database["public"]["Enums"]["notification_type"]
+          title: string
+          body?: string
+          data?: Record<string, unknown>
+          read?: boolean
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          type?: Database["public"]["Enums"]["notification_type"]
+          title?: string
+          body?: string
+          data?: Record<string, unknown>
+          read?: boolean
+          created_at?: string
+        }
+        Relationships: []
+      }
+      player_statistics: {
+        Row: {
+          id: string
+          coach_id: string
+          player_id: string
+          stat_type: string
+          stat_value: string
+          notes: string | null
+          recorded_at: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          coach_id: string
+          player_id: string
+          stat_type: string
+          stat_value?: string
+          notes?: string | null
+          recorded_at?: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          coach_id?: string
+          player_id?: string
+          stat_type?: string
+          stat_value?: string
+          notes?: string | null
+          recorded_at?: string
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "player_statistics_coach_id_fkey"
+            columns: ["coach_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "player_statistics_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           active_season_pass: boolean
+          avatar_url: string | null
+          coach_title: string | null
           created_at: string
           email: string | null
           full_name: string | null
@@ -103,6 +237,8 @@ export type Database = {
         }
         Insert: {
           active_season_pass?: boolean
+          avatar_url?: string | null
+          coach_title?: string | null
           created_at?: string
           email?: string | null
           full_name?: string | null
@@ -113,6 +249,8 @@ export type Database = {
         }
         Update: {
           active_season_pass?: boolean
+          avatar_url?: string | null
+          coach_title?: string | null
           created_at?: string
           email?: string | null
           full_name?: string | null
@@ -122,6 +260,91 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      recurring_booking_exceptions: {
+        Row: {
+          id: string
+          series_id: string
+          excluded_date: string
+          reason: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          series_id: string
+          excluded_date: string
+          reason?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          series_id?: string
+          excluded_date?: string
+          reason?: string | null
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recurring_booking_exceptions_series_id_fkey"
+            columns: ["series_id"]
+            isOneToOne: false
+            referencedRelation: "recurring_booking_series"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      recurring_booking_series: {
+        Row: {
+          id: string
+          coach_id: string
+          title: string
+          day_of_week: number
+          start_time: string
+          end_time: string
+          court_ids: string[]
+          effective_from: string
+          effective_until: string
+          is_active: boolean
+          player_ids: string[]
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          coach_id: string
+          title?: string
+          day_of_week: number
+          start_time: string
+          end_time: string
+          court_ids: string[]
+          effective_from: string
+          effective_until: string
+          is_active?: boolean
+          player_ids?: string[]
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          coach_id?: string
+          title?: string
+          day_of_week?: number
+          start_time?: string
+          end_time?: string
+          court_ids?: string[]
+          effective_from?: string
+          effective_until?: string
+          is_active?: boolean
+          player_ids?: string[]
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recurring_booking_series_coach_id_fkey"
+            columns: ["coach_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       season_pass_whitelist: {
         Row: {
@@ -154,7 +377,8 @@ export type Database = {
     Enums: {
       booking_status: "confirmed" | "cancelled"
       booking_type: "season_pass" | "one_time"
-      user_role: "member" | "admin"
+      notification_type: "booking_displaced" | "coach_assignment" | "coach_invitation" | "practice_cancelled" | "general"
+      user_role: "member" | "admin" | "coach"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -284,7 +508,8 @@ export const Constants = {
     Enums: {
       booking_status: ["confirmed", "cancelled"],
       booking_type: ["season_pass", "one_time"],
-      user_role: ["member", "admin"],
+      notification_type: ["booking_displaced", "coach_assignment", "coach_invitation", "practice_cancelled", "general"],
+      user_role: ["member", "admin", "coach"],
     },
   },
 } as const;

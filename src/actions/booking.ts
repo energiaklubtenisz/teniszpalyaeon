@@ -37,6 +37,7 @@ export type CourtOption = {
 export type CourtAvailability = {
   courtId: string;
   available: boolean;
+  isCoachBooking?: boolean;
 };
 
 export type UserBooking = {
@@ -48,6 +49,8 @@ export type UserBooking = {
   guestPlayerNames: string[];
   priceHuf: number | null;
   court: { number: number; name: string };
+  courtNumbers?: number[];
+  isCoachBooking?: boolean;
 };
 
 const timeLabelSchema = z
@@ -130,7 +133,7 @@ export async function getBusyIntervalsForDate(
       .eq("is_active", true),
     supabase
       .from("bookings")
-      .select("court_id, starts_at, ends_at")
+      .select("court_id, starts_at, ends_at, is_coach_booking")
       .eq("status", "confirmed")
       .lt("starts_at", dayEnd)
       .gt("ends_at", dayStart),
@@ -180,7 +183,7 @@ export async function getCourtsAvailabilityForWindow(
         .order("number", { ascending: true }),
       supabase
         .from("bookings")
-        .select("court_id, starts_at, ends_at")
+        .select("court_id, starts_at, ends_at, is_coach_booking")
         .eq("status", "confirmed")
         .lt("starts_at", endsAtDb)
         .gt("ends_at", startsAtDb),
@@ -190,13 +193,24 @@ export async function getCourtsAvailabilityForWindow(
     return actionError("Nem sikerült betölteni a foglaltságot.");
   }
 
-  const busyCourtIds = new Set((busy ?? []).map((row) => row.court_id));
+  const busyCourtMap = new Map<string, { isCoach: boolean }>();
+  for (const row of busy ?? []) {
+    const isCoach = Boolean(row.is_coach_booking);
+    const existing = busyCourtMap.get(row.court_id);
+    if (!existing || isCoach) {
+      busyCourtMap.set(row.court_id, { isCoach });
+    }
+  }
 
   return actionSuccess(
-    (courts ?? []).map((court) => ({
-      courtId: court.id,
-      available: !busyCourtIds.has(court.id),
-    })),
+    (courts ?? []).map((court) => {
+      const busyInfo = busyCourtMap.get(court.id);
+      return {
+        courtId: court.id,
+        available: !busyInfo,
+        isCoachBooking: busyInfo?.isCoach ?? false,
+      };
+    }),
   );
 }
 
@@ -315,6 +329,7 @@ export async function getUserBookings(): Promise<ActionResult<UserBooking[]>> {
       player_count,
       guest_player_names,
       price_huf,
+      is_coach_booking,
       court:courts(number, name)
     `,
     )
@@ -326,28 +341,68 @@ export async function getUserBookings(): Promise<ActionResult<UserBooking[]>> {
     return actionError("Nem sikerült betölteni a foglalásokat.");
   }
 
-  const bookings: UserBooking[] = (data ?? []).flatMap((row) => {
-    const court = row.court;
+  // Group coach multi-court bookings by (starts_at, ends_at) so they show as 1 booking per occasion
+  const coachGroups = new Map<string, UserBooking>();
+  const regularBookings: UserBooking[] = [];
+
+  for (const row of data ?? []) {
+    const court = row.court as unknown as { number: number; name: string } | null;
     if (!court || Array.isArray(court)) {
-      return [];
+      continue;
     }
 
-    return [
-      {
+    if (row.is_coach_booking) {
+      const key = `${row.starts_at}_${row.ends_at}`;
+      const existing = coachGroups.get(key);
+      if (existing) {
+        if (!existing.courtNumbers?.includes(court.number)) {
+          existing.courtNumbers?.push(court.number);
+          existing.courtNumbers?.sort((a, b) => a - b);
+          existing.court = {
+            number: existing.courtNumbers?.[0] ?? court.number,
+            name: `${existing.courtNumbers?.join("., ")}. pálya`,
+          };
+        }
+      } else {
+        coachGroups.set(key, {
+          id: row.id,
+          startsAt: row.starts_at,
+          endsAt: row.ends_at,
+          bookingType: row.booking_type,
+          playerCount: row.player_count,
+          guestPlayerNames: row.guest_player_names ?? [],
+          priceHuf: null,
+          court: {
+            number: court.number,
+            name: `${court.number}. pálya`,
+          },
+          courtNumbers: [court.number],
+          isCoachBooking: true,
+        });
+      }
+    } else {
+      regularBookings.push({
         id: row.id,
         startsAt: row.starts_at,
         endsAt: row.ends_at,
         bookingType: row.booking_type,
         playerCount: row.player_count,
-        guestPlayerNames: row.guest_player_names,
+        guestPlayerNames: row.guest_player_names ?? [],
         priceHuf: row.price_huf,
         court: {
           number: court.number,
           name: court.name,
         },
-      },
-    ];
-  });
+        courtNumbers: [court.number],
+        isCoachBooking: false,
+      });
+    }
+  }
+
+  const bookings: UserBooking[] = [
+    ...Array.from(coachGroups.values()),
+    ...regularBookings,
+  ].sort((a, b) => a.startsAt.localeCompare(b.startsAt));
 
   return actionSuccess(bookings);
 }

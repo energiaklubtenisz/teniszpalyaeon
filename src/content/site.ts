@@ -28,6 +28,9 @@ export const site = {
     auth: {
       login: { label: "Bejelentkezés", href: "/login" },
       register: { label: "Regisztráció", href: "/register" },
+      admin: { label: "Adminisztráció", href: "/admin" },
+      coach: { label: "Edzői felület", href: "/coach" },
+      myPractices: { label: "Edzéseim", href: "/edzeseim" },
       profile: { label: "Profil", href: "/profil", menuLabel: "Fiók menü" },
       myBookings: { label: "Foglalásaim", href: "/foglalasaim" },
       logout: { label: "Kijelentkezés" },

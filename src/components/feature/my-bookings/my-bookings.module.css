@@ -241,6 +241,12 @@
   border-radius: 999px;
 }
 
+.typeBadgeCoach {
+  color: #1d4ed8;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+}
+
 .typeBadgeSeason {
   color: var(--graphite);
   background: color-mix(in srgb, var(--stone) 70%, var(--eggshell));

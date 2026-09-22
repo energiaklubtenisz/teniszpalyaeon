@@ -85,6 +85,9 @@ export function BookingWizard({
   const [availabilityByCourtId, setAvailabilityByCourtId] = useState<
     Record<string, boolean>
   >({});
+  const [coachBookingByCourtId, setCoachBookingByCourtId] = useState<
+    Record<string, boolean>
+  >({});
   const [availabilityError, setAvailabilityError] = useState<string | null>(null);
   const [loadingAvailability, setLoadingAvailability] = useState(false);
   const [dayBusyByCourtId, setDayBusyByCourtId] = useState<
@@ -122,15 +125,19 @@ export function BookingWizard({
         setLoadingAvailability(false);
         if (!result.success) {
           setAvailabilityByCourtId({});
+          setCoachBookingByCourtId({});
           setAvailabilityError(result.error);
           return;
         }
 
         const next: Record<string, boolean> = {};
+        const nextCoach: Record<string, boolean> = {};
         for (const row of result.data) {
           next[row.courtId] = row.available;
+          nextCoach[row.courtId] = Boolean(row.isCoachBooking);
         }
         setAvailabilityByCourtId(next);
+        setCoachBookingByCourtId(nextCoach);
         setCourtId((current) =>
           current && next[current] === false ? null : current,
         );
@@ -422,6 +429,7 @@ export function BookingWizard({
                     courts={courts}
                     selectedCourtId={courtId}
                     availabilityByCourtId={availabilityByCourtId}
+                    coachBookingByCourtId={coachBookingByCourtId}
                     onSelect={(id) => {
                       setCourtId(id);
                       setBookingType(null);

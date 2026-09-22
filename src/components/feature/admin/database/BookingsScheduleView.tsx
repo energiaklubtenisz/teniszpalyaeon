@@ -99,9 +99,15 @@ export function BookingsScheduleView({
       map.set(c, []);
     }
     for (const b of dayBookings) {
-      const list = map.get(b.courtNumber) ?? [];
-      list.push(b);
-      map.set(b.courtNumber, list);
+      const courts =
+        b.courtNumbers && b.courtNumbers.length > 0
+          ? b.courtNumbers
+          : [b.courtNumber];
+      for (const c of courts) {
+        const list = map.get(c) ?? [];
+        list.push(b);
+        map.set(c, list);
+      }
     }
     // Sort each court's bookings chronologically
     for (let c = 1; c <= 8; c++) {
@@ -122,7 +128,11 @@ export function BookingsScheduleView({
         const eH = parseInt(b.endsAt.slice(11, 13), 10);
         const eM = parseInt(b.endsAt.slice(14, 16), 10);
         const mins = eH * 60 + eM - (sH * 60 + sM);
-        totalMinutes += mins > 0 ? mins : 60;
+        const numCourts =
+          b.courtNumbers && b.courtNumbers.length > 0
+            ? b.courtNumbers.length
+            : 1;
+        totalMinutes += (mins > 0 ? mins : 60) * numCourts;
       }
     }
     return {
@@ -131,16 +141,17 @@ export function BookingsScheduleView({
     };
   }, [dayBookings]);
 
-  const handleCancelBooking = (bookingId: string) => {
+  const handleCancelBooking = (bookingIds: string | string[]) => {
     if (!window.confirm(adminContent.database.bookings.actions.confirmCancel)) {
       return;
     }
 
-    setPendingId(bookingId);
+    const firstId = Array.isArray(bookingIds) ? bookingIds[0] : bookingIds;
+    setPendingId(firstId);
     setFeedback(null);
 
     startTransition(async () => {
-      const res = await adminCancelBooking(bookingId);
+      const res = await adminCancelBooking(bookingIds);
       setPendingId(null);
       if (res.success) {
         setFeedback({
@@ -392,7 +403,14 @@ export function BookingsScheduleView({
                       const startTime = b.startsAt.slice(11, 16);
                       const endTime = b.endsAt.slice(11, 16);
                       const isCancelled = b.status === "cancelled";
-                      const isPendingItem = isPending && pendingId === b.id;
+                      const isPendingItem =
+                        isPending &&
+                        (pendingId === b.id ||
+                          Boolean(
+                            b.bookingIds &&
+                              pendingId &&
+                              b.bookingIds.includes(pendingId),
+                          ));
 
                       return (
                         <div
@@ -423,6 +441,10 @@ export function BookingsScheduleView({
                               <span className={styles.badgeCancelled}>
                                 Lemondva
                               </span>
+                            ) : b.isCoachBooking ? (
+                              <span className={styles.badgeCoach}>
+                                Edző
+                              </span>
                             ) : b.bookingType === "season_pass" ? (
                               <span className={styles.badgeSeason}>
                                 Bérletes
@@ -433,24 +455,28 @@ export function BookingsScheduleView({
                               </span>
                             )}
 
-                            <span
-                              style={{
-                                display: "inline-flex",
-                                alignItems: "center",
-                                gap: 3,
-                                color: "var(--graphite)",
-                                fontSize: "0.75rem",
-                              }}
-                            >
-                              <Users size={12} aria-hidden />
-                              {b.playerCount} fő
-                              {b.guestPlayerNames.length > 0
-                                ? ` (${b.guestPlayerNames.join(", ")})`
-                                : ""}
-                            </span>
+                            {!b.isCoachBooking && (
+                              <span
+                                style={{
+                                  display: "inline-flex",
+                                  alignItems: "center",
+                                  gap: 3,
+                                  color: "var(--graphite)",
+                                  fontSize: "0.75rem",
+                                }}
+                              >
+                                <Users size={12} aria-hidden />
+                                {b.playerCount} fő
+                                {b.guestPlayerNames.length > 0
+                                  ? ` (${b.guestPlayerNames.join(", ")})`
+                                  : ""}
+                              </span>
+                            )}
 
                             <span className={styles.compactPrice}>
-                              {b.priceHuf != null
+                              {b.isCoachBooking
+                                ? "—"
+                                : b.priceHuf != null
                                 ? `${b.priceHuf.toLocaleString("hu-HU")} Ft`
                                 : "Bérlet (0 Ft)"}
                             </span>
@@ -460,7 +486,13 @@ export function BookingsScheduleView({
                                 type="button"
                                 className={`${styles.actionBtn} ${styles.actionBtnDanger}`}
                                 disabled={isPendingItem}
-                                onClick={() => handleCancelBooking(b.id)}
+                                onClick={() =>
+                                  handleCancelBooking(
+                                    b.bookingIds && b.bookingIds.length > 0
+                                      ? b.bookingIds
+                                      : b.id,
+                                  )
+                                }
                                 title={
                                   adminContent.database.bookings.actions.cancel
                                 }
@@ -527,7 +559,9 @@ export function BookingsScheduleView({
                         <td key={courtNum} className={styles.matrixTdCell}>
                           <div
                             className={`${styles.matrixBlockBooked} ${
-                              active.bookingType === "season_pass"
+                              active.isCoachBooking
+                                ? styles.matrixBlockCoach
+                                : active.bookingType === "season_pass"
                                 ? styles.matrixBlockSeason
                                 : styles.matrixBlockOneTime
                             }`}

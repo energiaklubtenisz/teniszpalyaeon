@@ -1,7 +1,7 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
-import { Check, Shield, ShieldAlert, User, Search, Ticket } from "lucide-react";
+import { useEffect, useMemo, useState, useTransition } from "react";
+import { Check, GraduationCap, Shield, User, Search, Ticket } from "lucide-react";
 
 import {
   updateUserRole,
@@ -9,6 +9,7 @@ import {
   type AdminUser,
 } from "@/actions/admin";
 import { adminContent } from "@/content/admin";
+import { RoleDropdown } from "./RoleDropdown";
 import styles from "../admin.module.css";
 
 type UsersTableProps = {
@@ -16,13 +17,18 @@ type UsersTableProps = {
   onMutated?: () => void;
 };
 
-export function UsersTable({ users, onMutated }: UsersTableProps) {
+export function UsersTable({ users: initialUsers, onMutated }: UsersTableProps) {
+  const [users, setUsers] = useState<AdminUser[]>(initialUsers);
   const [search, setSearch] = useState("");
-  const [roleFilter, setRoleFilter] = useState<"all" | "admin" | "member">("all");
+  const [roleFilter, setRoleFilter] = useState<"all" | "admin" | "member" | "coach">("all");
   const [passFilter, setPassFilter] = useState<"all" | "with" | "without">("all");
   const [feedback, setFeedback] = useState<{ type: "success" | "error"; message: string } | null>(null);
   const [pendingUserId, setPendingUserId] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+
+  useEffect(() => {
+    setUsers(initialUsers);
+  }, [initialUsers]);
 
   const filteredUsers = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -32,7 +38,8 @@ export function UsersTable({ users, onMutated }: UsersTableProps) {
         !q ||
         (u.fullName && u.fullName.toLowerCase().includes(q)) ||
         (u.email && u.email.toLowerCase().includes(q)) ||
-        (u.phone && u.phone.toLowerCase().includes(q));
+        (u.phone && u.phone.toLowerCase().includes(q)) ||
+        (u.coachTitle && u.coachTitle.toLowerCase().includes(q));
 
       if (!matchSearch) return false;
 
@@ -47,8 +54,9 @@ export function UsersTable({ users, onMutated }: UsersTableProps) {
     });
   }, [users, search, roleFilter, passFilter]);
 
-  const handleRoleChange = (userId: string, targetRole: "member" | "admin") => {
-    if (!window.confirm(adminContent.database.users.actions.confirmRoleChange)) {
+  const handleRoleChange = (userId: string, targetRole: "member" | "admin" | "coach") => {
+    const roleNames = { admin: "Adminisztrátor", coach: "Edző", member: "Tag" };
+    if (!window.confirm(`Biztosan módosítani szeretné a felhasználó szerepkörét erre: ${roleNames[targetRole]}?`)) {
       return;
     }
 
@@ -59,9 +67,12 @@ export function UsersTable({ users, onMutated }: UsersTableProps) {
       const res = await updateUserRole(userId, targetRole);
       setPendingUserId(null);
       if (res.success) {
+        setUsers((prev) =>
+          prev.map((u) => (u.id === userId ? { ...u, role: targetRole } : u)),
+        );
         setFeedback({
           type: "success",
-          message: `A felhasználó szerepköre sikeresen módosítva: ${targetRole === "admin" ? "Adminisztrátor" : "Tag"}.`,
+          message: `A felhasználó szerepköre sikeresen módosítva: ${roleNames[targetRole]}.`,
         });
         onMutated?.();
       } else {
@@ -83,6 +94,11 @@ export function UsersTable({ users, onMutated }: UsersTableProps) {
       const res = await toggleUserSeasonPassByEmail(email, active);
       setPendingUserId(null);
       if (res.success) {
+        setUsers((prev) =>
+          prev.map((u) =>
+            u.id === userId ? { ...u, activeSeasonPass: active } : u,
+          ),
+        );
         setFeedback({
           type: "success",
           message: active
@@ -119,6 +135,7 @@ export function UsersTable({ users, onMutated }: UsersTableProps) {
           >
             <option value="all">{adminContent.database.users.filters.allRoles}</option>
             <option value="admin">{adminContent.database.users.filters.onlyAdmin}</option>
+            <option value="coach">Csak Edző</option>
             <option value="member">{adminContent.database.users.filters.onlyMember}</option>
           </select>
 
@@ -192,6 +209,18 @@ export function UsersTable({ users, onMutated }: UsersTableProps) {
                           <Shield size={12} style={{ marginRight: 4 }} aria-hidden />
                           Admin
                         </span>
+                      ) : user.role === "coach" ? (
+                        <div style={{ display: "inline-flex", flexDirection: "column", gap: "0.25rem" }}>
+                          <span className={styles.badgeCoach}>
+                            <GraduationCap size={12} style={{ marginRight: 4 }} aria-hidden />
+                            Edző
+                          </span>
+                          {user.coachTitle ? (
+                            <span style={{ fontSize: "0.75rem", color: "var(--smoke)" }}>
+                              {user.coachTitle}
+                            </span>
+                          ) : null}
+                        </div>
                       ) : (
                         <span className={styles.badgeMember}>
                           <User size={12} style={{ marginRight: 4 }} aria-hidden />
@@ -200,7 +229,9 @@ export function UsersTable({ users, onMutated }: UsersTableProps) {
                       )}
                     </td>
                     <td className={styles.td}>
-                      {user.activeSeasonPass ? (
+                      {user.role === "coach" ? (
+                        <span style={{ color: "var(--smoke)" }}>—</span>
+                      ) : user.activeSeasonPass ? (
                         <span className={styles.badgeActive}>
                           <Check size={12} aria-hidden />
                           Bérletes
@@ -215,53 +246,37 @@ export function UsersTable({ users, onMutated }: UsersTableProps) {
                     <td className={styles.td}>{createdDate}</td>
                     <td className={styles.td}>
                       <div className={styles.actionBtnGroup}>
-                        {user.role === "admin" ? (
-                          <button
-                            type="button"
-                            className={`${styles.actionBtn} ${styles.actionBtnDanger}`}
-                            disabled={isUserPending}
-                            onClick={() => handleRoleChange(user.id, "member")}
-                            title={adminContent.database.users.actions.removeAdmin}
-                          >
-                            <ShieldAlert size={14} aria-hidden />
-                            <span>Jog elvétele</span>
-                          </button>
-                        ) : (
-                          <button
-                            type="button"
-                            className={styles.actionBtn}
-                            disabled={isUserPending}
-                            onClick={() => handleRoleChange(user.id, "admin")}
-                            title={adminContent.database.users.actions.makeAdmin}
-                          >
-                            <Shield size={14} aria-hidden />
-                            <span>Legyen Admin</span>
-                          </button>
-                        )}
+                        <RoleDropdown
+                          userId={user.id}
+                          currentRole={user.role}
+                          disabled={isUserPending}
+                          onRoleChange={handleRoleChange}
+                        />
 
-                        {user.activeSeasonPass ? (
-                          <button
-                            type="button"
-                            className={`${styles.actionBtn} ${styles.actionBtnDanger}`}
-                            disabled={isUserPending || !user.email}
-                            onClick={() => handlePassToggle(user.id, user.email, false)}
-                            title={adminContent.database.users.actions.revokePass}
-                          >
-                            <Ticket size={14} aria-hidden />
-                            <span>Bérlet megvonás</span>
-                          </button>
-                        ) : (
-                          <button
-                            type="button"
-                            className={styles.actionBtn}
-                            disabled={isUserPending || !user.email}
-                            onClick={() => handlePassToggle(user.id, user.email, true)}
-                            title={adminContent.database.users.actions.givePass}
-                          >
-                            <Ticket size={14} aria-hidden />
-                            <span>Bérlet adás</span>
-                          </button>
-                        )}
+                        {user.role !== "coach" &&
+                          (user.activeSeasonPass ? (
+                            <button
+                              type="button"
+                              className={`${styles.actionBtn} ${styles.actionBtnDanger}`}
+                              disabled={isUserPending || !user.email}
+                              onClick={() => handlePassToggle(user.id, user.email, false)}
+                              title={adminContent.database.users.actions.revokePass}
+                            >
+                              <Ticket size={14} aria-hidden />
+                              <span>Bérlet megvonás</span>
+                            </button>
+                          ) : (
+                            <button
+                              type="button"
+                              className={styles.actionBtn}
+                              disabled={isUserPending || !user.email}
+                              onClick={() => handlePassToggle(user.id, user.email, true)}
+                              title={adminContent.database.users.actions.givePass}
+                            >
+                              <Ticket size={14} aria-hidden />
+                              <span>Bérlet adás</span>
+                            </button>
+                          ))}
                       </div>
                     </td>
                   </tr>

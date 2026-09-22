@@ -35,3 +35,15 @@ export const initialDeleteAccountFormState: DeleteAccountFormState = {
   message: null,
   fieldErrors: {},
 };
+
+export type AvatarFormState = {
+  status: "idle" | "error" | "success";
+  message: string | null;
+  avatarUrl?: string | null;
+};
+
+export const initialAvatarFormState: AvatarFormState = {
+  status: "idle",
+  message: null,
+  avatarUrl: null,
+};

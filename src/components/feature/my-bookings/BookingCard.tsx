@@ -31,17 +31,26 @@ export function BookingCard({
 
   const startsAt = parseBookingTimestamp(booking.startsAt);
   const endsAt = parseBookingTimestamp(booking.endsAt);
-  const isSeasonPass = booking.bookingType === "season_pass";
-  const typeLabel = isSeasonPass
+  const isCoach = Boolean(booking.isCoachBooking);
+  const isSeasonPass = !isCoach && booking.bookingType === "season_pass";
+  const typeLabel = isCoach
+    ? "Edzői foglalás"
+    : isSeasonPass
     ? myBookings.card.type.seasonPass
     : myBookings.card.type.oneTime;
-  const typeBadge = isSeasonPass
+  const typeBadge = isCoach
+    ? "Edzés"
+    : isSeasonPass
     ? myBookings.card.typeBadge.seasonPass
     : myBookings.card.typeBadge.oneTime;
-  const courtLabel = myBookings.card.courtLabel.replace(
-    "{n}",
-    String(booking.court.number),
-  );
+  const courtBadge =
+    booking.courtNumbers && booking.courtNumbers.length > 1
+      ? booking.courtNumbers.join(", ")
+      : String(booking.court.number);
+  const courtLabel =
+    booking.courtNumbers && booking.courtNumbers.length > 1
+      ? booking.court.name
+      : myBookings.card.courtLabel.replace("{n}", String(booking.court.number));
   const playersLabel = myBookings.card.playersCount.replace(
     "{n}",
     String(booking.playerCount),
@@ -50,10 +59,11 @@ export function BookingCard({
     bookerName?.trim() || myBookings.card.bookerFallback,
     ...booking.guestPlayerNames.map((name) => name.trim()).filter(Boolean),
   ].join(", ");
-  const priceLabel =
-    isSeasonPass || booking.priceHuf == null
-      ? myBookings.card.priceFree
-      : formatPriceHuf(booking.priceHuf);
+  const priceLabel = isCoach
+    ? "—"
+    : isSeasonPass || booking.priceHuf == null
+    ? myBookings.card.priceFree
+    : formatPriceHuf(booking.priceHuf);
   const timeRange = `${formatBudapestTime(startsAt)}–${formatBudapestTime(endsAt)}`;
 
   return (
@@ -69,7 +79,7 @@ export function BookingCard({
       <div className={styles.cardBody}>
         <header className={styles.cardHeader}>
           <div className={styles.cardIdentity}>
-            <span className={styles.courtBadge}>{booking.court.number}</span>
+            <span className={styles.courtBadge}>{courtBadge}</span>
             <div className={styles.cardTitles}>
               <h3 className={styles.courtName}>{booking.court.name}</h3>
               <p className={styles.courtMeta}>{courtLabel}</p>
@@ -78,7 +88,11 @@ export function BookingCard({
           <span
             className={cn(
               styles.typeBadge,
-              isSeasonPass ? styles.typeBadgeSeason : styles.typeBadgeOneTime,
+              isCoach
+                ? styles.typeBadgeCoach
+                : isSeasonPass
+                ? styles.typeBadgeSeason
+                : styles.typeBadgeOneTime,
             )}
           >
             {typeBadge}
@@ -124,14 +138,18 @@ export function BookingCard({
                 <dt>{myBookings.card.labels.type}</dt>
                 <dd>{typeLabel}</dd>
               </div>
-              <div>
-                <dt>{myBookings.card.labels.players}</dt>
-                <dd>{playersLabel}</dd>
-              </div>
-              <div>
-                <dt>{myBookings.card.labels.playerNames}</dt>
-                <dd>{names}</dd>
-              </div>
+              {!isCoach && (
+                <div>
+                  <dt>{myBookings.card.labels.players}</dt>
+                  <dd>{playersLabel}</dd>
+                </div>
+              )}
+              {!isCoach && (
+                <div>
+                  <dt>{myBookings.card.labels.playerNames}</dt>
+                  <dd>{names}</dd>
+                </div>
+              )}
               <div>
                 <dt>{myBookings.card.labels.price}</dt>
                 <dd>{priceLabel}</dd>

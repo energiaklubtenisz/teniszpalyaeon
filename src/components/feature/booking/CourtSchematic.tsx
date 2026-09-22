@@ -11,6 +11,7 @@ type CourtSchematicProps = {
   courts: CourtOption[];
   selectedCourtId: string | null;
   availabilityByCourtId: Record<string, boolean>;
+  coachBookingByCourtId?: Record<string, boolean>;
   onSelect: (courtId: string) => void;
 };
 
@@ -45,6 +46,7 @@ export function CourtSchematic({
   courts,
   selectedCourtId,
   availabilityByCourtId,
+  coachBookingByCourtId,
   onSelect,
 }: CourtSchematicProps) {
   const byNumber = new Map(courts.map((court) => [court.number, court]));
@@ -55,6 +57,10 @@ export function CourtSchematic({
         <span>
           <i className={cn(styles.swatch, styles.swatchCourtFree)} />{" "}
           {booking.steps.court.available}
+        </span>
+        <span>
+          <i className={cn(styles.swatch, styles.swatchCourtPractice)} />{" "}
+          Edzés
         </span>
         <span>
           <i className={cn(styles.swatch, styles.swatchCourtBusy)} />{" "}
@@ -80,7 +86,14 @@ export function CourtSchematic({
                 }
 
                 const available = availabilityByCourtId[court.id] === true;
+                const isCoachPractice = !available && coachBookingByCourtId?.[court.id] === true;
                 const selected = court.id === selectedCourtId;
+
+                const statusLabel = available
+                  ? booking.steps.court.available
+                  : isCoachPractice
+                    ? "Edzés"
+                    : booking.steps.court.busy;
 
                 return (
                   <button
@@ -89,15 +102,15 @@ export function CourtSchematic({
                     disabled={!available}
                     className={cn(
                       styles.courtTile,
-                      available ? styles.courtTileFree : styles.courtTileBusy,
+                      available
+                        ? styles.courtTileFree
+                        : isCoachPractice
+                          ? styles.courtTilePractice
+                          : styles.courtTileBusy,
                       selected && styles.courtTileSelected,
                     )}
                     aria-pressed={selected}
-                    aria-label={`${court.name} — ${
-                      available
-                        ? booking.steps.court.available
-                        : booking.steps.court.busy
-                    }`}
+                    aria-label={`${court.name} — ${statusLabel}`}
                     onClick={() => {
                       if (available) onSelect(court.id);
                     }}
@@ -105,10 +118,13 @@ export function CourtSchematic({
                     <CourtSurface number={court.number} />
                     <span className={styles.courtMeta}>
                       <span className={styles.courtName}>{court.name}</span>
-                      <span className={styles.courtStatus}>
-                        {available
-                          ? booking.steps.court.available
-                          : booking.steps.court.busy}
+                      <span
+                        className={cn(
+                          styles.courtStatus,
+                          isCoachPractice && styles.courtStatusPractice,
+                        )}
+                      >
+                        {statusLabel}
                       </span>
                     </span>
                   </button>

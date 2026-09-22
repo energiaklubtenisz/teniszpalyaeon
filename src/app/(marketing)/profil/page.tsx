@@ -26,11 +26,20 @@ export default async function ProfileRoute() {
     .eq("id", user.id)
     .maybeSingle();
 
+  const fullName =
+    row?.full_name?.trim() ||
+    (user.user_metadata?.full_name as string | undefined)?.trim() ||
+    "";
+
+  const avatarUrl =
+    (user.user_metadata?.avatar_url as string | undefined) ?? null;
+
   return (
     <ProfilePage
       email={user.email ?? ""}
-      fullName={row?.full_name ?? ""}
+      fullName={fullName}
       phone={row?.phone ?? ""}
+      avatarUrl={avatarUrl}
     />
   );
 }
