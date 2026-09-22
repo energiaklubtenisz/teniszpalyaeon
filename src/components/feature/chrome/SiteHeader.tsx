@@ -1,6 +1,12 @@
 "use client";
 
-import { User } from "lucide-react";
+import {
+  CalendarDays,
+  ChevronDown,
+  LogOut,
+  Shield,
+  User,
+} from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -23,17 +29,25 @@ function isActivePath(pathname: string, href: string): boolean {
 type SiteHeaderProps = {
   isAuthenticated: boolean;
   isAdmin?: boolean;
+  userName?: string | null;
+  userEmail?: string | null;
+  avatarUrl?: string | null;
 };
 
 export function SiteHeader({
   isAuthenticated,
   isAdmin = false,
+  userName = null,
+  userEmail = null,
+  avatarUrl = null,
 }: SiteHeaderProps) {
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const profileMenuRef = useRef<HTMLDivElement>(null);
   const profileMenuId = useId();
+
+  const displayName = userName?.trim() || site.nav.auth.profile.label;
 
   const closeMenu = () => {
     setMenuOpen(false);
@@ -75,9 +89,11 @@ export function SiteHeader({
     };
   }, [profileMenuOpen]);
 
-  useEffect(() => {
+  const [prevPathname, setPrevPathname] = useState(pathname);
+  if (prevPathname !== pathname) {
+    setPrevPathname(pathname);
     setProfileMenuOpen(false);
-  }, [pathname]);
+  }
 
   return (
     <header className={styles.header}>
@@ -128,84 +144,161 @@ export function SiteHeader({
 
         <div className={styles.auth}>
           {isAuthenticated ? (
-            <>
-              {isAdmin ? (
-                <Link
-                  href="/admin"
-                  className={cn(
-                    styles.admin,
-                    isActivePath(pathname, "/admin") && styles.adminActive
+            <div className={styles.profileMenu} ref={profileMenuRef}>
+              <button
+                type="button"
+                className={cn(
+                  styles.profileButton,
+                  (profileMenuOpen ||
+                    isActivePath(pathname, site.nav.auth.profile.href) ||
+                    isActivePath(pathname, site.nav.auth.myBookings.href) ||
+                    isActivePath(pathname, "/admin")) &&
+                    styles.profileButtonActive
+                )}
+                aria-label={site.nav.auth.profile.menuLabel}
+                aria-expanded={profileMenuOpen}
+                aria-haspopup="menu"
+                aria-controls={profileMenuId}
+                onClick={() => {
+                  setProfileMenuOpen((open) => !open);
+                }}
+              >
+                <span className={styles.profileAvatar}>
+                  {avatarUrl ? (
+                    <Image
+                      src={avatarUrl}
+                      alt={displayName}
+                      fill
+                      unoptimized
+                      className={styles.profileAvatarImg}
+                    />
+                  ) : (
+                    <User className={styles.profileAvatarIcon} aria-hidden />
                   )}
-                  onClick={closeMenu}
-                >
-                  Admin
-                </Link>
-              ) : null}
-              <div className={styles.profileMenu} ref={profileMenuRef}>
-                <button
-                  type="button"
+                </span>
+                <span className={styles.profileName}>{displayName}</span>
+                <ChevronDown
                   className={cn(
-                    styles.profile,
-                    (profileMenuOpen ||
-                      isActivePath(pathname, site.nav.auth.profile.href) ||
-                      isActivePath(
-                        pathname,
-                        site.nav.auth.myBookings.href
-                      )) &&
-                      styles.profileActive
+                    styles.profileChevron,
+                    profileMenuOpen && styles.profileChevronOpen
                   )}
-                  aria-label={site.nav.auth.profile.menuLabel}
-                  aria-expanded={profileMenuOpen}
-                  aria-haspopup="menu"
-                  aria-controls={profileMenuId}
-                  onClick={() => {
-                    setProfileMenuOpen((open) => !open);
-                  }}
-                >
-                  <User className={styles.profileIcon} aria-hidden />
-                </button>
+                  aria-hidden
+                />
+              </button>
 
-                {profileMenuOpen ? (
-                  <div
-                    id={profileMenuId}
-                    className={styles.profileDropdown}
-                    role="menu"
-                  >
-                    <Link
-                      href={site.nav.auth.profile.href}
-                      role="menuitem"
-                      className={styles.profileDropdownItem}
-                      onClick={() => {
-                        closeProfileMenu();
-                        closeMenu();
-                      }}
-                    >
-                      {site.nav.auth.profile.label}
-                    </Link>
-                    <Link
-                      href={site.nav.auth.myBookings.href}
-                      role="menuitem"
-                      className={styles.profileDropdownItem}
-                      onClick={() => {
-                        closeProfileMenu();
-                        closeMenu();
-                      }}
-                    >
-                      {site.nav.auth.myBookings.label}
-                    </Link>
-                    <form action={logout} className={styles.profileDropdownForm}>
-                      <button
-                        type="submit"
-                        role="menuitem"
-                        className={styles.profileDropdownItem}
-                      >
-                        {site.nav.auth.logout.label}
-                      </button>
-                    </form>
+              {profileMenuOpen ? (
+                <div
+                  id={profileMenuId}
+                  className={styles.profileDropdown}
+                  role="menu"
+                >
+                  <div className={styles.profileDropdownHeader}>
+                    <div className={styles.profileDropdownUserRow}>
+                      <span className={styles.profileDropdownAvatar}>
+                        {avatarUrl ? (
+                          <Image
+                            src={avatarUrl}
+                            alt={displayName}
+                            fill
+                            unoptimized
+                            className={styles.profileAvatarImg}
+                          />
+                        ) : (
+                          <User className={styles.profileAvatarIcon} aria-hidden />
+                        )}
+                      </span>
+                      <div className={styles.profileDropdownUserInfo}>
+                        <p className={styles.profileDropdownName}>{displayName}</p>
+                        {userEmail ? (
+                          <p className={styles.profileDropdownEmail}>{userEmail}</p>
+                        ) : null}
+                      </div>
+                    </div>
                   </div>
-                ) : null}
-              </div>
-            </>
+
+                  <div className={styles.profileDropdownDivider} />
+
+                  {isAdmin ? (
+                    <Link
+                      href="/admin"
+                      role="menuitem"
+                      className={cn(
+                        styles.profileDropdownItem,
+                        styles.profileDropdownAdmin,
+                        isActivePath(pathname, "/admin") &&
+                          styles.profileDropdownItemActive
+                      )}
+                      onClick={() => {
+                        closeProfileMenu();
+                        closeMenu();
+                      }}
+                    >
+                      <span className={styles.dropdownItemMain}>
+                        <Shield className={styles.dropdownItemIcon} aria-hidden />
+                        <span>{site.nav.auth.admin.label}</span>
+                      </span>
+                      <span className={styles.adminBadge}>Admin</span>
+                    </Link>
+                  ) : null}
+
+                  <Link
+                    href={site.nav.auth.profile.href}
+                    role="menuitem"
+                    className={cn(
+                      styles.profileDropdownItem,
+                      isActivePath(pathname, site.nav.auth.profile.href) &&
+                        styles.profileDropdownItemActive
+                    )}
+                    onClick={() => {
+                      closeProfileMenu();
+                      closeMenu();
+                    }}
+                  >
+                    <span className={styles.dropdownItemMain}>
+                      <User className={styles.dropdownItemIcon} aria-hidden />
+                      <span>{site.nav.auth.profile.label}</span>
+                    </span>
+                  </Link>
+
+                  <Link
+                    href={site.nav.auth.myBookings.href}
+                    role="menuitem"
+                    className={cn(
+                      styles.profileDropdownItem,
+                      isActivePath(pathname, site.nav.auth.myBookings.href) &&
+                        styles.profileDropdownItemActive
+                    )}
+                    onClick={() => {
+                      closeProfileMenu();
+                      closeMenu();
+                    }}
+                  >
+                    <span className={styles.dropdownItemMain}>
+                      <CalendarDays className={styles.dropdownItemIcon} aria-hidden />
+                      <span>{site.nav.auth.myBookings.label}</span>
+                    </span>
+                  </Link>
+
+                  <div className={styles.profileDropdownDivider} />
+
+                  <form action={logout} className={styles.profileDropdownForm}>
+                    <button
+                      type="submit"
+                      role="menuitem"
+                      className={cn(
+                        styles.profileDropdownItem,
+                        styles.profileDropdownLogout
+                      )}
+                    >
+                      <span className={styles.dropdownItemMain}>
+                        <LogOut className={styles.dropdownItemIcon} aria-hidden />
+                        <span>{site.nav.auth.logout.label}</span>
+                      </span>
+                    </button>
+                  </form>
+                </div>
+              ) : null}
+            </div>
           ) : (
             <>
               <Link

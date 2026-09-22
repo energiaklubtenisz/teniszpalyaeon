@@ -93,6 +93,7 @@ export type Database = {
       profiles: {
         Row: {
           active_season_pass: boolean
+          avatar_url: string | null
           created_at: string
           email: string | null
           full_name: string | null
@@ -103,6 +104,7 @@ export type Database = {
         }
         Insert: {
           active_season_pass?: boolean
+          avatar_url?: string | null
           created_at?: string
           email?: string | null
           full_name?: string | null
@@ -113,6 +115,7 @@ export type Database = {
         }
         Update: {
           active_season_pass?: boolean
+          avatar_url?: string | null
           created_at?: string
           email?: string | null
           full_name?: string | null

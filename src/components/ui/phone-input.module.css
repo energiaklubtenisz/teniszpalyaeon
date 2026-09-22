@@ -1,0 +1,92 @@
+.phoneInputContainer {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--stone);
+  border-radius: 4px;
+  transition: border-color 160ms ease, box-shadow 160ms ease;
+  overflow: hidden;
+}
+
+.phoneInputContainer:hover:not(.phoneInputContainerDisabled) {
+  border-color: var(--ash);
+}
+
+.phoneInputContainerFocused {
+  border-color: var(--eon-red) !important;
+  box-shadow: 0 0 0 3px rgb(225 29 72 / 14%) !important;
+}
+
+.phoneInputContainerInvalid {
+  border-color: var(--eon-red) !important;
+}
+
+.phoneInputContainerDisabled {
+  opacity: 0.85;
+  cursor: not-allowed;
+  background: var(--warm-taupe);
+}
+
+.countrySelectWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.countrySelect {
+  appearance: none;
+  -webkit-appearance: none;
+  background: transparent;
+  border: none;
+  padding: 0.7rem 1.85rem 0.7rem 0.85rem;
+  font: inherit;
+  font-size: var(--text-body-sm);
+  font-weight: 500;
+  color: var(--ink);
+  cursor: pointer;
+  outline: none;
+}
+
+.countrySelect:disabled {
+  cursor: not-allowed;
+}
+
+.selectChevron {
+  position: absolute;
+  right: 0.55rem;
+  width: 0.85rem;
+  height: 0.85rem;
+  color: var(--smoke);
+  pointer-events: none;
+}
+
+.divider {
+  width: 1px;
+  height: 1.5rem;
+  background: var(--stone);
+  flex-shrink: 0;
+}
+
+.numberInput {
+  flex: 1;
+  min-width: 0;
+  width: 100%;
+  padding: 0.7rem 0.85rem;
+  font: inherit;
+  font-size: var(--text-body-sm);
+  line-height: 1.4;
+  color: var(--ink);
+  background: transparent;
+  border: none;
+  outline: none;
+}
+
+.numberInput:disabled {
+  cursor: not-allowed;
+}
+
+.numberInput::placeholder {
+  color: var(--ash);
+}

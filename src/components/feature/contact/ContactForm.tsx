@@ -5,6 +5,7 @@ import { useActionState } from "react";
 import { sendContactMessage } from "@/actions/contact";
 import { initialContactFormState } from "@/actions/contact-state";
 import { buttonVariants } from "@/components/ui/button";
+import { PhoneInput } from "@/components/ui/phone-input";
 import { contact } from "@/content/contact";
 import { cn } from "@/lib/utils";
 
@@ -91,22 +92,23 @@ export function ContactForm({ defaultMessage = "" }: ContactFormProps) {
         </div>
 
         <div className={styles.field}>
-          <label htmlFor="contact-phone" className={styles.fieldLabel}>
+          <label
+            id="contact-phone-label"
+            htmlFor="contact-phone"
+            className={styles.fieldLabel}
+          >
             {form.fields.phone.label}
             <span className={styles.optional}> ({form.optional})</span>
           </label>
-          <input
+          <PhoneInput
             id="contact-phone"
             name="phone"
-            type="tel"
-            autoComplete="tel"
-            maxLength={40}
             disabled={pending}
-            aria-invalid={Boolean(fieldErrors.phone)}
-            aria-describedby={
+            ariaInvalid={Boolean(fieldErrors.phone)}
+            ariaDescribedBy={
               fieldErrors.phone ? "contact-phone-error" : undefined
             }
-            className={styles.input}
+            ariaLabelledBy="contact-phone-label"
           />
           {fieldErrors.phone ? (
             <p
