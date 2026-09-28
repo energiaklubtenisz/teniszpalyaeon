@@ -1,16 +1,22 @@
 "use client";
 
 import {
+  ArrowRight,
+  Calendar,
   Check,
+  CheckCircle2,
+  Clock,
   KeyRound,
   Lock,
   Shield,
   ShieldAlert,
+  Ticket,
   Trash2,
   Upload,
   User,
 } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 import { startTransition, useActionState, useRef, useState } from "react";
 
 import {
@@ -30,6 +36,7 @@ import { buttonVariants } from "@/components/ui/button";
 import { PhoneInput } from "@/components/ui/phone-input";
 import { profile } from "@/content/profile";
 import { cn } from "@/lib/utils";
+import type { UserSeasonPass } from "@/types/season-pass";
 
 import styles from "./profile.module.css";
 
@@ -38,16 +45,31 @@ type ProfileFormsProps = {
   fullName: string;
   phone: string;
   avatarUrl?: string | null;
+  seasonPasses?: UserSeasonPass[];
 };
+
+function formatDate(isoString: string): string {
+  try {
+    const d = new Date(isoString);
+    return new Intl.DateTimeFormat("hu-HU", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    }).format(d);
+  } catch {
+    return isoString;
+  }
+}
 
 export function ProfileForms({
   email,
   fullName,
   phone,
   avatarUrl = null,
+  seasonPasses = [],
 }: ProfileFormsProps) {
   const { fields, sections, tabs, avatar } = profile;
-  const [activeTab, setActiveTab] = useState<"details" | "security">("details");
+  const [activeTab, setActiveTab] = useState<"details" | "security" | "pass">("details");
 
   const [deletedAvatar, setDeletedAvatar] = useState(false);
   const [isDeletingAvatar, setIsDeletingAvatar] = useState(false);
@@ -118,6 +140,10 @@ export function ProfileForms({
   const passwordErrors = passwordState.fieldErrors ?? {};
   const deleteErrors = deleteState.fieldErrors ?? {};
 
+  const currentYear = new Date().getFullYear();
+  const currentPass = seasonPasses.find((p) => p.seasonYear === currentYear);
+  const otherPasses = seasonPasses.filter((p) => p.seasonYear !== currentYear);
+
   return (
     <div className={styles.container}>
       {/* Segmented Tab Navigation */}
@@ -153,10 +179,26 @@ export function ProfileForms({
           <Shield className={styles.tabIcon} aria-hidden />
           <span>{tabs.security}</span>
         </button>
+
+        <button
+          type="button"
+          role="tab"
+          aria-selected={activeTab === "pass"}
+          aria-controls="panel-pass"
+          id="tab-pass"
+          className={cn(
+            styles.tabButton,
+            activeTab === "pass" && styles.tabButtonActive,
+          )}
+          onClick={() => setActiveTab("pass")}
+        >
+          <Ticket className={styles.tabIcon} aria-hidden />
+          <span>{tabs.pass}</span>
+        </button>
       </nav>
 
       {/* Tab 1: Personal Details & Avatar */}
-      {activeTab === "details" ? (
+      {activeTab === "details" && (
         <div
           id="panel-details"
           role="tabpanel"
@@ -382,8 +424,10 @@ export function ProfileForms({
             </form>
           </section>
         </div>
-      ) : (
-        /* Tab 2: Security & Account Deletion */
+      )}
+
+      {/* Tab 2: Security & Account Deletion */}
+      {activeTab === "security" && (
         <div
           id="panel-security"
           role="tabpanel"
@@ -639,6 +683,180 @@ export function ProfileForms({
               </div>
             </form>
           </section>
+        </div>
+      )}
+
+      {/* Tab 3: Season Pass */}
+      {activeTab === "pass" && (
+        <div
+          id="panel-pass"
+          role="tabpanel"
+          aria-labelledby="tab-pass"
+          className={styles.tabContent}
+        >
+          {currentPass ? (
+            <section className={styles.passCard} aria-labelledby="active-pass-title">
+              <div className={styles.passHeader}>
+                <div>
+                  <span className={styles.badgeActive}>
+                    <CheckCircle2 size={13} aria-hidden />
+                    {profile.pass.active.badge}
+                  </span>
+                  <h2 id="active-pass-title" className={styles.passTitle} style={{ marginTop: "0.5rem" }}>
+                    {profile.pass.active.title.replace("{year}", String(currentPass.seasonYear))}
+                  </h2>
+                </div>
+              </div>
+
+              <p className={styles.passLead}>
+                {profile.pass.active.description}
+              </p>
+
+              <div className={styles.passGrid}>
+                <div className={styles.passGridItem}>
+                  <span className={styles.passGridLabel}>{profile.pass.active.seasonLabel}</span>
+                  <span className={styles.passGridValue}>
+                    {profile.pass.active.seasonValue.replace("{year}", String(currentPass.seasonYear))}
+                  </span>
+                </div>
+                <div className={styles.passGridItem}>
+                  <span className={styles.passGridLabel}>{profile.pass.active.registeredEmail}</span>
+                  <span className={styles.passGridValue}>{email}</span>
+                </div>
+                <div className={styles.passGridItem}>
+                  <span className={styles.passGridLabel}>{profile.pass.active.statusLabel}</span>
+                  <span className={styles.passGridValue}>{profile.pass.active.statusValue}</span>
+                </div>
+                <div className={styles.passGridItem}>
+                  <span className={styles.passGridLabel}>{profile.pass.active.grantedAtLabel}</span>
+                  <span className={styles.passGridValue}>{formatDate(currentPass.createdAt)}</span>
+                </div>
+              </div>
+
+              <div className={styles.passActions}>
+                <Link href="/booking" className={styles.passBookButton}>
+                  <Calendar size={15} aria-hidden />
+                  <span>{profile.pass.active.bookButton}</span>
+                  <ArrowRight size={14} aria-hidden />
+                </Link>
+              </div>
+            </section>
+          ) : otherPasses.length > 0 ? (
+            <section className={styles.passCard} aria-labelledby="expired-pass-title">
+              <div className={styles.passHeader}>
+                <div>
+                  <span className={styles.badgeExpired}>
+                    <Clock size={13} aria-hidden />
+                    {profile.pass.expired.badge}
+                  </span>
+                  <h2 id="expired-pass-title" className={styles.passTitle} style={{ marginTop: "0.5rem" }}>
+                    {profile.pass.expired.title.replace("{year}", String(currentYear))}
+                  </h2>
+                </div>
+              </div>
+
+              <p className={styles.passLead}>
+                {profile.pass.expired.description}
+              </p>
+
+              <p className={styles.passLead} style={{ fontSize: "var(--text-body-sm)" }}>
+                {profile.pass.expired.contactLead}
+              </p>
+
+              <div className={styles.passActions}>
+                <Link href="/kapcsolat" className={styles.passBookButton}>
+                  <span>{profile.pass.expired.contactButton}</span>
+                  <ArrowRight size={14} aria-hidden />
+                </Link>
+                <Link href="/arak" className={styles.passSecondaryButton}>
+                  <span>{profile.pass.expired.pricesButton}</span>
+                </Link>
+              </div>
+            </section>
+          ) : (
+            <section className={styles.passEmptyCard} aria-labelledby="empty-pass-title">
+              <div className={styles.emptyIconWrapper}>
+                <Ticket size={24} aria-hidden />
+              </div>
+              <h2 id="empty-pass-title" className={styles.passTitle}>
+                {profile.pass.empty.title}
+              </h2>
+              <p className={styles.passLead} style={{ maxWidth: "28rem" }}>
+                {profile.pass.empty.description}
+              </p>
+              <div className={styles.passActions}>
+                <Link href="/kapcsolat" className={styles.passBookButton}>
+                  <span>{profile.pass.empty.contactButton}</span>
+                  <ArrowRight size={14} aria-hidden />
+                </Link>
+                <Link href="/arak" className={styles.passSecondaryButton}>
+                  <span>{profile.pass.empty.pricesButton}</span>
+                </Link>
+              </div>
+            </section>
+          )}
+
+          {/* Season Pass History */}
+          {seasonPasses.length > 0 && (
+            <section className={styles.historyCard} aria-labelledby="history-title">
+              <div>
+                <h3 id="history-title" className={styles.panelTitle}>
+                  {profile.pass.history.title}
+                </h3>
+                <p className={styles.panelSupport}>
+                  {profile.pass.history.lead}
+                </p>
+              </div>
+
+              <table className={styles.historyTable}>
+                <thead>
+                  <tr>
+                    <th scope="col" className={styles.historyTh}>
+                      {profile.pass.history.seasonColumn}
+                    </th>
+                    <th scope="col" className={styles.historyTh}>
+                      {profile.pass.history.statusColumn}
+                    </th>
+                    <th scope="col" className={styles.historyTh}>
+                      {profile.pass.history.dateColumn}
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {seasonPasses.map((pass) => {
+                    const isCurrent = pass.seasonYear === currentYear;
+                    const isFuture = pass.seasonYear > currentYear;
+                    return (
+                      <tr key={pass.id} className={styles.historyTr}>
+                        <td className={styles.historyTd} style={{ fontWeight: 600 }}>
+                          {pass.seasonYear}-os szezon
+                        </td>
+                        <td className={styles.historyTd}>
+                          {isCurrent ? (
+                            <span className={styles.badgeActive}>
+                              <CheckCircle2 size={11} aria-hidden />
+                              {profile.pass.history.activeBadge}
+                            </span>
+                          ) : isFuture ? (
+                            <span className={styles.badgeFuture}>
+                              {profile.pass.history.futureBadge}
+                            </span>
+                          ) : (
+                            <span className={styles.badgeExpired}>
+                              {profile.pass.history.expiredBadge}
+                            </span>
+                          )}
+                        </td>
+                        <td className={styles.historyTd}>
+                          {formatDate(pass.createdAt)}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </section>
+          )}
         </div>
       )}
     </div>

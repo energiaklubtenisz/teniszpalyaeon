@@ -20,6 +20,8 @@ type BookingTypeStepProps = {
   bookerName: string | null;
   startLabel: TimeLabel;
   endLabel: TimeLabel;
+  hasSeasonPass?: boolean;
+  selectedYear?: number;
   onChangeType: (value: BookingTypeChoice) => void;
   onChangePlayers: (value: PlayerCountChoice) => void;
   onChangeGuestName: (index: number, value: string) => void;
@@ -32,12 +34,15 @@ export function BookingTypeStep({
   bookerName,
   startLabel,
   endLabel,
+  hasSeasonPass = true,
+  selectedYear,
   onChangeType,
   onChangePlayers,
   onChangeGuestName,
 }: BookingTypeStepProps) {
   const oneTimePrice = calculateOneTimePriceHuf(startLabel, endLabel);
   const guestSlots = playerCount ? playerCount - 1 : 0;
+  const currentYear = selectedYear ?? new Date().getFullYear();
 
   return (
     <div className={styles.typeBlock}>
@@ -50,11 +55,18 @@ export function BookingTypeStep({
           type="button"
           role="radio"
           aria-checked={value === "season_pass"}
+          disabled={!hasSeasonPass}
           className={cn(
             styles.typeOption,
             value === "season_pass" && styles.typeOptionSelected,
+            !hasSeasonPass && styles.typeOptionDisabled,
           )}
-          onClick={() => onChangeType("season_pass")}
+          style={!hasSeasonPass ? { opacity: 0.6, cursor: "not-allowed" } : undefined}
+          onClick={() => {
+            if (hasSeasonPass) {
+              onChangeType("season_pass");
+            }
+          }}
         >
           <span className={styles.typeTitle}>
             {booking.steps.type.seasonPass.title}
@@ -62,6 +74,15 @@ export function BookingTypeStep({
           <span className={styles.typeBody}>
             {booking.steps.type.seasonPass.body}
           </span>
+          {!hasSeasonPass ? (
+            <span style={{ fontSize: "0.75rem", color: "var(--eon-red)", marginTop: "0.25rem", display: "block", fontWeight: 500 }}>
+              {booking.steps.type.seasonPass.noPassForYear.replace("{year}", String(currentYear))}
+            </span>
+          ) : (
+            <span style={{ fontSize: "0.75rem", color: "#065f46", marginTop: "0.25rem", display: "block", fontWeight: 500 }}>
+              {booking.steps.type.seasonPass.validForYear.replace("{year}", String(currentYear))}
+            </span>
+          )}
         </button>
 
         <button

@@ -558,6 +558,217 @@
   flex-shrink: 0;
 }
 
+/* Season Pass Tab Styles */
+.passCard {
+  background: var(--elevated);
+  border: 1px solid var(--stone);
+  border-radius: 20px;
+  padding: 1.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  box-shadow: var(--shadow-card);
+}
+
+.passHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.passTitle {
+  margin: 0;
+  font-size: var(--text-subheading);
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.passLead {
+  margin: 0;
+  font-size: var(--text-body);
+  color: var(--smoke);
+  line-height: 1.5;
+}
+
+.badgeActive {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: #ecfdf5;
+  color: #065f46;
+  border: 1px solid #a7f3d0;
+  border-radius: 9999px;
+  font-size: var(--text-caption);
+  font-weight: 600;
+  padding: 0.25rem 0.75rem;
+}
+
+.badgeExpired {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: var(--surface);
+  color: var(--smoke);
+  border: 1px solid var(--stone);
+  border-radius: 9999px;
+  font-size: var(--text-caption);
+  font-weight: 500;
+  padding: 0.25rem 0.75rem;
+}
+
+.badgeFuture {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: rgb(234 28 44 / 8%);
+  color: var(--eon-red);
+  border: 1px solid rgb(234 28 44 / 25%);
+  border-radius: 9999px;
+  font-size: var(--text-caption);
+  font-weight: 600;
+  padding: 0.25rem 0.75rem;
+}
+
+.passGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 1rem;
+  background: var(--surface);
+  border: 1px solid var(--stone);
+  border-radius: 12px;
+  padding: 1.15rem 1.25rem;
+}
+
+.passGridItem {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.passGridLabel {
+  font-size: var(--text-caption);
+  font-weight: 500;
+  color: var(--ash);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.passGridValue {
+  font-size: var(--text-body-sm);
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.passActions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-top: 0.25rem;
+}
+
+.passBookButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.65rem 1.5rem;
+  background: var(--ink);
+  color: #fdfcfc;
+  border-radius: 9999px;
+  font-size: var(--text-body-sm);
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.15s ease;
+}
+
+.passBookButton:hover {
+  opacity: 0.88;
+  transform: translateY(-1px);
+}
+
+.passSecondaryButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.65rem 1.25rem;
+  background: var(--canvas);
+  color: var(--ink);
+  border: 1px solid var(--stone);
+  border-radius: 9999px;
+  font-size: var(--text-body-sm);
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 0.15s ease;
+}
+
+.passSecondaryButton:hover {
+  border-color: var(--graphite);
+}
+
+.passEmptyCard {
+  background: var(--elevated);
+  border: 1px solid var(--stone);
+  border-radius: 20px;
+  padding: 3rem 2rem;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  box-shadow: var(--shadow-card);
+}
+
+.emptyIconWrapper {
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: 50%;
+  background: var(--surface);
+  border: 1px solid var(--stone);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--smoke);
+}
+
+.historyCard {
+  background: var(--elevated);
+  border: 1px solid var(--stone);
+  border-radius: 20px;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  box-shadow: var(--shadow-card);
+}
+
+.historyTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--text-body-sm);
+}
+
+.historyTh {
+  text-align: left;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--stone);
+  color: var(--ash);
+  font-size: var(--text-caption);
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+.historyTd {
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid var(--stone);
+  color: var(--graphite);
+}
+
+.historyTr:last-child .historyTd {
+  border-bottom: none;
+}
+
 @media (min-width: 768px) {
   .section {
     margin-top: 2.5rem;

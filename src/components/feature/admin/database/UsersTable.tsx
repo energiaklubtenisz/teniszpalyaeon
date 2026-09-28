@@ -47,12 +47,15 @@ export function UsersTable({ users: initialUsers, onMutated }: UsersTableProps) 
       if (roleFilter !== "all" && u.role !== roleFilter) return false;
 
       // Pass filter
-      if (passFilter === "with" && !u.activeSeasonPass) return false;
-      if (passFilter === "without" && u.activeSeasonPass) return false;
+      const hasPass = (u.seasonPassYears && u.seasonPassYears.length > 0) || u.activeSeasonPass;
+      if (passFilter === "with" && !hasPass) return false;
+      if (passFilter === "without" && hasPass) return false;
 
       return true;
     });
   }, [users, search, roleFilter, passFilter]);
+
+  const currentYear = new Date().getFullYear();
 
   const handleRoleChange = (userId: string, targetRole: "member" | "admin" | "coach") => {
     const roleNames = { admin: "Adminisztrátor", coach: "Edző", member: "Tag" };
@@ -81,7 +84,12 @@ export function UsersTable({ users: initialUsers, onMutated }: UsersTableProps) 
     });
   };
 
-  const handlePassToggle = (userId: string, email: string | null, active: boolean) => {
+  const handlePassToggle = (
+    userId: string,
+    email: string | null,
+    active: boolean,
+    seasonYear: number = currentYear,
+  ) => {
     if (!email) {
       setFeedback({ type: "error", message: "A felhasználóhoz nem tartozik email cím." });
       return;
@@ -91,19 +99,27 @@ export function UsersTable({ users: initialUsers, onMutated }: UsersTableProps) 
     setFeedback(null);
 
     startTransition(async () => {
-      const res = await toggleUserSeasonPassByEmail(email, active);
+      const res = await toggleUserSeasonPassByEmail(email, active, seasonYear);
       setPendingUserId(null);
       if (res.success) {
         setUsers((prev) =>
-          prev.map((u) =>
-            u.id === userId ? { ...u, activeSeasonPass: active } : u,
-          ),
+          prev.map((u) => {
+            if (u.id !== userId) return u;
+            const updatedYears = active
+              ? Array.from(new Set([...(u.seasonPassYears ?? []), seasonYear])).sort((a, b) => b - a)
+              : (u.seasonPassYears ?? []).filter((y) => y !== seasonYear);
+            return {
+              ...u,
+              activeSeasonPass: updatedYears.includes(currentYear),
+              seasonPassYears: updatedYears,
+            };
+          }),
         );
         setFeedback({
           type: "success",
           message: active
-            ? `Bérlet sikeresen aktiválva: ${email}`
-            : `Bérlet sikeresen visszavonva: ${email}`,
+            ? `Bérlet (${seasonYear}) sikeresen aktiválva: ${email}`
+            : `Bérlet (${seasonYear}) sikeresen visszavonva: ${email}`,
         });
         onMutated?.();
       } else {
@@ -231,11 +247,19 @@ export function UsersTable({ users: initialUsers, onMutated }: UsersTableProps) 
                     <td className={styles.td}>
                       {user.role === "coach" ? (
                         <span style={{ color: "var(--smoke)" }}>—</span>
-                      ) : user.activeSeasonPass ? (
-                        <span className={styles.badgeActive}>
-                          <Check size={12} aria-hidden />
-                          Bérletes
-                        </span>
+                      ) : user.seasonPassYears && user.seasonPassYears.length > 0 ? (
+                        <div style={{ display: "inline-flex", gap: "0.25rem", flexWrap: "wrap", alignItems: "center" }}>
+                          {user.seasonPassYears.map((yr) => (
+                            <span
+                              key={yr}
+                              className={yr === currentYear ? styles.badgeActive : styles.badgeMember}
+                              title={`${yr}-os szezonbérlet`}
+                            >
+                              {yr === currentYear && <Check size={10} aria-hidden style={{ marginRight: 2 }} />}
+                              {yr}
+                            </span>
+                          ))}
+                        </div>
                       ) : (
                         <span className={styles.badgeMember}>Nincs</span>
                       )}
@@ -254,27 +278,27 @@ export function UsersTable({ users: initialUsers, onMutated }: UsersTableProps) 
                         />
 
                         {user.role !== "coach" &&
-                          (user.activeSeasonPass ? (
+                          (user.activeSeasonPass || (user.seasonPassYears && user.seasonPassYears.includes(currentYear)) ? (
                             <button
                               type="button"
                               className={`${styles.actionBtn} ${styles.actionBtnDanger}`}
                               disabled={isUserPending || !user.email}
-                              onClick={() => handlePassToggle(user.id, user.email, false)}
-                              title={adminContent.database.users.actions.revokePass}
+                              onClick={() => handlePassToggle(user.id, user.email, false, currentYear)}
+                              title={`Bérlet megvonása (${currentYear})`}
                             >
                               <Ticket size={14} aria-hidden />
-                              <span>Bérlet megvonás</span>
+                              <span>Megvonás ({currentYear})</span>
                             </button>
                           ) : (
                             <button
                               type="button"
                               className={styles.actionBtn}
                               disabled={isUserPending || !user.email}
-                              onClick={() => handlePassToggle(user.id, user.email, true)}
-                              title={adminContent.database.users.actions.givePass}
+                              onClick={() => handlePassToggle(user.id, user.email, true, currentYear)}
+                              title={`Bérlet adása (${currentYear})`}
                             >
                               <Ticket size={14} aria-hidden />
-                              <span>Bérlet adás</span>
+                              <span>Bérlet adás ({currentYear})</span>
                             </button>
                           ))}
                       </div>

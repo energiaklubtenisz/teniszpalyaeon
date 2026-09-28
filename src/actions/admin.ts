@@ -16,6 +16,7 @@ import type { Database } from "@/types/database.types";
 export type SeasonPassHolder = {
   id: string;
   email: string;
+  seasonYear: number;
   createdAt: string;
   userId: string | null;
   fullName: string | null;
@@ -36,6 +37,7 @@ export type AdminUser = {
   phone: string | null;
   role: Database["public"]["Enums"]["user_role"];
   activeSeasonPass: boolean;
+  seasonPassYears: number[];
   coachTitle: string | null;
   createdAt: string;
   totalBookings: number;
@@ -113,10 +115,11 @@ export async function getSeasonPassData(): Promise<
 
   const supabase = createAdminClient();
 
-  // Fetch whitelist rows
+  // Fetch whitelist rows with season_year
   const { data: whitelist, error: whitelistError } = await supabase
     .from("season_pass_whitelist")
-    .select("id, email, created_at")
+    .select("id, email, season_year, created_at")
+    .order("season_year", { ascending: false })
     .order("created_at", { ascending: false });
 
   if (whitelistError) {
@@ -144,6 +147,7 @@ export async function getSeasonPassData(): Promise<
     return {
       id: w.id,
       email: w.email,
+      seasonYear: w.season_year,
       createdAt: w.created_at,
       userId: profile?.id ?? null,
       fullName: profile?.full_name ?? null,
@@ -152,14 +156,19 @@ export async function getSeasonPassData(): Promise<
     };
   });
 
-  const activeEmailSet = new Set((whitelist ?? []).map((w) => w.email.toLowerCase()));
+  const currentYear = new Date().getFullYear();
+  const currentYearActiveEmails = new Set(
+    (whitelist ?? [])
+      .filter((w) => w.season_year === currentYear)
+      .map((w) => w.email.toLowerCase()),
+  );
 
-  // Candidates: registered users who do NOT yet have an active season pass (and are not coaches)
+  // Candidates: registered users who do NOT yet have a pass for the current year (and are not coaches)
   const candidates: RegisteredUserCandidate[] = (profiles ?? [])
     .filter(
       (p) =>
         p.email &&
-        !activeEmailSet.has(p.email.toLowerCase()) &&
+        !currentYearActiveEmails.has(p.email.toLowerCase()) &&
         p.role !== "coach",
     )
     .map((p) => ({
@@ -173,7 +182,8 @@ export async function getSeasonPassData(): Promise<
 
 export async function addSeasonPass(
   rawEmail: string,
-): Promise<ActionResult<{ email: string; isRegistered: boolean }>> {
+  rawSeasonYear?: number,
+): Promise<ActionResult<{ email: string; seasonYear: number; isRegistered: boolean }>> {
   let adminUser;
   try {
     const auth = await requireAdmin();
@@ -190,6 +200,12 @@ export async function addSeasonPass(
     );
   }
 
+  const currentYear = new Date().getFullYear();
+  const seasonYear = rawSeasonYear !== undefined ? Number(rawSeasonYear) : currentYear;
+  if (isNaN(seasonYear) || seasonYear < 2020 || seasonYear > 2100) {
+    return actionError(adminContent.seasonPass.addForm.errors.invalidSeasonYear);
+  }
+
   const email = parsed.data;
   const supabase = createAdminClient();
 
@@ -197,16 +213,20 @@ export async function addSeasonPass(
     .from("season_pass_whitelist")
     .select("id")
     .ilike("email", email)
+    .eq("season_year", seasonYear)
     .maybeSingle();
 
   if (existing) {
-    return actionError(adminContent.seasonPass.addForm.errors.alreadyExists);
+    return actionError(
+      adminContent.seasonPass.addForm.errors.alreadyExists.replace("{year}", String(seasonYear)),
+    );
   }
 
   const { error: insertError } = await supabase
     .from("season_pass_whitelist")
     .insert({
       email,
+      season_year: seasonYear,
       created_by: adminUser.id,
     });
 
@@ -223,10 +243,13 @@ export async function addSeasonPass(
   revalidatePath("/admin");
   revalidatePath("/admin/adatbazis");
   revalidatePath("/admin/riportok");
+  revalidatePath("/profil");
+  revalidatePath("/booking");
   revalidatePath("/", "layout");
 
   return actionSuccess({
     email,
+    seasonYear,
     isRegistered: Boolean(profile),
   });
 }
@@ -322,13 +345,22 @@ export async function getAdminUsersData(): Promise<ActionResult<AdminUser[]>> {
     }));
   };
 
-  const [profiles, { data: bookings, error: bookingsError }] = await Promise.all([
+  const [profiles, { data: bookings, error: bookingsError }, { data: passes }] = await Promise.all([
     fetchProfiles(),
     supabase.from("bookings").select("user_id, starts_at, ends_at, is_coach_booking"),
+    supabase.from("season_pass_whitelist").select("email, season_year"),
   ]);
 
   if (!profiles) {
     return actionError("Nem sikerült lekérdezni a felhasználókat.");
+  }
+
+  const userSeasonPassMap = new Map<string, number[]>();
+  for (const pass of passes ?? []) {
+    const key = pass.email.toLowerCase();
+    const existing = userSeasonPassMap.get(key) ?? [];
+    existing.push(pass.season_year);
+    userSeasonPassMap.set(key, existing);
   }
 
   // Count bookings per user (deduplicating multi-court coach interval bookings into 1 session per occasion)
@@ -348,17 +380,23 @@ export async function getAdminUsersData(): Promise<ActionResult<AdminUser[]>> {
     }
   }
 
-  const users: AdminUser[] = (profiles ?? []).map((p) => ({
-    id: p.id,
-    email: p.email,
-    fullName: p.full_name,
-    phone: p.phone,
-    role: p.role,
-    activeSeasonPass: p.active_season_pass,
-    coachTitle: p.coach_title ?? null,
-    createdAt: p.created_at,
-    totalBookings: bookingCountMap.get(p.id) ?? 0,
-  }));
+  const users: AdminUser[] = (profiles ?? []).map((p) => {
+    const passYears = (p.email ? userSeasonPassMap.get(p.email.toLowerCase()) : []) ?? [];
+    passYears.sort((a, b) => b - a);
+
+    return {
+      id: p.id,
+      email: p.email,
+      fullName: p.full_name,
+      phone: p.phone,
+      role: p.role,
+      activeSeasonPass: p.active_season_pass,
+      seasonPassYears: passYears,
+      coachTitle: p.coach_title ?? null,
+      createdAt: p.created_at,
+      totalBookings: bookingCountMap.get(p.id) ?? 0,
+    };
+  });
 
   return actionSuccess(users);
 }
@@ -460,31 +498,36 @@ export async function setCoachTitle(
 export async function toggleUserSeasonPassByEmail(
   email: string,
   activate: boolean,
-): Promise<ActionResult<{ email: string; active: boolean }>> {
+  seasonYear?: number,
+): Promise<ActionResult<{ email: string; active: boolean; seasonYear: number }>> {
   try {
     await requireAdmin();
   } catch {
     return actionError(adminContent.seasonPass.addForm.errors.unauthorized);
   }
 
+  const currentYear = new Date().getFullYear();
+  const targetYear = seasonYear ?? currentYear;
+
   if (activate) {
-    const res = await addSeasonPass(email);
+    const res = await addSeasonPass(email, targetYear);
     if (!res.success) return actionError(res.error);
-    return actionSuccess({ email, active: true });
+    return actionSuccess({ email, active: true, seasonYear: targetYear });
   } else {
     const supabase = createAdminClient();
     const { data: row } = await supabase
       .from("season_pass_whitelist")
       .select("id")
       .ilike("email", email)
+      .eq("season_year", targetYear)
       .maybeSingle();
 
     if (!row) {
-      return actionError("A bérlet nem található a rendszerben.");
+      return actionError(`A bérlet nem található a rendszerben a(z) ${targetYear}-os szezonra.`);
     }
     const res = await revokeSeasonPass(row.id);
     if (!res.success) return actionError(res.error);
-    return actionSuccess({ email, active: false });
+    return actionSuccess({ email, active: false, seasonYear: targetYear });
   }
 }
 

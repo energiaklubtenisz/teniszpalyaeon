@@ -50,6 +50,8 @@ export const booking = {
       seasonPass: {
         title: "Szezonbérletem van",
         body: "Bérletes pályahasználat — nincs óránkénti díj a foglaláskor.",
+        noPassForYear: "Nem érhető el: nincs érvényes bérlete a(z) {year}-os szezonra.",
+        validForYear: "Érvényes bérlet a(z) {year}-os szezonra.",
       },
       oneTime: {
         title: "Egyedi foglalás",

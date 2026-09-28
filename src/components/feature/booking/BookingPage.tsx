@@ -59,6 +59,7 @@ export async function BookingPage() {
         courts={courtsResult.data}
         isAuthenticated={session.isAuthenticated}
         bookerName={session.fullName}
+        seasonPassYears={session.seasonPassYears}
       />
     </main>
   );

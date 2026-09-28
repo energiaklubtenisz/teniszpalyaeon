@@ -352,18 +352,21 @@ export type Database = {
           created_by: string | null
           email: string
           id: string
+          season_year: number
         }
         Insert: {
           created_at?: string
           created_by?: string | null
           email: string
           id?: string
+          season_year?: number
         }
         Update: {
           created_at?: string
           created_by?: string | null
           email?: string
           id?: string
+          season_year?: number
         }
         Relationships: []
       }

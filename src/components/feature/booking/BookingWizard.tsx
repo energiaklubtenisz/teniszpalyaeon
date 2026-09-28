@@ -54,6 +54,7 @@ type BookingWizardProps = {
   courts: CourtOption[];
   isAuthenticated: boolean;
   bookerName: string | null;
+  seasonPassYears?: number[];
   onSuccess: () => void;
 };
 
@@ -71,6 +72,7 @@ export function BookingWizard({
   courts,
   isAuthenticated,
   bookerName,
+  seasonPassYears = [],
   onSuccess,
 }: BookingWizardProps) {
   const [stepIndex, setStepIndex] = useState(0);
@@ -82,6 +84,16 @@ export function BookingWizard({
   const [bookingType, setBookingType] = useState<BookingTypeChoice | null>(null);
   const [playerCount, setPlayerCount] = useState<PlayerCountChoice | null>(null);
   const [guestPlayerNames, setGuestPlayerNames] = useState<string[]>([]);
+
+  const selectedYear = dateKey
+    ? parseInt(dateKey.slice(0, 4), 10)
+    : new Date().getFullYear();
+  const hasSeasonPass = seasonPassYears.includes(selectedYear);
+
+  const effectiveBookingType: BookingTypeChoice | null =
+    bookingType === "season_pass" && !hasSeasonPass
+      ? "one_time"
+      : (bookingType ?? (hasSeasonPass ? "season_pass" : "one_time"));
   const [availabilityByCourtId, setAvailabilityByCourtId] = useState<
     Record<string, boolean>
   >({});
@@ -181,7 +193,7 @@ export function BookingWizard({
         return Boolean(courtId && availabilityByCourtId[courtId] === true);
       case "type":
         return Boolean(
-          bookingType &&
+          effectiveBookingType &&
             playerCount &&
             guestNamesComplete(playerCount, guestPlayerNames),
         );
@@ -213,7 +225,7 @@ export function BookingWizard({
       !dateKey ||
       !startLabel ||
       !endLabel ||
-      !bookingType ||
+      !effectiveBookingType ||
       !playerCount ||
       !guestNamesComplete(playerCount, guestPlayerNames)
     ) {
@@ -232,7 +244,7 @@ export function BookingWizard({
         dateKey,
         startLabel,
         endLabel,
-        bookingType,
+        bookingType: effectiveBookingType,
         playerCount,
         guestPlayerNames: guestPlayerNames.map((name) => name.trim()),
       });
@@ -287,7 +299,7 @@ export function BookingWizard({
   };
 
   const priceLabel =
-    bookingType === "season_pass"
+    effectiveBookingType === "season_pass"
       ? booking.steps.confirm.priceFree
       : startLabel && endLabel
         ? formatPriceHuf(calculateOneTimePriceHuf(startLabel, endLabel))
@@ -443,12 +455,14 @@ export function BookingWizard({
 
             {step === "type" && startLabel && endLabel ? (
               <BookingTypeStep
-                value={bookingType}
+                value={effectiveBookingType}
                 playerCount={playerCount}
                 guestPlayerNames={guestPlayerNames}
                 bookerName={bookerName}
                 startLabel={startLabel}
                 endLabel={endLabel}
+                hasSeasonPass={hasSeasonPass}
+                selectedYear={selectedYear}
                 onChangeType={setBookingType}
                 onChangePlayers={(count) => {
                   setPlayerCount(count);
@@ -483,7 +497,7 @@ export function BookingWizard({
                 <div>
                   <dt>{booking.steps.confirm.type}</dt>
                   <dd>
-                    {bookingType === "season_pass"
+                    {effectiveBookingType === "season_pass"
                       ? booking.steps.type.seasonPass.title
                       : booking.steps.type.oneTime.title}
                   </dd>

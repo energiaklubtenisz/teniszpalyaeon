@@ -18,7 +18,9 @@ export function AddSeasonPassForm({
   onAdded,
 }: AddSeasonPassFormProps) {
   const { addForm } = adminContent.seasonPass;
+  const currentYear = new Date().getFullYear();
   const [email, setEmail] = useState("");
+  const [seasonYear, setSeasonYear] = useState<number>(currentYear);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
@@ -35,13 +37,16 @@ export function AddSeasonPassForm({
     setSuccess(null);
 
     startTransition(async () => {
-      const result = await addSeasonPass(cleanEmail);
+      const result = await addSeasonPass(cleanEmail, seasonYear);
       if (!result.success) {
         setError(result.error);
       } else {
-        const msg = result.data.isRegistered
-          ? addForm.success.registered.replace("{email}", result.data.email)
-          : addForm.success.pending.replace("{email}", result.data.email);
+        const template = result.data.isRegistered
+          ? addForm.success.registered
+          : addForm.success.pending;
+        const msg = template
+          .replace("{email}", result.data.email)
+          .replace("{year}", String(result.data.seasonYear));
         setSuccess(msg);
         setEmail("");
         onAdded?.();
@@ -54,6 +59,13 @@ export function AddSeasonPassForm({
     setError(null);
     setSuccess(null);
   };
+
+  const startYear = Math.min(2025, currentYear - 1);
+  const maxYear = 2050;
+  const availableYears = Array.from(
+    { length: maxYear - startYear + 1 },
+    (_, i) => startYear + i,
+  );
 
   return (
     <section className={styles.panel} aria-labelledby="add-season-pass-heading">
@@ -96,6 +108,27 @@ export function AddSeasonPassForm({
               autoComplete="email"
             />
           </div>
+
+          <div className={styles.inputWrapper} style={{ maxWidth: "160px" }}>
+            <label htmlFor="season-pass-year-select" className={styles.label}>
+              {addForm.seasonLabel}
+            </label>
+            <select
+              id="season-pass-year-select"
+              value={seasonYear}
+              onChange={(e) => setSeasonYear(Number(e.target.value))}
+              disabled={isPending}
+              className={styles.input}
+              aria-label={addForm.seasonLabel}
+            >
+              {availableYears.map((yr) => (
+                <option key={yr} value={yr}>
+                  {yr}-os szezon
+                </option>
+              ))}
+            </select>
+          </div>
+
           <button
             type="submit"
             disabled={isPending || !email.trim()}

@@ -13,12 +13,14 @@ type BookingViewProps = {
   courts: CourtOption[];
   isAuthenticated: boolean;
   bookerName: string | null;
+  seasonPassYears?: number[];
 };
 
 export function BookingView({
   courts,
   isAuthenticated,
   bookerName,
+  seasonPassYears = [],
 }: BookingViewProps) {
   const [succeeded, setSucceeded] = useState(false);
 
@@ -58,6 +60,7 @@ export function BookingView({
           courts={courts}
           isAuthenticated={isAuthenticated}
           bookerName={bookerName}
+          seasonPassYears={seasonPassYears}
           onSuccess={() => setSucceeded(true)}
         />
       ) : null}

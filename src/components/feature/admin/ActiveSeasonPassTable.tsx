@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useMemo, useState, useTransition } from "react";
 import {
   Search,
   CheckCircle2,
@@ -26,6 +26,7 @@ export function ActiveSeasonPassTable({
 }: ActiveSeasonPassTableProps) {
   const { table, revokeSuccess, revokeError } = adminContent.seasonPass;
   const [searchQuery, setSearchQuery] = useState("");
+  const [seasonFilter, setSeasonFilter] = useState<string>("all");
   const [confirmingId, setConfirmingId] = useState<string | null>(null);
   const [feedback, setFeedback] = useState<{
     type: "success" | "error";
@@ -33,7 +34,16 @@ export function ActiveSeasonPassTable({
   } | null>(null);
   const [isPending, startTransition] = useTransition();
 
+  const availableSeasons = useMemo(() => {
+    const years = new Set(holders.map((h) => h.seasonYear));
+    return Array.from(years).sort((a, b) => b - a);
+  }, [holders]);
+
   const filteredHolders = holders.filter((h) => {
+    const matchSeason =
+      seasonFilter === "all" || String(h.seasonYear) === seasonFilter;
+    if (!matchSeason) return false;
+
     const q = searchQuery.toLowerCase().trim();
     if (!q) return true;
     const emailMatch = h.email.toLowerCase().includes(q);
@@ -97,16 +107,33 @@ export function ActiveSeasonPassTable({
         </div>
 
         {holders.length > 0 && (
-          <div className={styles.searchWrapper}>
-            <Search size={16} className={styles.searchIcon} aria-hidden />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder={adminContent.seasonPass.searchPlaceholder}
-              className={styles.searchInput}
-              aria-label="Keresés bérletesek között"
-            />
+          <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", alignItems: "center" }}>
+            {availableSeasons.length > 1 && (
+              <select
+                value={seasonFilter}
+                onChange={(e) => setSeasonFilter(e.target.value)}
+                className={styles.filterSelect}
+                aria-label={table.filters?.filterBySeason ?? "Szűrés szezon szerint"}
+              >
+                <option value="all">{table.filters?.allSeasons ?? "Összes szezon"}</option>
+                {availableSeasons.map((year) => (
+                  <option key={year} value={String(year)}>
+                    {year}-os szezon
+                  </option>
+                ))}
+              </select>
+            )}
+            <div className={styles.searchWrapper}>
+              <Search size={16} className={styles.searchIcon} aria-hidden />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder={adminContent.seasonPass.searchPlaceholder}
+                className={styles.searchInput}
+                aria-label="Keresés bérletesek között"
+              />
+            </div>
           </div>
         )}
       </div>
@@ -153,6 +180,9 @@ export function ActiveSeasonPassTable({
                   {table.columns.phone}
                 </th>
                 <th scope="col" className={styles.th}>
+                  {table.columns.season}
+                </th>
+                <th scope="col" className={styles.th}>
                   {table.columns.status}
                 </th>
                 <th scope="col" className={styles.th}>
@@ -175,6 +205,11 @@ export function ActiveSeasonPassTable({
                       <span className={styles.emailText}>{holder.email}</span>
                     </td>
                     <td className={styles.td}>{holder.phone || "—"}</td>
+                    <td className={styles.td}>
+                      <span className={styles.badgeMember}>
+                        {holder.seasonYear}
+                      </span>
+                    </td>
                     <td className={styles.td}>
                       {holder.isRegistered ? (
                         <span className={styles.badgeActive}>

@@ -261,15 +261,26 @@ export async function createBooking(
   }
 
   if (bookingType === "season_pass") {
+    const bookingYear = parseInt(dateKey.slice(0, 4), 10);
+
     const { data: profile } = await supabase
       .from("profiles")
-      .select("active_season_pass")
+      .select("email")
       .eq("id", user.id)
       .maybeSingle();
 
-    if (!profile?.active_season_pass) {
+    const userEmail = profile?.email || user.email;
+
+    const { data: pass } = await supabase
+      .from("season_pass_whitelist")
+      .select("id")
+      .ilike("email", userEmail ?? "")
+      .eq("season_year", bookingYear)
+      .maybeSingle();
+
+    if (!pass) {
       return actionError(
-        "Bérletes foglaláshoz érvényes aktív bérlet szükséges. Válasszon alkalmi foglalást, vagy vegye fel a kapcsolatot a klubbal.",
+        `Bérletes foglaláshoz érvényes bérlet szükséges a(z) ${bookingYear}-os szezonra. Válasszon alkalmi foglalást, vagy vegye fel a kapcsolatot a klubbal.`,
       );
     }
   }
@@ -410,6 +421,7 @@ export async function getUserBookings(): Promise<ActionResult<UserBooking[]>> {
 export async function getBookingSession(): Promise<{
   isAuthenticated: boolean;
   fullName: string | null;
+  seasonPassYears: number[];
   todayKey: string;
 }> {
   const supabase = await createClient();
@@ -421,19 +433,30 @@ export async function getBookingSession(): Promise<{
     return {
       isAuthenticated: false,
       fullName: null,
+      seasonPassYears: [],
       todayKey: budapestDateKey(),
     };
   }
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("full_name")
+    .select("full_name, email")
     .eq("id", user.id)
     .maybeSingle();
+
+  const userEmail = profile?.email || user.email || "";
+
+  const { data: passes } = await supabase
+    .from("season_pass_whitelist")
+    .select("season_year")
+    .ilike("email", userEmail);
+
+  const seasonPassYears = (passes ?? []).map((p) => p.season_year);
 
   return {
     isAuthenticated: true,
     fullName: profile?.full_name?.trim() || null,
+    seasonPassYears,
     todayKey: budapestDateKey(),
   };
 }
